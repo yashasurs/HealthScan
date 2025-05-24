@@ -2,6 +2,7 @@ venv
 __pycache__
 alembic.ini
 alembic
+sql_app.db
 .env
 *.sqlite
 *.sqlite3

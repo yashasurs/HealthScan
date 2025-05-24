@@ -21,12 +21,17 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=schemas.Token)
-def login(user_credentials: schemas.UserLogin, db: Session = Depends(database.get_db)):
-    user = db.query(models.User).filter(models.User.username == user_credentials.username).first()
-    if not user or not utils.verify(user_credentials.password, user.password):
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(database.get_db)
+):
+    """Login endpoint that works with both Swagger UI and API clients"""
+    user = db.query(models.User).filter(models.User.username == form_data.username).first()
+    if not user or not utils.verify(form_data.password, user.password):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Invalid Credentials"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = oauth2.create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
