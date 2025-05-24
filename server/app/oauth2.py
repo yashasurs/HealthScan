@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt  # PyJWT
 from sqlalchemy.orm import session
 
 from . import database, models, schemas
@@ -39,7 +39,9 @@ def verify_access_token(token: str, credentials_exception):
             raise credentials_exception
         token_data = schemas.TokenData(id=id)
 
-    except JWTError:
+    except jwt.ExpiredSignatureError:
+        raise credentials_exception
+    except jwt.InvalidTokenError:
         raise credentials_exception
 
     return token_data
