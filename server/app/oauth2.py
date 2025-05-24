@@ -10,7 +10,7 @@ from sqlalchemy.orm import session
 
 from . import database, models, schemas
 
-load_dotenv(dotenv_path=Path(__file__).parent / 'routers' / '.env')
+load_dotenv()
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALGORITHM = os.environ.get('ALGORITHM')

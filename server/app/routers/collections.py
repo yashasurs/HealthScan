@@ -1,0 +1,146 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
+from ..database import get_db
+from ..models import Collection, Record
+from ..schemas import CollectionCreate, CollectionResponse, RecordResponse
+from ..oauth2 import get_current_user
+
+router = APIRouter(
+    prefix='/collections',
+    tags=['collections']
+)
+
+@router.post("/", response_model=CollectionResponse)
+async def create_collection(
+    collection: CollectionCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Create a new collection"""
+    db_collection = Collection(
+        name=collection.name,
+        description=collection.description,
+        user_id=current_user.id
+    )
+    db.add(db_collection)
+    db.commit()
+    db.refresh(db_collection)
+    return db_collection
+
+@router.get("/", response_model=List[CollectionResponse])
+async def get_all_collections(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get all collections under a user"""
+    collections = db.query(Collection).filter(Collection.user_id == current_user.id).all()
+    return collections
+
+@router.get("/{collection_id}/records", response_model=List[RecordResponse])
+async def get_records_from_collection(
+    collection_id: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get all records from a collection"""
+    # Verify collection belongs to user
+    collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    records = db.query(Record).filter(Record.collection_id == collection_id).all()
+    return records
+
+@router.put("/{collection_id}/records/{record_id}")
+async def add_record_to_collection(
+    collection_id: str,
+    record_id: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Add a record to a collection"""
+    # Verify collection belongs to user
+    collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Verify record belongs to user
+    record = db.query(Record).filter(
+        Record.id == record_id,
+        Record.user_id == current_user.id
+    ).first()
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    record.collection_id = collection_id
+    db.commit()
+    
+    return {"message": "Record added to collection successfully"}
+
+@router.delete("/{collection_id}/records/{record_id}")
+async def remove_record_from_collection(
+    collection_id: str,
+    record_id: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Remove a record from a collection (sets collection_id to null)"""
+    # Verify collection belongs to user
+    collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Verify record belongs to user and is in this collection
+    record = db.query(Record).filter(
+        Record.id == record_id,
+        Record.user_id == current_user.id,
+        Record.collection_id == collection_id
+    ).first()
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found in this collection")
+    
+    record.collection_id = None
+    db.commit()
+    
+    return {"message": "Record removed from collection successfully"}
+
+@router.delete("/{collection_id}")
+async def delete_collection(
+    collection_id: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Delete a collection"""
+    collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Remove collection_id from all records in this collection
+    db.query(Record).filter(Record.collection_id == collection_id).update(
+        {"collection_id": None}
+    )
+    
+    # Delete the collection
+    db.delete(collection)
+    db.commit()
+    
+    return {"message": "Collection deleted successfully"}

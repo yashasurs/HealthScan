@@ -1,10 +1,14 @@
 import io
 import easyocr
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import List
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from typing import List, Optional
 from PIL import Image
 import numpy as np
-from ..schemas import OCRResponse
+from sqlalchemy.orm import Session
+from ..schemas import OCRResponse, RecordResponse
+from ..models import Record
+from ..database import get_db
+from ..oauth2 import get_current_user
 
 router = APIRouter(
     prefix='/ocr',
@@ -17,8 +21,13 @@ reader = easyocr.Reader(['en'], gpu=False)
 def testing():
     return {"message": "ocr works fine"}
 
-@router.post("/get-text", response_model=List[OCRResponse])
-async def get_text(files: List[UploadFile] = File(...)):
+@router.post("/get-text", response_model=List[RecordResponse])
+async def get_text(
+    files: List[UploadFile] = File(...),
+    collection_id: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     response = []
 
     try:
@@ -29,6 +38,7 @@ async def get_text(files: List[UploadFile] = File(...)):
             
             # Read the file content
             content = await file.read()
+            file_size = len(content)
             
             # Check if content is empty
             if not content:
@@ -55,13 +65,25 @@ async def get_text(files: List[UploadFile] = File(...)):
             # Extract text from OCR results
             extracted_text = " ".join([result[1] for result in ocr_results])
 
-            response.append(OCRResponse(content=extracted_text))
+            # Create and save record to database
+            record = Record(
+                filename=file.filename,
+                content=extracted_text,
+                file_size=file_size,
+                file_type=file.content_type,
+                user_id=current_user.id,
+                collection_id=collection_id
+            )
+            
+            db.add(record)
+            db.commit()
+            db.refresh(record)
+            
+            response.append(record)
 
         return response
-    
-    except HTTPException:
-        # Re-raise HTTP exceptions
-        raise
+
     except Exception as e:
+        db.rollback()
         print("An unexpected error occurred:", e)
         raise HTTPException(status_code=500, detail=f"OCR processing failed: {str(e)}")
