@@ -1,6 +1,6 @@
 venv
 __pycache__
 alembic.inni
-migrations
+alembic
 .env
 
