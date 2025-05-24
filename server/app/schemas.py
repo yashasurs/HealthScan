@@ -17,6 +17,8 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class UserCreate(UserLogin):
+    email: EmailStr
 
 class UserDelete(BaseModel):
     user_id: int
