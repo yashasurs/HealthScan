@@ -31,9 +31,14 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(database.ge
     access_token = oauth2.create_access_token(data={"user_id": user.id})
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.delete("/user/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(database.get_db), current_user: models.User = Depends(oauth2.get_current_user)):
-    user_obj = db.query(models.User).filter(models.User.id == user_id).first()
+@router.delete("/user")
+def delete_user(
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    user_obj = db.query(models.User).filter(models.User.id == current_user.id).first()
     if not user_obj:
         raise HTTPException(status_code=404, detail="User not found")
     db.delete(user_obj)
