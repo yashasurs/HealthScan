@@ -107,12 +107,10 @@ const LoginForm = () => {
                     className="mt-4 w-full rounded border border-transparent bg-black py-2 px-4 text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-1 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isLoading ? "Signing in..." : "Sign in"}
-                </button>
-
-                <div className="mt-4 text-center">
+                </button>                <div className="mt-4 text-center">
                     <div className="text-xs text-gray-600">
                         Don't have an account?{" "}
-                        <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                        <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
                             Sign up
                         </a>
                     </div>
