@@ -1,67 +1,83 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, ScrollView, Alert } from 'react-native';
+import { useAuth } from '../utils/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { Header } from '../components/common';
+import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
 
 const ProfileScreen = () => {
-  const userData = {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (123) 456-7890',
-    role: 'Administrator',
-    joinDate: 'January 2023',
+  const { user, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const navigation = useNavigation();
+  
+  // Fallback user data if API data is not yet loaded
+  const defaultUserData = {
+    name: 'User',
+    email: 'loading@example.com',
+    phone: 'Loading...',
+    role: 'User',
+    joinDate: 'Loading...',
+  };
+  
+  // Use API data if available, otherwise use default
+  const userData = user || defaultUserData;
+  
+  const handleLogout = async () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to log out?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Logout',
+          onPress: async () => {
+            setIsLoggingOut(true);
+            try {
+              await logout();
+              // Navigation is handled by the AppNavigator based on auth state
+            } catch (error) {
+              Alert.alert('Logout Failed', error.message || 'Please try again');
+              setIsLoggingOut(false);
+            }
+          },
+        },
+      ]
+    );
   };
 
+  const handleChangeAvatar = () => {
+    Alert.alert('Coming Soon', 'This feature will be available in a future update.');
+  };
+
+  const handleEditProfile = () => {
+    Alert.alert('Coming Soon', 'This feature will be available in a future update.');
+  };
+
+  const handleChangePassword = () => {
+    Alert.alert('Coming Soon', 'This feature will be available in a future update.');
+  };
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Profile</Text>
-      </View>
+      <Header title="Profile" />
       
-      <View style={styles.profileSection}>
-        <View style={styles.avatarContainer}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{userData.name.split(' ').map(n => n[0]).join('')}</Text>
-          </View>
-          <TouchableOpacity style={styles.editAvatarButton}>
-            <Text style={styles.editAvatarButtonText}>Change</Text>
-          </TouchableOpacity>
-        </View>
-        
-        <Text style={styles.userName}>{userData.name}</Text>
-        <Text style={styles.userRole}>{userData.role}</Text>
-      </View>
+      <ProfileHeader 
+        userData={userData} 
+        onChangeAvatar={handleChangeAvatar} 
+      />
       
-      <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Personal Information</Text>
-        
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Email</Text>
-          <Text style={styles.infoValue}>{userData.email}</Text>
-        </View>
-        
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Phone</Text>
-          <Text style={styles.infoValue}>{userData.phone}</Text>
-        </View>
-        
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Member Since</Text>
-          <Text style={styles.infoValue}>{userData.joinDate}</Text>
-        </View>
-      </View>
+      <ProfileInfo userData={userData} />
       
-      <View style={styles.actionsSection}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionButtonText}>Edit Profile</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={styles.actionButtonText}>Change Password</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={[styles.actionButton, styles.logoutButton]}>
-          <Text style={[styles.actionButtonText, styles.logoutButtonText]}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+      <ProfileActions 
+        isLoggingOut={isLoggingOut}
+        onEditProfile={handleEditProfile}
+        onChangePassword={handleChangePassword}
+        onAuthTest={() => navigation.navigate('AuthTest')}
+        onNetworkTest={() => navigation.navigate('NetworkTest')}
+        onLogout={handleLogout}
+      />
     </ScrollView>
   );
 };
@@ -70,110 +86,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-  },
-  header: {
-    padding: 20,
-    backgroundColor: '#000',
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  profileSection: {
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  editAvatarButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 12,
-  },
-  editAvatarButtonText: {
-    fontSize: 12,
-    color: '#000',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 4,
-  },
-  userRole: {
-    fontSize: 16,
-    color: '#777',
-  },
-  infoSection: {
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#000',
-  },
-  infoItem: {
-    marginBottom: 16,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: '#777',
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#000',
-  },
-  actionsSection: {
-    padding: 20,
-  },
-  actionButton: {
-    backgroundColor: '#000',
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  logoutButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
-  },
-  logoutButtonText: {
-    color: '#000',
-  },
+  }
 });
 
 export default ProfileScreen;
