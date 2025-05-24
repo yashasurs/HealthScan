@@ -16,3 +16,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: int | None = None
+=======
+class OCRResponse(BaseModel):
+    content: str
