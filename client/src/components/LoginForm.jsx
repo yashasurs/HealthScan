@@ -18,8 +18,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    
-    const handleSubmit = async (e) => {
+      const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
@@ -31,6 +30,9 @@ const LoginForm = () => {
             
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Redirect to home page on successful login
+            window.location.href = '/home';
             
         } catch (err) {
             setError('An error occurred during login');
