@@ -1,11 +1,20 @@
 from fastapi import FastAPI
-import uvicorn
+from pydantic_settings import BaseSettings
+
+from . import models
+from .config import settings
+from .database import engine
+from .routers import auth, post, user
+
+models.Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI()
 
-@app.get("/")
-def home():
-    return {"message": "hello world"}
+app.include_router(auth.router)
 
-if __name__ == "__main__":
-    uvicorn.run(app)
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to my api!!"}
+
