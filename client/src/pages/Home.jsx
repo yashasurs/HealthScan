@@ -26,207 +26,216 @@ const MobileIcon = () => (
   </svg>
 );
 
-const Home = () => {
-  return (
+const Home = () => {  return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="relative">
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-            <div className="md:flex md:items-center md:space-x-8">
-              <div className="md:w-1/2 text-white mb-10 md:mb-0">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                  Digitizing Healthcare Records for India
-                </h1>
-                <p className="mt-6 text-lg md:text-xl text-blue-50">
-                  Simple, secure, and accessible digital health records for Primary Health Centers across India
-                </p>
-                <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <Link to="/register" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-800 hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-700">
-                    Get Started
-                  </Link>
-                  <a href="#how-it-works" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Learn More
-                  </a>
+      <section className="relative overflow-hidden">
+        <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+            <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:items-center">
+              <div className="lg:col-span-6 text-white mb-12 lg:mb-0">
+                <div className="max-w-lg lg:max-w-none">
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+                    Digitizing Healthcare
+                    <span className="block text-blue-200">Records for India</span>
+                  </h1>
+                  <p className="mt-6 text-xl lg:text-2xl text-blue-100 leading-relaxed">
+                    Simple, secure, and accessible digital health records for Primary Health Centers across India
+                  </p>
+                  <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                    <Link to="/register" className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg shadow-lg text-white bg-blue-600 hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                      Get Started
+                    </Link>
+                    <a href="#how-it-works" className="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-200 text-lg font-medium rounded-lg text-blue-100 hover:bg-blue-50 hover:text-blue-700 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-300">
+                      Learn More
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div className="md:w-1/2">
-                <div className="relative h-64 sm:h-72 md:h-80 rounded-lg shadow-xl overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-700 opacity-90"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="px-6 py-4 bg-white bg-opacity-90 rounded-lg shadow-lg max-w-sm">
-                      <div className="flex items-center justify-center mb-4">
-                        <QrCodeIcon />
-                        <span className="ml-2 text-xl font-semibold text-gray-800">HealthScan QR</span>
+              
+              <div className="lg:col-span-6 flex justify-center lg:justify-end">
+                <div className="relative">
+                  <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-2xl blur-xl opacity-30"></div>
+                  <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-sm transform hover:scale-105 transition-transform duration-300">
+                    <div className="text-center">
+                      <div className="flex items-center justify-center mb-6">
+                        <div className="p-2 bg-blue-100 rounded-lg mr-3">
+                          <QrCodeIcon />
+                        </div>
+                        <span className="text-2xl font-bold text-gray-800">HealthScan</span>
+                      </div>                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6">
+                        <img 
+                          src="/QR.svg" 
+                          alt="QR Code for HealthScan" 
+                          className="w-40 h-40 mx-auto"
+                        />
                       </div>
-                      <div className="bg-gray-200 rounded-lg p-4 flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-32 h-32">
-                          <path d="M30,30 L30,45 L45,45 L45,30 L30,30" fill="#000" />
-                          <path d="M55,30 L55,45 L70,45 L70,30 L55,30" fill="#000" />
-                          <path d="M30,55 L30,70 L45,70 L45,55 L30,55" fill="#000" />
-                          <rect x="55" y="55" width="5" height="5" fill="#000" />
-                          <rect x="65" y="55" width="5" height="5" fill="#000" />
-                          <rect x="55" y="65" width="5" height="5" fill="#000" />
-                          <rect x="65" y="65" width="5" height="5" fill="#000" />
-                          <rect x="50" y="30" width="3" height="3" fill="#000" />
-                          <rect x="50" y="40" width="3" height="3" fill="#000" />
-                          <rect x="30" y="50" width="3" height="3" fill="#000" />
-                          <rect x="40" y="50" width="3" height="3" fill="#000" />
-                          <rect x="50" y="50" width="3" height="3" fill="#000" />
-                        </svg>
-                      </div>
-                      <p className="mt-3 text-center text-sm text-gray-600">
-                        Scan to access patient records
+                      <p className="text-gray-600 font-medium">
+                        Scan to access patient records instantly
                       </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </div>            </div>
           </div>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-gray-50" id="how-it-works">
+      </section>{/* Features Section */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white" id="how-it-works">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">How It Works</h2>
-            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-              Our platform simplifies health record management for PHCs across India
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">How It Works</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Our platform simplifies health record management for PHCs across India with a simple three-step process
             </p>
           </div>
 
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white mb-5">
+          <div className="grid gap-8 md:grid-cols-3 relative">
+            {/* Connecting lines for desktop */}
+            <div className="hidden md:block absolute top-16 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-indigo-300 via-indigo-400 to-indigo-300"></div>
+            
+            <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
                 <ScanIcon />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Scan Documents</h3>
-              <p className="text-gray-600">
-                Easily scan patient records, prescriptions, test results, and medical histories using your smartphone or scanner.
-              </p>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">1. Scan Documents</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Easily scan patient records, prescriptions, test results, and medical histories using your smartphone or scanner.
+                </p>
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white mb-5">
+            <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
                 <QrCodeIcon />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Generate QR Codes</h3>
-              <p className="text-gray-600">
-                Our system automatically generates secure QR codes linked to the patient's digital health record.
-              </p>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">2. Generate QR Codes</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Our system automatically generates secure QR codes linked to the patient's digital health record.
+                </p>
+              </div>
             </div>
             
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex items-center justify-center w-12 h-12 rounded-md bg-indigo-500 text-white mb-5">
+            <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
                 <MobileIcon />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Access Anywhere</h3>
-              <p className="text-gray-600">
-                Healthcare providers can instantly access patient records by scanning the QR code with any smartphone.
-              </p>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">3. Access Anywhere</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Healthcare providers can instantly access patient records by scanning the QR code with any smartphone.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-16">
+      </section>      {/* Benefits Section */}
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
-            <div>
-              <h2 className="text-3xl font-extrabold text-gray-900">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+            <div className="mb-12 lg:mb-0">
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">
                 Benefits for Indian PHCs
               </h2>
-              <p className="mt-4 text-lg text-gray-600">
+              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
                 Our solution addresses the unique challenges faced by Primary Health Centers in rural and urban India.
               </p>
-              <div className="mt-8 space-y-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
+              <div className="space-y-6">
+                <div className="flex items-start group">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
+                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">Reduced Paperwork</h4>
-                    <p className="mt-1 text-gray-600">Minimize the burden of physical record-keeping and storage space requirements.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">Improved Patient Care</h4>
-                    <p className="mt-1 text-gray-600">Quick access to complete patient histories enables better diagnosis and treatment.</p>
+                  <div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-2">Reduced Paperwork</h4>
+                    <p className="text-gray-600 leading-relaxed">Minimize the burden of physical record-keeping and storage space requirements.</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
+                <div className="flex items-start group">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
+                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">Works Offline</h4>
-                    <p className="mt-1 text-gray-600">Designed to function in areas with limited internet connectivity.</p>
+                  <div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-2">Improved Patient Care</h4>
+                    <p className="text-gray-600 leading-relaxed">Quick access to complete patient histories enables better diagnosis and treatment.</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start">
-                  <div className="flex-shrink-0">
-                    <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
+                <div className="flex items-start group">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
+                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                   </div>
-                  <div className="ml-4">
-                    <h4 className="text-lg font-medium text-gray-900">Multilingual Support</h4>
-                    <p className="mt-1 text-gray-600">Available in Hindi, English, and major regional languages across India.</p>
+                  <div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-2">Works Offline</h4>                    <p className="text-gray-600 leading-relaxed">Designed to function in areas with limited internet connectivity.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start group">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
+                      <svg className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xl font-semibold text-gray-900 mb-2">Multilingual Support</h4>
+                    <p className="text-gray-600 leading-relaxed">Available in Hindi, English, and major regional languages across India.</p>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="mt-10 lg:mt-0 lg:ml-10">
-              <div className="bg-indigo-50 p-6 rounded-lg">
-                <blockquote>
-                  <div className="text-xl font-medium text-gray-900">
-                    "This system has transformed how we manage patient records at our PHC. What used to take hours now takes seconds."
-                  </div>
-                  <footer className="mt-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 rounded-full bg-indigo-200 h-12 w-12 flex items-center justify-center text-indigo-500 font-bold text-xl">
-                        DR
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-base font-medium text-gray-900">Dr. Rajesh Sharma</div>
-                        <div className="text-sm text-gray-500">PHC Medical Officer, Uttar Pradesh</div>
-                      </div>
+            <div className="mt-12 lg:mt-0">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-10"></div>
+                <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
+                  <blockquote>
+                    <div className="text-2xl font-medium text-gray-900 mb-6 leading-relaxed">
+                      "This system has transformed how we manage patient records at our PHC. What used to take hours now takes seconds."
                     </div>
-                  </footer>
-                </blockquote>
-                
-                <div className="mt-8 border-t border-gray-200 pt-8">
-                  <div className="text-center">
-                    <h4 className="text-lg font-medium text-gray-900">Our impact in numbers</h4>
-                    <div className="mt-4 grid grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-2xl font-bold text-indigo-600">500+</p>
-                        <p className="text-sm text-gray-500">PHCs served</p>
+                    <footer>
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 h-16 w-16 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                          DR
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-lg font-semibold text-gray-900">Dr. Rajesh Sharma</div>
+                          <div className="text-blue-600 font-medium">PHC Medical Officer, Uttar Pradesh</div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-2xl font-bold text-indigo-600">2M+</p>
-                        <p className="text-sm text-gray-500">Patient records</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-indigo-600">14</p>
-                        <p className="text-sm text-gray-500">States</p>
+                    </footer>
+                  </blockquote>
+                  
+                  <div className="mt-10 pt-8 border-t border-blue-200">
+                    <div className="text-center">
+                      <h4 className="text-xl font-semibold text-gray-900 mb-6">Our Impact in Numbers</h4>
+                      <div className="grid grid-cols-3 gap-6">
+                        <div className="text-center">
+                          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">500+</p>
+                          <p className="text-sm text-gray-600 font-medium mt-1">PHCs Served</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">2M+</p>
+                          <p className="text-sm text-gray-600 font-medium mt-1">Patient Records</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">14</p>
+                          <p className="text-sm text-gray-600 font-medium mt-1">States</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -235,9 +244,7 @@ const Home = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* CTA Section */}
+      </section>      {/* CTA Section */}
       <section className="bg-indigo-700">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
