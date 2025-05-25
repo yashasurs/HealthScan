@@ -9,6 +9,7 @@ from ..schemas import OCRResponse, RecordResponse
 from ..models import Record
 from ..database import get_db
 from ..oauth2 import get_current_user
+from ..utils import GeminiAgent
 
 router = APIRouter(
     prefix='/ocr',
@@ -65,10 +66,18 @@ async def get_text(
             # Extract text from OCR results
             extracted_text = " ".join([result[1] for result in ocr_results])
 
+            # Format the extracted text before saving
+            agent = GeminiAgent()
+            try:
+                markup = await agent.generate_markup(extracted_text)
+            except Exception as e:
+                print(f"Error formatting content for {file.filename}: {str(e)}")
+                markup = extracted_text  # fallback to raw text
+
             # Create and save record to database
             record = Record(
                 filename=file.filename,
-                content=extracted_text,
+                content=markup,
                 file_size=file_size,
                 file_type=file.content_type,
                 user_id=current_user.id,
