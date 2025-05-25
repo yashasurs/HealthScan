@@ -87,8 +87,7 @@ const Navbar = () => {
                 <div className="flex items-center">
                   <div className="text-gray-700 mr-2">
                     <UserIcon />
-                  </div>
-                  <span className="text-gray-900 font-bold">
+                  </div>                  <span className="text-gray-900 font-bold">
                     {user?.username || 'User'}
                   </span>
                 </div>
@@ -145,8 +144,7 @@ const Navbar = () => {
                 <div className="px-3 py-2 flex items-center">
                   <div className="text-gray-700 mr-2">
                     <UserIcon />
-                  </div>
-                  <span className="text-gray-900 font-bold">
+                  </div>                  <span className="text-gray-900 font-bold">
                     {user?.username || 'User'}
                   </span>
                 </div>

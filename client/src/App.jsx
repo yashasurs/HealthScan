@@ -6,6 +6,8 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import AuthProvider from './context/AuthContext'
 import Navbar from './components/Navbar'
+import ProtectedRoute from './components/ProtectedRoute'
+import Documents from './pages/Documents'
 
 function App() {
   
@@ -17,7 +19,16 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
-            <Route path='/home' element={<Home />} />
+            <Route path='/home' element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+            <Route path='/documents' element={
+              <ProtectedRoute>
+                <Documents />
+              </ProtectedRoute>
+            } />
             <Route path='/' element={<Home />} />
           </Routes>
         </div>
