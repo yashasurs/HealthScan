@@ -246,78 +246,137 @@ const Documents = () => {
     } finally {
       setIsUploading(false);
     }
-  };
-    return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <h1 className="text-3xl font-bold text-center mb-8">Document Management</h1>
-      
-      {/* Collection Manager Component */}
-      <CollectionManager 
-        collections={collections} 
-        onCollectionCreated={handleCollectionCreated}
-        onCollectionDeleted={handleCollectionDeleted}
-      />
-      
-      {/* Tab Navigation */}
-      <TabNav 
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        fetchCollections={fetchCollections}
-        fetchRecords={fetchRecords}
-        selectedCollection={selectedCollection}
-        isLoading={isLoading}
-      />
-      
-      {/* Upload Tab */}
-      {activeTab === 'upload' && (
-        <UploadTab 
-          collections={collections}
-          selectedCollection={selectedCollection}
-          handleCollectionChange={handleCollectionChange}
-          files={files}
-          handleFileChange={handleFileChange}
-          handleDrop={handleDrop}
-          handleDragOver={handleDragOver}
-          removeFile={removeFile}
-          setFiles={setFiles}
-          handleUpload={handleUpload}
-          isUploading={isUploading}
-          uploadStatus={uploadStatus}
-        />
-      )}
-      
-      {/* Records Tab */}
-      {activeTab === 'records' && (
-        <RecordsTab 
-          collections={collections}
-          selectedCollection={selectedCollection}
-          handleCollectionChange={handleCollectionChange}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          isLoading={isLoading}
-          filteredRecords={filteredRecords}
-          records={records}
-          selectedDocument={selectedDocument}
-          setSelectedDocument={setSelectedDocument}
-          setViewingRecord={setViewingRecord}
-        />
-      )}
-      
-      {/* Document Viewer Modal */}
-      {viewingRecord && (
-        <DocumentViewer 
-          record={viewingRecord} 
-          onClose={() => setViewingRecord(null)} 
-        />
-      )}
-      
-      {/* Debug Information */}
-      <DebugInfo 
-        isAuthenticated={isAuthenticated}
-        selectedCollection={selectedCollection}
-        records={records}
-        files={files}
-      />
+  };    return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+      {/* Hero Section */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4 py-6 max-w-7xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Document Management</h1>
+              <p className="text-gray-600">Upload, organize, and search your documents with OCR processing</p>
+            </div>
+            <div className="hidden md:flex items-center space-x-4">
+              <div className="bg-blue-50 rounded-lg px-4 py-2">
+                <span className="text-sm font-medium text-blue-700">Collections: {collections.length}</span>
+              </div>
+              <div className="bg-green-50 rounded-lg px-4 py-2">
+                <span className="text-sm font-medium text-green-700">Documents: {records.length}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Collection Manager Component */}
+        <div className="mb-8">
+          <CollectionManager 
+            collections={collections} 
+            onCollectionCreated={handleCollectionCreated}
+            onCollectionDeleted={handleCollectionDeleted}
+          />
+        </div>
+        
+        {/* Main Content Area */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          {/* Enhanced Tab Navigation */}
+          <div className="border-b border-gray-200 bg-gray-50">
+            <TabNav 
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              fetchCollections={fetchCollections}
+              fetchRecords={fetchRecords}
+              selectedCollection={selectedCollection}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          {/* Tab Content */}
+          <div className="p-6 md:p-8">
+            {/* Upload Tab */}
+            {activeTab === 'upload' && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="bg-blue-100 rounded-full p-2">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Upload Documents</h2>
+                    <p className="text-gray-600">Process your images with OCR technology</p>
+                  </div>
+                </div>
+                <UploadTab 
+                  collections={collections}
+                  selectedCollection={selectedCollection}
+                  handleCollectionChange={handleCollectionChange}
+                  files={files}
+                  handleFileChange={handleFileChange}
+                  handleDrop={handleDrop}
+                  handleDragOver={handleDragOver}
+                  removeFile={removeFile}
+                  setFiles={setFiles}
+                  handleUpload={handleUpload}
+                  isUploading={isUploading}
+                  uploadStatus={uploadStatus}
+                />
+              </div>
+            )}
+            
+            {/* Records Tab */}
+            {activeTab === 'records' && (
+              <div className="space-y-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="bg-green-100 rounded-full p-2">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-gray-900">Document Library</h2>
+                    <p className="text-gray-600">Browse and search your processed documents</p>
+                  </div>
+                </div>
+                <RecordsTab 
+                  collections={collections}
+                  selectedCollection={selectedCollection}
+                  handleCollectionChange={handleCollectionChange}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  isLoading={isLoading}
+                  filteredRecords={filteredRecords}
+                  records={records}
+                  selectedDocument={selectedDocument}
+                  setSelectedDocument={setSelectedDocument}
+                  setViewingRecord={setViewingRecord}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Document Viewer Modal */}
+        {viewingRecord && (
+          <DocumentViewer 
+            record={viewingRecord} 
+            onClose={() => setViewingRecord(null)} 
+          />
+        )}
+        
+        {/* Debug Information - Only in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-8">
+            <DebugInfo 
+              isAuthenticated={isAuthenticated}
+              selectedCollection={selectedCollection}
+              records={records}
+              files={files}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

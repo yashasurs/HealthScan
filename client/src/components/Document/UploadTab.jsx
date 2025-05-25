@@ -16,135 +16,204 @@ const UploadTab = ({
   uploadStatus
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Upload Images for OCR Processing</h2>
-      
-      <form onSubmit={handleUpload}>
-        {/* Collection selection */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Collection (Optional)
-          </label>
-          <select
-            className="w-full p-2 border rounded-md focus:ring focus:ring-blue-200"
-            value={selectedCollection}
-            onChange={handleCollectionChange}
-          >
-            <option value="">-- No Collection --</option>
-            {collections.map(collection => (
-              <option key={collection.id} value={collection.id}>
-                {collection.name}
-              </option>
-            ))}
-          </select>
+    <div className="space-y-8">
+      {/* Collection Selection */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+        <div className="flex items-start space-x-4">
+          <div className="bg-blue-100 rounded-full p-2 flex-shrink-0">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              Choose Collection (Optional)
+            </label>
+            <p className="text-sm text-gray-600 mb-4">
+              Select a collection to organize your documents, or leave blank to process without storing
+            </p>
+            <select
+              className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
+              value={selectedCollection}
+              onChange={handleCollectionChange}
+            >
+              <option value="">-- Process Without Collection --</option>
+              {collections.map(collection => (
+                <option key={collection.id} value={collection.id}>
+                  📁 {collection.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        
-        {/* File input */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Select Image File(s)
-          </label>
+      </div>
+
+      {/* File Upload Area */}
+      <div className="space-y-6">
+        <form onSubmit={handleUpload} className="space-y-6">
+          {/* Drag and Drop Zone */}
           <div 
-            className="mt-1 flex flex-col items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md"
+            className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
+              files.length > 0 
+                ? 'border-green-300 bg-green-50' 
+                : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50'
+            }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
           >
-            <div className="space-y-1 text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                stroke="currentColor"
-                fill="none"
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <div className="flex text-sm text-gray-600">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                >
-                  <span>Upload images</span>
-                  <input
-                    id="file-upload"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileChange}
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
-              </div>
-              <p className="text-xs text-gray-500">
-                PNG, JPG, GIF up to 10MB
-              </p>
+            <div className="space-y-4">
+              {files.length === 0 ? (
+                <>
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload your images</h3>
+                    <p className="text-gray-600 mb-4">Drag and drop your files here, or click to browse</p>
+                  </div>
+                  <div className="flex justify-center">
+                    <label className="relative cursor-pointer">
+                      <span className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Choose Files
+                      </span>
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    Supports PNG, JPG, GIF files up to 10MB each
+                  </p>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-lg font-medium text-green-700">
+                      {files.length} file{files.length > 1 ? 's' : ''} ready for processing
+                    </p>
+                  </div>
+                  
+                  {/* File Previews */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-6">
+                    {Array.from(files).map((file, index) => (
+                      <ImagePreview 
+                        key={index} 
+                        file={file} 
+                        onRemove={removeFile} 
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Add More Files */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <label className="cursor-pointer">
+                      <span className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors duration-200">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Add More Files
+                      </span>
+                      <input
+                        type="file"
+                        className="sr-only"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                    <button 
+                      type="button" 
+                      onClick={() => setFiles([])} 
+                      className="ml-3 inline-flex items-center px-4 py-2 text-red-600 hover:text-red-800 font-medium transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-            
-            {/* Image previews */}
-            {files.length > 0 && (
-              <div className="mt-6 w-full">
-                <div className="flex flex-wrap justify-center">
-                  {Array.from(files).map((file, index) => (
-                    <ImagePreview 
-                      key={index} 
-                      file={file} 
-                      onRemove={removeFile} 
-                    />
-                  ))}
+          </div>
+          
+          {/* Upload Status */}
+          {uploadStatus && (
+            <div className={`p-4 rounded-lg border ${
+              uploadStatus.startsWith('Error') 
+                ? 'bg-red-50 border-red-200 text-red-800' 
+                : uploadStatus.startsWith('Successfully') 
+                ? 'bg-green-50 border-green-200 text-green-800' 
+                : 'bg-blue-50 border-blue-200 text-blue-800'
+            }`}>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  {uploadStatus.startsWith('Error') ? (
+                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : uploadStatus.startsWith('Successfully') ? (
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  )}
                 </div>
-                <div className="mt-3 text-center">
-                  <button 
-                    type="button" 
-                    onClick={() => setFiles([])} 
-                    className="text-sm text-red-600 hover:text-red-800"
-                  >
-                    Clear all files
-                  </button>
-                </div>
+                <p className="font-medium">{uploadStatus}</p>
               </div>
-            )}
+            </div>
+          )}
+          
+          {/* Process Button */}
+          <div className="flex justify-center pt-6">
+            <button
+              type="submit"
+              disabled={isUploading || files.length === 0}
+              className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform ${
+                isUploading || files.length === 0
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+              }`}
+            >
+              {isUploading ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing Images...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Process Images with OCR
+                </span>
+              )}
+            </button>
           </div>
-        </div>
-        
-        {/* Upload status */}
-        {uploadStatus && (
-          <div className={`mb-4 p-3 rounded-md ${uploadStatus.startsWith('Error') ? 'bg-red-100 text-red-700' : uploadStatus.startsWith('Successfully') ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-            {uploadStatus}
-          </div>
-        )}
-        
-        {/* Upload button */}
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            disabled={isUploading || files.length === 0}
-            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-              isUploading || files.length === 0
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-            }`}
-          >
-            {isUploading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Processing...
-              </span>
-            ) : (
-              'Process Images'
-            )}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
