@@ -1,7 +1,7 @@
 from passlib.context import CryptContext
 from pydantic_ai.models.gemini import GeminiModel
 from pydantic_ai.providers.google_gla import GoogleGLAProvider
-import os, logging
+import os
 import asyncio
 from dotenv import load_dotenv
 
@@ -28,7 +28,7 @@ class GeminiAgent():
         self.model = GeminiModel(
             "gemini-2.0-flash",
             provider=GoogleGLAProvider(
-                api_key=os.getenv("GEMINI_API_KEY"),
+                api_key=str(os.getenv("GEMINI_API_KEY")),
             ),
         )
         self.headers = {
