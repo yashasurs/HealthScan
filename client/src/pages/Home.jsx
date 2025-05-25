@@ -36,7 +36,7 @@ const Home = () => {
             <div className="md:flex md:items-center md:space-x-8">
               <div className="md:w-1/2 text-white mb-10 md:mb-0">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                  Digitizing Healthcare Records for Rural India
+                  Digitizing Healthcare Records for India
                 </h1>
                 <p className="mt-6 text-lg md:text-xl text-blue-50">
                   Simple, secure, and accessible digital health records for Primary Health Centers across India

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 // Pre-define SVG components to reduce render work
 const UserIcon = () => (
@@ -18,24 +20,20 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-      const handleSubmit = async (e) => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
         
         try {
-            // Handle login logic here
-            console.log('Username:', username);
-            console.log('Password:', password);
-            
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // Redirect to home page on successful login
-            window.location.href = '/home';
+            await login(username, password);
+            navigate('/home');
             
         } catch (err) {
-            setError('An error occurred during login');
+            setError(err.response?.data?.detail || 'Invalid username or password. Please try again.');
         } finally {
             setIsLoading(false);
         }
