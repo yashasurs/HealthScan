@@ -7,7 +7,7 @@ import Home from './pages/Home'
 import AuthProvider from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
-import Documents from './pages/Documents'
+import Documents from './pages/Documents.jsx'
 
 function App() {
   
