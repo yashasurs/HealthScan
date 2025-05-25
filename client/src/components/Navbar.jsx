@@ -93,9 +93,6 @@ const Navbar = () => {
                   <div className="text-gray-500 mr-2">
                     <UserIcon />
                   </div>
-                  <span className="text-gray-600 text-sm">
-                    {user?.username || 'User'}
-                  </span>
                 </div>
                 <button
                   onClick={handleLogout}

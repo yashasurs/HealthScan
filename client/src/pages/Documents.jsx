@@ -56,14 +56,20 @@ const Documents = () => {
   const handleCollectionCreated = (newCollection) => {
     setCollections([...collections, newCollection]);
   };
-  
-  // Handle collection deletion callback
+    // Handle collection deletion callback
   const handleCollectionDeleted = (deletedCollectionId) => {
     setCollections(collections.filter(c => c.id !== deletedCollectionId));
     if (selectedCollection === deletedCollectionId) {
       setSelectedCollection('');
       setRecords([]);
     }
+  };
+  
+  // Handle collection selection
+  const handleCollectionSelect = (collectionId) => {
+    setSelectedCollection(collectionId);
+    setActiveTab('records'); // Switch to records tab when a collection is selected
+    fetchRecords(collectionId);
   };
   
   // Fetch records of a collection
@@ -269,12 +275,13 @@ const Documents = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Collection Manager Component */}
-        <div className="mb-8">
+        {/* Collection Manager Component */}        <div className="mb-8">
           <CollectionManager 
             collections={collections} 
             onCollectionCreated={handleCollectionCreated}
             onCollectionDeleted={handleCollectionDeleted}
+            onCollectionSelect={handleCollectionSelect}
+            selectedCollectionId={selectedCollection}
           />
         </div>
         

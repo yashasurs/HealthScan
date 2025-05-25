@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import createApiService from '../../utils/apiService';
 
-const CollectionManager = ({ collections, onCollectionCreated, onCollectionDeleted }) => {
+const CollectionManager = ({ collections, onCollectionCreated, onCollectionDeleted, onCollectionSelect, selectedCollectionId }) => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [newCollectionDescription, setNewCollectionDescription] = useState('');
@@ -9,7 +9,8 @@ const CollectionManager = ({ collections, onCollectionCreated, onCollectionDelet
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-    // Handle collection creation form submission
+  
+  // Handle collection creation form submission
   const handleCreateCollection = async (e) => {
     e.preventDefault();
     setError('');
@@ -45,7 +46,8 @@ const CollectionManager = ({ collections, onCollectionCreated, onCollectionDelet
       setIsCreating(false);
     }
   };
-    // Handle collection deletion
+  
+  // Handle collection deletion
   const handleDeleteCollection = async (collectionId, collectionName) => {
     if (window.confirm(`Are you sure you want to delete the collection "${collectionName}"? Documents will not be deleted but will be removed from this collection.`)) {
       setIsDeleting(true);
@@ -67,7 +69,15 @@ const CollectionManager = ({ collections, onCollectionCreated, onCollectionDelet
       }
     }
   };
-    return (
+
+  // Handle collection selection
+  const handleCollectionClick = (collectionId) => {
+    if (onCollectionSelect) {
+      onCollectionSelect(collectionId);
+    }
+  };
+    
+  return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-50 to-blue-70 px-6 py-4 border-b border-gray-200">
@@ -226,23 +236,37 @@ const CollectionManager = ({ collections, onCollectionCreated, onCollectionDelet
         ) : (
           <div className="grid gap-4">
             {collections.map(collection => (
-              <div key={collection.id} className="group bg-gradient-to-r from-white to-blue-50/30 rounded-xl p-6 border border-gray-200 hover:border-blue-300 transition-all duration-200 hover:shadow-lg">
+              <div 
+                key={collection.id} 
+                onClick={() => handleCollectionClick(collection.id)}
+                className={`group rounded-xl p-6 border transition-all duration-200 hover:shadow-lg cursor-pointer ${
+                  selectedCollectionId === collection.id 
+                    ? 'bg-blue-50 border-blue-400' 
+                    : 'bg-gradient-to-r from-white to-blue-50/30 border-gray-200 hover:border-blue-300'
+                }`}
+              >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <div className="bg-blue-100 rounded-lg p-2">
+                      <div className={`rounded-lg p-2 ${selectedCollectionId === collection.id ? 'bg-blue-200' : 'bg-blue-100'}`}>
                         <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                       </div>
                       <h4 className="font-semibold text-gray-900">{collection.name}</h4>
+                      {selectedCollectionId === collection.id && (
+                        <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">Selected</span>
+                      )}
                     </div>
                     {collection.description && (
                       <p className="text-sm text-gray-600 ml-11">{collection.description}</p>
                     )}
                   </div>
                   <button
-                    onClick={() => handleDeleteCollection(collection.id, collection.name)}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent collection click when delete button is clicked
+                      handleDeleteCollection(collection.id, collection.name);
+                    }}
                     disabled={isDeleting}
                     className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
                     title="Delete collection"
@@ -261,7 +285,8 @@ const CollectionManager = ({ collections, onCollectionCreated, onCollectionDelet
                 </div>
               </div>
             ))}
-          </div>        )}
+          </div>
+        )}
       </div>
       </div>
     </div>
