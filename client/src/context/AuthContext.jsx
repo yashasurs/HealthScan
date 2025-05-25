@@ -14,7 +14,6 @@ export default function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   const API_URL = "http://localhost:8000"; 
-
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("token");
@@ -23,13 +22,15 @@ export default function AuthProvider({ children }) {
           // Setup axios headers for authorized requests
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
           
-          // You could verify the token here with an API call
-          // For now, we'll just set isAuthenticated to true if token exists
           setIsAuthenticated(true);
+          
+          // Fetch current user data
+          await getCurrentUser();
         } catch (err) {
           console.error("Error verifying authentication", err);
           localStorage.removeItem("token");
           setIsAuthenticated(false);
+          setUser(null);
         }
       }
       setLoading(false);
@@ -37,7 +38,6 @@ export default function AuthProvider({ children }) {
 
     checkAuthStatus();
   }, []);
-
   const register = async (userData) => {
     setError(null);
     try {
@@ -50,6 +50,8 @@ export default function AuthProvider({ children }) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
       
       setIsAuthenticated(true);
+      await getCurrentUser();
+      
       return response.data;
     } catch (err) {
       setError(err.response?.data?.detail || "Registration failed");
@@ -57,8 +59,7 @@ export default function AuthProvider({ children }) {
     }
   };
 
-  
-  const login = async (username, password) => {
+    const login = async (username, password) => {
     setError(null);
     try {
       
@@ -74,6 +75,10 @@ export default function AuthProvider({ children }) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
       
       setIsAuthenticated(true);
+      
+      // Get user data after successful login
+      await getCurrentUser();
+      
       return response.data;
     } catch (err) {
       setError(err.response?.data?.detail || "Login failed");
@@ -86,8 +91,20 @@ export default function AuthProvider({ children }) {
     delete axios.defaults.headers.common["Authorization"];
     setIsAuthenticated(false);
     setUser(null);
-  };
+  };  
   
+  const getCurrentUser = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/me`);
+      console.log("Current user data:", response.data);
+      setUser(response.data);
+      return response.data;
+    } catch (err) {
+      console.error("Error fetching user data", err);
+      return null;
+    }
+  };
+
   const value = {
     isAuthenticated,
     user,
@@ -96,6 +113,7 @@ export default function AuthProvider({ children }) {
     register,
     login,
     logout,
+    getCurrentUser
   };
 
   return (
