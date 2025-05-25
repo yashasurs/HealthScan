@@ -1,10 +1,13 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+
+// Import AuthProvider and useAuth
+import { AuthProvider, useAuth } from './Contexts/Authcontext';
 
 // Import Screens
 import LoginScreen from './screens/LoginScreen';
@@ -23,7 +26,6 @@ function MainTabNavigator() {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'QR Code') {
@@ -33,7 +35,6 @@ function MainTabNavigator() {
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
-
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: '#000',
@@ -54,16 +55,39 @@ function MainTabNavigator() {
   );
 }
 
-export default function App() {
+function AppNavigator() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Signup" component={SignupScreen} />
-        <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+        {isAuthenticated ? (
+          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
   );
 }
 

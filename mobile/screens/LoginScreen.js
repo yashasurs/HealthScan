@@ -11,28 +11,38 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useAuth } from '../Contexts/Authcontext';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login, error } = useAuth();
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter both email and password');
+    if (!username.trim()) {
+      Alert.alert('Error', 'Please enter your username');
+      return;
+    }
+
+    if (!password.trim()) {
+      Alert.alert('Error', 'Please enter your password');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Simulate login process
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await login(username, password);
       
-      // Navigate directly to MainTabs without authentication
-      navigation.replace('MainTabs');
+      if (result.success) {
+        // Navigation will happen automatically due to auth state change
+      } else {
+        Alert.alert('Login Failed', result.error || 'Please check your credentials');
+      }
     } catch (error) {
-      Alert.alert('Login Failed', 'Please check your credentials and try again');
+      Alert.alert('Error', 'An unexpected error occurred');
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -43,29 +53,36 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to your account</Text>
+            <Text style={styles.subtitle}>Please sign in to your account</Text>
           </View>
+
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Username</Text>
               <TextInput
                 style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="Enter your email"
-                placeholderTextColor="#666"
-                keyboardType="email-address"
+                placeholder="Enter your username"
+                value={username}
+                onChangeText={setUsername}
                 autoCapitalize="none"
-                autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
@@ -73,23 +90,21 @@ const LoginScreen = ({ navigation }) => {
               <Text style={styles.label}>Password</Text>
               <TextInput
                 style={styles.input}
+                placeholder="Enter your password"
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor="#666"
                 secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
-            <TouchableOpacity
+            <TouchableOpacity 
               style={[styles.loginButton, isLoading && styles.disabledButton]}
               onPress={handleLogin}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color="#ffffff" />
               ) : (
                 <Text style={styles.loginButtonText}>Sign In</Text>
               )}
@@ -97,14 +112,14 @@ const LoginScreen = ({ navigation }) => {
 
             <View style={styles.signupContainer}>
               <Text style={styles.signupText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={navigateToSignup}>
+              <TouchableOpacity onPress={navigateToSignup} disabled={isLoading}>
                 <Text style={styles.signupLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -136,6 +151,18 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#666666',
+  },
+  errorContainer: {
+    backgroundColor: '#ffe6e6',
+    padding: 12,
+    borderRadius: 4,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff0000',
+  },
+  errorText: {
+    color: '#cc0000',
+    fontSize: 14,
   },
   form: {
     flex: 1,
