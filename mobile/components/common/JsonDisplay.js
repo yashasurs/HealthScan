@@ -11,20 +11,14 @@ const JsonDisplay = ({ data, style, noDataMessage = 'No data available' }) => {
   // Helper function to render JSON data
   const renderJson = () => {
     if (!data) return <Text style={styles.noData}>{noDataMessage}</Text>;
-    
-    // Make sure data is properly stringified and avoid any non-serializable objects
-    let jsonString;
-    try {
-      jsonString = JSON.stringify(data, (key, value) => {
-        // Handle functions, undefined values, or circular references
-        if (typeof value === 'function' || typeof value === 'undefined') {
-          return String(value);
-        }
-        return value;
-      }, 2);
-    } catch (error) {
-      jsonString = `Error stringifying data: ${error.message}`;
-    }
+      // Make sure data is properly stringified and avoid any non-serializable objects
+    let jsonString = JSON.stringify(data, (key, value) => {
+      // Handle functions, undefined values, or circular references
+      if (typeof value === 'function' || typeof value === 'undefined') {
+        return String(value);
+      }
+      return value;
+    }, 2);
     
     return <Text style={styles.jsonText}>{jsonString}</Text>;
   };

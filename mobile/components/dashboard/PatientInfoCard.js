@@ -14,11 +14,11 @@ const PatientInfoCard = () => {
     bloodType: "O+",
     allergies: ["Penicillin", "Peanuts", "Dust"]
   };
-  
-  return (
+    return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Patient Information</Text>
-      <View style={styles.patientInfoContainer}>        <View style={styles.patientInfoRow}>
+      <View style={styles.patientInfoContainer}>
+        <View style={styles.patientInfoRow}>
           <Text style={styles.patientInfoLabel}>Name:</Text>
           <Text style={styles.patientInfoValue}>{patientData.name}</Text>
         </View>

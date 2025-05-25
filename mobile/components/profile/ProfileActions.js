@@ -6,16 +6,12 @@ import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator } from 'rea
  * @param {boolean} isLoggingOut - Whether the user is currently logging out
  * @param {function} onEditProfile - Function to call when edit profile is pressed
  * @param {function} onChangePassword - Function to call when change password is pressed
- * @param {function} onAuthTest - Function to call when test authentication is pressed
- * @param {function} onNetworkTest - Function to call when test network is pressed
  * @param {function} onLogout - Function to call when logout is pressed
  */
 const ProfileActions = ({ 
   isLoggingOut, 
   onEditProfile, 
   onChangePassword, 
-  onAuthTest, 
-  onNetworkTest, 
   onLogout 
 }) => {
   return (
@@ -32,20 +28,6 @@ const ProfileActions = ({
         onPress={onChangePassword}
       >
         <Text style={styles.actionButtonText}>Change Password</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.actionButton}
-        onPress={onAuthTest}
-      >
-        <Text style={styles.actionButtonText}>Test Authentication</Text>
-      </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={styles.actionButton}
-        onPress={onNetworkTest}
-      >
-        <Text style={styles.actionButtonText}>Test Network</Text>
       </TouchableOpacity>
       
       <TouchableOpacity 

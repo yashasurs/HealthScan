@@ -7,19 +7,14 @@ import * as DocumentPicker from 'expo-document-picker';
  * @param {Object} props
  * @param {Function} props.onDocumentPicked - Callback when document is selected
  */
-const DocumentUploader = ({ onDocumentPicked }) => {
-  const pickDocument = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: '*/*',
-        copyToCacheDirectory: true,
-      });
-      
-      if (result.canceled === false) {
-        onDocumentPicked(result.assets[0]);
-      }
-    } catch (err) {
-      console.log('Document picking error:', err);
+const DocumentUploader = ({ onDocumentPicked }) => {  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: '*/*',
+      copyToCacheDirectory: true,
+    });
+    
+    if (result.canceled === false) {
+      onDocumentPicked(result.assets[0]);
     }
   };
 

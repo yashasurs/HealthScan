@@ -2,17 +2,25 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 
 /**
- * Profile header component showing user avatar, name and role
- * @param {object} userData - User data containing name and role
+ * Profile header component showing user avatar, name and role with hardcoded data
  * @param {function} onChangeAvatar - Function to call when change avatar button is pressed
  */
-const ProfileHeader = ({ userData, onChangeAvatar }) => {
+const ProfileHeader = ({ onChangeAvatar }) => {
+  // Hardcoded user data
+  const hardcodedUserData = {
+    fullName: "John Doe",
+    role: "Patient"
+  };
+  
+  // Generate initials from the name
+  const displayName = hardcodedUserData.fullName;
+  const initials = displayName.split(' ').map(n => n[0]).join('');  
   return (
     <View style={styles.profileSection}>
       <View style={styles.avatarContainer}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
-            {userData.name.split(' ').map(n => n[0]).join('')}
+            {initials}
           </Text>
         </View>
         <TouchableOpacity 
@@ -23,8 +31,8 @@ const ProfileHeader = ({ userData, onChangeAvatar }) => {
         </TouchableOpacity>
       </View>
       
-      <Text style={styles.userName}>{userData.name}</Text>
-      <Text style={styles.userRole}>{userData.role}</Text>
+      <Text style={styles.userName}>{displayName}</Text>
+      <Text style={styles.userRole}>{hardcodedUserData.role}</Text>
     </View>
   );
 };
