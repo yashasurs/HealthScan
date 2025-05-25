@@ -32,6 +32,7 @@ const RegisterForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
+    
       const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');

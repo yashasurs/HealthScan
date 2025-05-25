@@ -22,20 +22,17 @@ const LoginForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
         
         try {
-            // Use the login function from authentication context
             await login(username, password);
-            
-            // On successful login, navigate to home page
             navigate('/home');
             
         } catch (err) {
-            // Display the error message from the API or a fallback
             setError(err.response?.data?.detail || 'Invalid username or password. Please try again.');
         } finally {
             setIsLoading(false);
