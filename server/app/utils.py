@@ -1,5 +1,7 @@
+from typing import List
 from passlib.context import CryptContext
 from pydantic_ai.models.gemini import GeminiModel
+from pydantic_ai.agent import Agent
 from pydantic_ai.providers.google_gla import GoogleGLAProvider
 import os
 import asyncio
@@ -37,37 +39,50 @@ class GeminiAgent():
     
     async def generate_markup(
             self,
-            text: str,
-    ) -> MarkupResponse:
+            texts: List[str],
+    ) -> List[MarkupResponse]:
         """
         Uses the LLM to format the input text as markup language, without changing its content.
         """
-        from pydantic_ai.agent import Agent
         agent = Agent(
             self.model,
-            result_type=str,
+            result_type=List[MarkupResponse],
             system_prompt=(
-                "You are a formatter. Format the following text as well-structured Markdown, using headings, bullet points, and code blocks where appropriate. Organize the information for maximum readability, but do not invent or omit any content."
+                "You are a formatter. You will receive a list of text excerpts. Format each text as well-structured Markdown, using headings, bullet points, and code blocks where appropriate. Organize the information for maximum readability. IMPORTANT: Do NOT change any content, do NOT add any new content, and do NOT delete any existing content. Preserve all original information exactly as provided - only format it using Markdown syntax. Return a list where each item corresponds to the formatted version of the input text at the same index."
             ),
         )
-        response = await agent.run(text)
-        return response.data
+        response = await agent.run(texts)
+        return response.output
 
 
 if __name__ == "__main__":
     async def main():
         agent = GeminiAgent()
-        text = """
+        texts = [
+            """
             Anirudh Kashyap +91 6366201598 anirudhkashyap321@gmailcom github com /dynamite-123 linkedin EDUCATION JSS Science and Technology University, Mysore CGPA: 9.2/10 Bachelor of Engineering in Computer Science Oct 2023 present PROJECT EXPERIENCE Smart Stock - Feb 2025 PES University Built with a team of four and shortlisted in the top 10 at a hackathon Led backend development using Django REST Framework for a web app providing stock insights, recommendations, and sentiment analysis Frontend built with React: GitHub: https:L Lgithub com [dvnamite-L23 /NextGen 2 Raytracing in € - March 2025 Built a program in C to demonstrate raytracing using the SDL library: GitHub: https:L Lgithub com /dynamite-L23 [Ravtracing CRM Webapp Dec 2024 Built a customer relationship management app using Django framework GitHub: https LLgithubcomLdynamite-L23 /diango-crm API for CRUD operations Sep 2024 Built a simple RESTful API using FastAPI to handle CRUD (create, read; update, delete) operations GitHub: https:L Lgithub com /dynamite-123 [Social_Media App
-        """
-        print("Input text:\n", text)
-        response = await agent.generate_markup(text)
+            """,
+
+            """
+            JAkash Savanur +6581732147 | akash013@e.ntu.edu.sg linkedin com/in/akash-savanur EDUCATION Nanyang Technological University, Singapore CGPA: 4.84/5.00 Bachelor of Engineering in Computer Science, Second Major in Business 2023 _ July 2027 Relevant Coursework Data Structures and Algorithms, Data Science and Artificial Intelligence, Digital Logic, Financial Management ExPERIENCE Full Stack Development Intern June 2024 _ July 2024 DoozieSoft Bangalore, India Engineered a full-fledged temple management website the PERN stack (PostgreSQL, Express_ React; Node js). Designed and deploved 15+ microservices, reducing API response times by 40%,and handled over 2000 user registrations and 500+ payments through Razorpay with a 98% success rate  Integrated WhatsApp APIs for OTP generation and notifications, enhancing user authentication and engagement; along with automated audit logs and receipt generation for secure transactions Managed the deployment process on AWS services, ensuring high scalability and reliability ofthe application, and maintained robust version control using GitHub. Registered over 2000 users within the beta phase, facilitated by efficient event booking and donation management features, contributing to high user satisfaction and engagement: Phishing Email Detection using Machine Learning 2024 May 2024 Nanyang Technological University Singapore Designed a Machine Learning solution to accurately classify and detect phishing emails, providing practical insights to prevent individuals from victim to phishing attacks in real-world scenarios_ Utilised Logistic Regression, Random Forest; GRU Neural Network and SVM machine learning models Best-F performing model had an Fl-score of 0.97. The findings of this project have practical implications in real-world scenarios, where individuals can use the developed model to identify and avoid phishing emails, thereby reducing the risk of victim to cyber attacks. Aug using Apr falling falling
+            """,
+
+            """
+            To exit full screen; press and hold Esc vinyas bharadwaj 8310055407 vinyasbharadwaj101@gmail com Mysore, Karnataka Profile Im always looking to connect with others who inspire me to be my best: have a strong passion for backend and API development, and I've gained experience with FastAPI , Django, other backend technologies_ Im also skilled in using API tools like Postman to test and refine my work. Im eager to keep learning and expanding my skills in these areas  and Im excited to explore new technologies that can help me grow and contribute to my work. Skills Django Backend Developer; Python Programming; API Development with FastAPI, Web Development Fundamentals Communication skills Education JSS Science And Technology University Ist semester: 9.63 GPA Excel Public School Shortlisted among the top 50 teams across India in the Atal  Innovation Marathon (AIM): developed an innovative design for a vertical axis wind turbine to surmount the inherent limitations of  conventional wind energy harvesting technologies_ Projects Customer Relationship Management (CRM) System Developed a CRM system with Django, featuring authentication mechanisms and a user-friendly, interactive Ul. Secure user authentication, dynamic and responsive interface for seamless user interaction: RESTful API for CRUD Operations Designed and implemented a RESTful API using FastAPI , capable of handling all CRUD (Create, Read, Update, Delete) operations_ The API is optimized for performance and scalability, full CRUD functionality, fast and lightweight, with asynchronous capabilities. Well-documented endpoints_ Accomplishments JEE Mains: 98.729 percentile KCET: ranked 135th in my state and We
+            """
+        ]
+        print("Input texts:\n", texts)
+        response = await agent.generate_markup(texts)
         print("\nFormatted output (type={}):\n".format(type(response)))
-        print(response)
-        # Ensure the directory exists and write the formatted output to test.md
+        print(f"Number of records: {len(response)}")
+        for i, record in enumerate(response):
+            print(f"\nRecord {i+1}:\n{record.markup}")
+        
+        # Write the first formatted output to test.md
         output_dir = os.path.dirname(os.path.abspath(__file__))
         output_path = os.path.join(output_dir, "test.md")
-        with open(output_path, "w") as f:
-            f.write(response)
+        if response:
+            with open(output_path, "w") as f:
+                f.write(response[0].markup)
 
     asyncio.run(main())
