@@ -2,27 +2,49 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
 /**
- * Profile information component showing user details
- * @param {object} userData - User data containing email, phone, and joinDate
+ * Profile information component showing user details with hardcoded data
  */
-const ProfileInfo = ({ userData }) => {
+const ProfileInfo = () => {
+  // Hardcoded user data
+  const hardcodedUserData = {
+    email: "john.doe@example.com",
+    username: "johndoe",
+    phoneNumber: "+1 (123) 456-7890",
+    lastLogin: "2025-05-24T14:30:00Z"
+  };
+
+  // Format date if lastLogin exists
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    } catch (e) {
+      return 'N/A';
+    }
+  };
   return (
     <View style={styles.infoSection}>
       <Text style={styles.sectionTitle}>Personal Information</Text>
       
       <View style={styles.infoItem}>
         <Text style={styles.infoLabel}>Email</Text>
-        <Text style={styles.infoValue}>{userData.email}</Text>
+        <Text style={styles.infoValue}>{hardcodedUserData.email}</Text>
       </View>
       
+      <View style={styles.infoItem}>
+        <Text style={styles.infoLabel}>Username</Text>
+        <Text style={styles.infoValue}>{hardcodedUserData.username}</Text>
+      </View>
+
       <View style={styles.infoItem}>
         <Text style={styles.infoLabel}>Phone</Text>
-        <Text style={styles.infoValue}>{userData.phone}</Text>
+        <Text style={styles.infoValue}>{hardcodedUserData.phoneNumber}</Text>
       </View>
       
       <View style={styles.infoItem}>
-        <Text style={styles.infoLabel}>Member Since</Text>
-        <Text style={styles.infoValue}>{userData.joinDate}</Text>
+        <Text style={styles.infoLabel}>Last Login</Text>
+        <Text style={styles.infoValue}>{formatDate(hardcodedUserData.lastLogin)}</Text>
       </View>
     </View>
   );
