@@ -60,40 +60,46 @@ const Navbar = () => {
         { name: 'Home', path: '/' },
         { name: 'Features', path: '/#features' },
         { name: 'About', path: '/#about' },
-      ];  return (    <nav 
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white shadow-md"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      ];  return (
+    <nav 
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100"
+    >      <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
         <div className="flex justify-between h-16">
-          {/* Main navigation - visible only on desktop */}
-          <div className="flex items-center">            
-            {/* Desktop Navigation - hidden on mobile */}
-            <div className="hidden md:flex md:items-center md:space-x-4">
-              {navigationLinks.map((item) => (                <Link
+          {/* Logo and Brand - visible on all screens */}          <div className="flex items-center">            <Link to={isAuthenticated ? "/home" : "/"} className="flex items-center group pl-0 lg:pl-0">
+              <img 
+                src="/Logo.png" 
+                alt="HealthScan Logo" 
+                className="h-54 p-2 group-hover:scale-105 transition-transform duration-200" 
+              />
+            </Link>
+              {/* Desktop Navigation - hidden on mobile */}
+            <div className="hidden md:flex md:items-center md:space-x-5 ml-8">
+              {navigationLinks.map((item) => (
+                <Link
                   key={item.name}
                   to={item.path}
-                  className="px-3 py-2 rounded-md text-sm font-bold transition-colors text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                  className="px-2 py-1 text-sm text-gray-700 hover:text-blue-500 transition-all duration-200 relative group"
                 >
                   {item.name}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               ))}
             </div>
-          </div>
-        
-          {/* Desktop Authentication buttons */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
+          </div>          {/* Desktop Authentication buttons */}
+          <div className="hidden md:flex md:items-center md:space-x-6">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 <div className="flex items-center">
-                  <div className="text-gray-700 mr-2">
+                  <div className="text-gray-500 mr-2">
                     <UserIcon />
-                  </div>                  <span className="text-gray-900 font-bold">
+                  </div>
+                  <span className="text-gray-600 text-sm">
                     {user?.username || 'User'}
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  className="text-md font-semibold text-red-500 cursor-pointer transition-all duration-200"
                 >
                   Log out
                 </button>
@@ -102,13 +108,13 @@ const Navbar = () => {
               <>
                 <Link
                   to="/login"
-                  className="px-4 py-2 rounded-md text-sm font-bold text-blue-600 hover:text-blue-700"
+                  className="text-md font-semibold text-gray-500 hover:text-blue-500 transition-all duration-200"
                 >
                   Log in
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 rounded-md text-sm font-bold shadow text-white bg-blue-600 hover:bg-blue-700"
+                  className="text-md font-semibold text-blue-500 hover:text-blue-600 transition-all duration-200"
                 >
                   Sign up
                 </Link>
@@ -118,58 +124,58 @@ const Navbar = () => {
           <div className="flex md:hidden items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+              className="p-2 text-gray-500 hover:text-blue-500 transition-all duration-200"
               aria-label="Menu"
             >
               {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
             </button>
           </div></div>
-      </div>
-        {/* Mobile menu - only shown when menu is opened and hidden on desktop */}
+      </div>        {/* Mobile menu - only shown when menu is opened and hidden on desktop */}
       <div className={`md:hidden ${mobileMenuOpen ? 'block' : 'hidden'}`}>
-        <div className="px-2 pt-2 pb-3 space-y-1 bg-white shadow-lg">
-          {navigationLinks.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className="block px-3 py-2 rounded-md text-base font-bold text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-            >
-              {item.name}
-            </Link>
-          ))}
-            {/* Authentication in mobile menu */}
-          <div className="pt-4 pb-3 border-t border-gray-200">
+        <div className="px-4 py-3 bg-white/95 backdrop-blur-md border-t border-gray-100">          <div className="space-y-4">
+            {navigationLinks.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="block py-2 text-base text-gray-700 hover:text-blue-500 transition-all duration-200"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>{/* Authentication in mobile menu */}
+          <div className="mt-4 pt-3 border-t border-gray-200">
             {isAuthenticated ? (
-              <>
-                <div className="px-3 py-2 flex items-center">
-                  <div className="text-gray-700 mr-2">
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <div className="text-gray-500 mr-2">
                     <UserIcon />
-                  </div>                  <span className="text-gray-900 font-bold">
+                  </div>
+                  <span className="text-gray-600">
                     {user?.username || 'User'}
                   </span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left block px-3 py-2 rounded-md text-base font-bold text-white bg-blue-600 hover:bg-blue-700 mt-1 shadow"
+                  className="block w-full text-left py-2 text-gray-500 hover:text-blue-500 transition-all duration-200"
                 >
                   Log out
                 </button>
-              </>
+              </div>
             ) : (
-              <>
+              <div className="space-y-4">
                 <Link
                   to="/login"
-                  className="block px-3 py-2 rounded-md text-base font-bold text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                  className="block py-2 text-gray-500 hover:text-blue-500 transition-all duration-200"
                 >
                   Log in
                 </Link>
                 <Link
                   to="/register"
-                  className="block px-3 py-2 rounded-md text-base font-bold text-white bg-blue-600 hover:bg-blue-700 mt-1 shadow"
+                  className="block py-2 text-blue-500 hover:text-blue-600 transition-all duration-200"
                 >
                   Sign up
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
