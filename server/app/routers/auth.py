@@ -10,9 +10,12 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     # Check if email or username already exists
     if db.query(models.User).filter(models.User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
+
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
+
     hashed_password = utils.hash(user.password)
+
     new_user = models.User(email=user.email, username=user.username, password=hashed_password)
     db.add(new_user)
     db.commit()

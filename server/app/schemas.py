@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from pydantic import BaseModel, EmailStr
+from pydantic import Field, BaseModel, EmailStr
 
 
 class Token(BaseModel):
@@ -61,3 +61,8 @@ class CollectionResponse(CollectionBase):
     
     class Config:
         from_attributes = True
+
+class MarkupResponse(BaseModel):
+    markup: str = Field(description="The markup content of the record.")
+
+
