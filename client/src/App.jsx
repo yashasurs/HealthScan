@@ -8,6 +8,7 @@ import AuthProvider from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import Documents from './pages/Documents.jsx'
+import Collections from './pages/Collections.jsx'
 
 function App() {
   
@@ -27,6 +28,11 @@ function App() {
             <Route path='/documents' element={
               <ProtectedRoute>
                 <Documents />
+              </ProtectedRoute>
+            } />
+            <Route path='/collections' element={
+              <ProtectedRoute>
+                <Collections />
               </ProtectedRoute>
             } />
             <Route path='/' element={<Home />} />

@@ -49,12 +49,12 @@ const Navbar = () => {
     logout();
     
   };
-  
-  const navigationLinks = isAuthenticated 
+    const navigationLinks = isAuthenticated 
     ? [
         { name: 'Home', path: '/home' },
         { name: 'Dashboard', path: '/dashboard' },
         { name: 'Documents', path: '/documents' },
+        { name: 'Collections', path: '/collections' },
       ]
     : [
         { name: 'Home', path: '/' },

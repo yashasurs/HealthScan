@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
 import createApiService from '../utils/apiService'
 import { 
-  CollectionManager,
   UploadTab,
   RecordsTab,
   DocumentViewer,
@@ -272,19 +271,7 @@ const Documents = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Collection Manager Component */}        <div className="mb-8">
-          <CollectionManager 
-            collections={collections} 
-            onCollectionCreated={handleCollectionCreated}
-            onCollectionDeleted={handleCollectionDeleted}
-            onCollectionSelect={handleCollectionSelect}
-            selectedCollectionId={selectedCollection}
-          />
-        </div>
-        
+      </div>      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Main Content Area */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
           {/* Enhanced Tab Navigation */}
