@@ -11,15 +11,17 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useAuth } from '../Contexts/Authcontext';
 
 const SignupScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
+    username: '',
     password: '',
     confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { register, error } = useAuth();
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -29,12 +31,7 @@ const SignupScreen = ({ navigation }) => {
   };
 
   const validateForm = () => {
-    const { fullName, email, password, confirmPassword } = formData;
-    
-    if (!fullName.trim()) {
-      Alert.alert('Error', 'Please enter your full name');
-      return false;
-    }
+    const { email, username, password, confirmPassword } = formData;
     
     if (!email.trim()) {
       Alert.alert('Error', 'Please enter your email');
@@ -43,6 +40,11 @@ const SignupScreen = ({ navigation }) => {
     
     if (!email.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email address');
+      return false;
+    }
+    
+    if (!username.trim()) {
+      Alert.alert('Error', 'Please enter a username');
       return false;
     }
     
@@ -70,22 +72,18 @@ const SignupScreen = ({ navigation }) => {
     setIsLoading(true);
 
     try {
-      // Simulate registration process
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { email, username, password } = formData;
+      const result = await register(email, username, password);
       
-      // Show success and navigate to MainTabs
-      Alert.alert(
-        "Account Created",
-        "Your account has been created successfully!",
-        [
-          { 
-            text: "OK", 
-            onPress: () => navigation.replace('MainTabs')
-          }
-        ]
-      );
+      if (result.success) {
+        Alert.alert('Success', 'Account created successfully!');
+        // Navigation will happen automatically due to auth state change
+      } else {
+        Alert.alert('Registration Failed', result.error || 'Please try again');
+      }
     } catch (error) {
-      Alert.alert('Registration Failed', 'Please try again');
+      Alert.alert('Error', 'An unexpected error occurred');
+      console.error('Signup error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -96,42 +94,49 @@ const SignupScreen = ({ navigation }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>Create Account</Text>
-            <Text style={styles.subtitle}>Join us to get started</Text>
+            <Text style={styles.subtitle}>Please fill in the form to continue</Text>
           </View>
 
-          <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Full Name</Text>
-              <TextInput
-                style={styles.input}
-                value={formData.fullName}
-                onChangeText={(value) => handleInputChange('fullName', value)}
-                placeholder="Enter your full name"
-                placeholderTextColor="#666"
-                autoCapitalize="words"
-                autoCorrect={false}
-              />
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
             </View>
+          )}
 
+          <View style={styles.form}>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
+                placeholder="Enter your email"
                 value={formData.email}
                 onChangeText={(value) => handleInputChange('email', value)}
-                placeholder="Enter your email"
-                placeholderTextColor="#666"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                autoCorrect={false}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Username</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your username"
+                value={formData.username}
+                onChangeText={(value) => handleInputChange('username', value)}
+                autoCapitalize="none"
+                editable={!isLoading}
               />
             </View>
 
@@ -139,13 +144,11 @@ const SignupScreen = ({ navigation }) => {
               <Text style={styles.label}>Password</Text>
               <TextInput
                 style={styles.input}
+                placeholder="Enter your password"
                 value={formData.password}
                 onChangeText={(value) => handleInputChange('password', value)}
-                placeholder="Create a password"
-                placeholderTextColor="#666"
                 secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
@@ -153,23 +156,21 @@ const SignupScreen = ({ navigation }) => {
               <Text style={styles.label}>Confirm Password</Text>
               <TextInput
                 style={styles.input}
+                placeholder="Confirm your password"
                 value={formData.confirmPassword}
                 onChangeText={(value) => handleInputChange('confirmPassword', value)}
-                placeholder="Confirm your password"
-                placeholderTextColor="#666"
                 secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
+                editable={!isLoading}
               />
             </View>
 
-            <TouchableOpacity
+            <TouchableOpacity 
               style={[styles.signupButton, isLoading && styles.disabledButton]}
               onPress={handleSignup}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color="#ffffff" />
               ) : (
                 <Text style={styles.signupButtonText}>Create Account</Text>
               )}
@@ -177,14 +178,14 @@ const SignupScreen = ({ navigation }) => {
 
             <View style={styles.loginContainer}>
               <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={navigateToLogin}>
+              <TouchableOpacity onPress={navigateToLogin} disabled={isLoading}>
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </ScrollView>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -216,6 +217,18 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     color: '#666666',
+  },
+  errorContainer: {
+    backgroundColor: '#ffe6e6',
+    padding: 12,
+    borderRadius: 4,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff0000',
+  },
+  errorText: {
+    color: '#cc0000',
+    fontSize: 14,
   },
   form: {
     flex: 1,
