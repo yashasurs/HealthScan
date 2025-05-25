@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 // Pre-define SVG components to reduce render work
 const UserIcon = () => (
@@ -28,12 +30,12 @@ const RegisterForm = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    
-    const handleSubmit = async (e) => {
+    const { register } = useAuth();
+    const navigate = useNavigate();
+      const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         
-        // Validate passwords match
         if (password !== confirmPassword) {
             setError("Passwords don't match");
             return;
@@ -42,17 +44,17 @@ const RegisterForm = () => {
         setIsLoading(true);
         
         try {
-            // Handle registration logic here
-            console.log('Full Name:', fullName);
-            console.log('Username:', username);
-            console.log('Email:', email);
-            console.log('Password:', password);
+            const userData = {
+                username: username,
+                email: email,
+                password: password
+            };
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await register(userData);
+            navigate('/home');
             
         } catch (err) {
-            setError('An error occurred during registration');
+            setError(err.response?.data?.detail || 'An error occurred during registration. Please try again.');
         } finally {
             setIsLoading(false);
         }
