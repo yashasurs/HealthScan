@@ -3,10 +3,12 @@ import { StyleSheet, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Header } from '../components/common';
 import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
+import { useAuth } from '../Contexts/Authcontext';
 
 const ProfileScreen = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigation = useNavigation();
+  const { logout } = useAuth();
   const handleLogout = async () => {
     Alert.alert(
       'Confirm Logout',
@@ -16,20 +18,14 @@ const ProfileScreen = () => {
           text: 'Cancel',
           style: 'cancel',
         },
-        {
-          text: 'Logout',
+        {          text: 'Logout',
           onPress: async () => {
             setIsLoggingOut(true);
             try {
-              // Simulated logout - no actual authentication call
-              setTimeout(() => {
-                // Navigate to login screen
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'Login' }],
-                });
-                setIsLoggingOut(false);
-              }, 1000);
+              // Call the logout function from AuthContext
+              await logout();
+              // No need to navigate, the AuthProvider will handle the navigation
+              setIsLoggingOut(false);
             } catch (error) {
               Alert.alert('Error', 'Failed to logout');
               setIsLoggingOut(false);

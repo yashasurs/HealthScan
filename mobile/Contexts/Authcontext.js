@@ -76,14 +76,18 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       setError(null);
-      const response = await axios.post(`${API_URL}/login`, {
-        username,
-        password
+      // Use URLSearchParams to send form-encoded data
+      const formData = new URLSearchParams();
+      formData.append('username', username);
+      formData.append('password', password);
+      const response = await axios.post(`${API_URL}/login`, formData, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
       });
 
       const { access_token } = response.data;
       const userData = { username };
-      
       setToken(access_token);
       setUser(userData);
       await AsyncStorage.setItem("token", access_token);
