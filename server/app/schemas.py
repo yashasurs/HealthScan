@@ -66,3 +66,4 @@ class MarkupResponse(BaseModel):
     markup: str = Field(description="The markup content of the record.")
 
 
+

@@ -30,6 +30,8 @@ async def get_text(
     current_user = Depends(get_current_user)
 ):
     response = []
+    extracted_texts = []
+    file_info = []
 
     try:
         for file in files:
@@ -65,21 +67,34 @@ async def get_text(
 
             # Extract text from OCR results
             extracted_text = " ".join([result[1] for result in ocr_results])
+            
+            # Store extracted text and file info for batch processing
+            extracted_texts.append(extracted_text)
+            file_info.append({
+                'filename': file.filename,
+                'file_size': file_size,
+                'file_type': file.content_type
+            })
 
-            # Format the extracted text before saving
-            agent = GeminiAgent()
-            try:
-                markup = await agent.generate_markup(extracted_text)
-            except Exception as e:
-                print(f"Error formatting content for {file.filename}: {str(e)}")
-                markup = extracted_text  # fallback to raw text
+        # Second pass: format all extracted texts in batch
+        agent = GeminiAgent()
+        try:
+            formatted_texts = await agent.generate_markup(extracted_texts)
+            # Extract markup content from MarkupResponse objects
+            formatted_texts = [text.markup for text in formatted_texts]
+            
+        except Exception as e:
+            print(f"Error formatting content: {str(e)}")
+            formatted_texts = extracted_texts  # fallback to raw text
 
-            # Create and save record to database
+        for i, info in enumerate(file_info):
+            markup = formatted_texts[i] if i < len(formatted_texts) else extracted_texts[i]
+            
             record = Record(
-                filename=file.filename,
+                filename=info['filename'],
                 content=markup,
-                file_size=file_size,
-                file_type=file.content_type,
+                file_size=info['file_size'],
+                file_type=info['file_type'],
                 user_id=current_user.id,
                 collection_id=collection_id
             )
