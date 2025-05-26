@@ -4,6 +4,7 @@ from pydantic_ai.models.gemini import GeminiModel
 from pydantic_ai.agent import Agent
 from pydantic_ai.providers.google_gla import GoogleGLAProvider
 import os
+import qrcode
 import asyncio
 from dotenv import load_dotenv
 
@@ -23,6 +24,20 @@ def hash(password: str):
 
 def verify(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
+
+
+def make_qr(link: str):
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(link)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    return img
+
 
 
 class GeminiAgent():
@@ -56,6 +71,32 @@ class GeminiAgent():
 
 
 if __name__ == "__main__":
+    # Test the make_qr function
+    import os
+    
+    def test_make_qr():
+        print("Testing make_qr function...")
+        # Generate a QR code for a test URL
+        test_url = "https://github.com/dynamite-123/ProjectSunga/tree/main"
+        qr_img = make_qr(test_url)
+        
+        # Save the QR code to a file
+        output_dir = os.path.dirname(os.path.abspath(__file__))
+        output_path = os.path.join(output_dir, "test_qr.png")
+        qr_img.save(output_path)
+        
+        print(f"QR code generated successfully and saved to: {output_path}")
+        print(f"QR code contains URL: {test_url}")
+        
+        return os.path.exists(output_path)
+    
+    # Run the test
+    test_result = test_make_qr()
+    print(f"QR code test {'passed' if test_result else 'failed'}")
+    
+    # The rest of the test code is commented out
+    '''
+if __name__ == "__main__":
     async def main():
         agent = GeminiAgent()
         texts = [
@@ -86,3 +127,4 @@ if __name__ == "__main__":
                 f.write(response[0].markup)
 
     asyncio.run(main())
+'''

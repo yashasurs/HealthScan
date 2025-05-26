@@ -65,5 +65,6 @@ class CollectionResponse(CollectionBase):
 class MarkupResponse(BaseModel):
     markup: str = Field(description="The markup content of the record.")
 
-
+class LinkInput(BaseModel):
+    link: str = Field(..., description="The link to generate a QR code for.")
 
