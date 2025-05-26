@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Alert, RefreshControl, ScrollView } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import { Header } from '../components/common';
 import { FolderNavigator, RecordOrganizer } from '../components/folder';
 import { useApiService } from '../services/apiService';
@@ -59,7 +59,6 @@ const FolderSystemScreen = ({ navigation }) => {
   const handleNavigateToUpload = () => {
     navigation.navigate('Documents');
   };
-
   return (
     <View style={styles.container}>
       <Header 
@@ -71,22 +70,14 @@ const FolderSystemScreen = ({ navigation }) => {
         }}
       />
       
-      <ScrollView
-        style={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={['#4A90E2']}
-            tintColor="#4A90E2"
-          />
-        }
-      >
+      <View style={styles.content}>
         <FolderNavigator
           onRecordSelect={handleRecordSelect}
           onCollectionSelect={handleCollectionSelect}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
         />
-      </ScrollView>
+      </View>
 
       <RecordOrganizer
         visible={showOrganizer}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import DocumentItem from './DocumentItem';
 
 /**
@@ -10,6 +10,22 @@ import DocumentItem from './DocumentItem';
  * @param {Function} props.onUploadAll - Callback when upload all button is pressed
  */
 const DocumentList = ({ documents, onRemoveDocument, onUploadAll }) => {
+  const renderDocumentItem = ({ item }) => (
+    <DocumentItem 
+      document={item} 
+      onRemove={onRemoveDocument} 
+    />
+  );
+  
+  const renderFooter = () => (
+    <TouchableOpacity 
+      style={styles.submitButton}
+      onPress={onUploadAll}
+    >
+      <Text style={styles.submitButtonText}>Upload All Documents</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>
@@ -21,22 +37,14 @@ const DocumentList = ({ documents, onRemoveDocument, onUploadAll }) => {
           <Text style={styles.emptyStateText}>No documents uploaded yet</Text>
         </View>
       ) : (
-        <>
-          {documents.map((doc, index) => (
-            <DocumentItem 
-              key={index} 
-              document={doc} 
-              onRemove={onRemoveDocument} 
-            />
-          ))}
-          
-          <TouchableOpacity 
-            style={styles.submitButton}
-            onPress={onUploadAll}
-          >
-            <Text style={styles.submitButtonText}>Upload All Documents</Text>
-          </TouchableOpacity>
-        </>
+        <FlatList
+          data={documents}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderDocumentItem}
+          ListFooterComponent={renderFooter}
+          scrollEnabled={false}
+          nestedScrollEnabled={true}
+        />
       )}
     </View>
   );

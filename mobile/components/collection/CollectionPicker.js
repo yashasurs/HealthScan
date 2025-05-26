@@ -194,49 +194,49 @@ const CollectionPicker = ({
                 </TouchableOpacity>
               </View>
             ) : (
-              <View style={styles.modalBody}>
-                <TouchableOpacity
-                  style={[
-                    styles.collectionItem,
-                    !selectedCollectionId && styles.selectedCollectionItem
-                  ]}
-                  onPress={() => {
-                    onCollectionSelect(null);
-                    setShowModal(false);
-                  }}
-                >
-                  <View style={styles.collectionContent}>
-                    <View style={styles.collectionIcon}>
-                      <Ionicons 
-                        name="document-outline" 
-                        size={20} 
-                        color={!selectedCollectionId ? '#4A90E2' : '#7f8c8d'} 
-                      />
-                    </View>
-                    <View style={styles.collectionInfo}>
-                      <Text style={[
-                        styles.collectionName,
-                        !selectedCollectionId && styles.selectedCollectionName
-                      ]}>
-                        No Collection
-                      </Text>
-                      <Text style={styles.collectionDescription}>
-                        Upload without organizing into a collection
-                      </Text>
-                    </View>
-                    {!selectedCollectionId && (
-                      <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-
-                <FlatList
+              <View style={styles.modalBody}>                <FlatList
                   data={collections}
                   keyExtractor={(item) => item.id}
                   renderItem={renderCollectionItem}
                   ListEmptyComponent={renderEmptyState}
                   showsVerticalScrollIndicator={false}
                   style={styles.collectionsList}
+                  ListHeaderComponent={() => (
+                    <TouchableOpacity
+                      style={[
+                        styles.collectionItem,
+                        !selectedCollectionId && styles.selectedCollectionItem
+                      ]}
+                      onPress={() => {
+                        onCollectionSelect(null);
+                        setShowModal(false);
+                      }}
+                    >
+                      <View style={styles.collectionContent}>
+                        <View style={styles.collectionIcon}>
+                          <Ionicons 
+                            name="document-outline" 
+                            size={20} 
+                            color={!selectedCollectionId ? '#4A90E2' : '#7f8c8d'} 
+                          />
+                        </View>
+                        <View style={styles.collectionInfo}>
+                          <Text style={[
+                            styles.collectionName,
+                            !selectedCollectionId && styles.selectedCollectionName
+                          ]}>
+                            No Collection
+                          </Text>
+                          <Text style={styles.collectionDescription}>
+                            Upload without organizing into a collection
+                          </Text>
+                        </View>
+                        {!selectedCollectionId && (
+                          <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  )}
                 />
               </View>
             )}
