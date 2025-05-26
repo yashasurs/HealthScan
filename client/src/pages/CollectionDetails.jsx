@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../utils/apiService';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MoveRecordModal from '../components/Document/MoveRecordModal';
 
 const CollectionDetails = () => {
   const { id } = useParams();
@@ -10,10 +11,16 @@ const CollectionDetails = () => {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [moveModalOpen, setMoveModalOpen] = useState(false);
+  const [selectedRecordId, setSelectedRecordId] = useState(null);
+  const [selectedRecordIds, setSelectedRecordIds] = useState([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
 
   useEffect(() => {
     fetchCollectionDetails();
-  }, [id]);  const fetchCollectionDetails = async () => {
+  }, [id]);
+
+  const fetchCollectionDetails = async () => {
     try {
       setLoading(true);
       console.log('Fetching collection details for ID:', id);
@@ -71,6 +78,69 @@ const CollectionDetails = () => {
     } catch (err) {
       setError('Failed to remove document from collection');
       console.error('Error removing record:', err);
+    }
+  };
+
+  const handleMoveRecord = (recordId) => {
+    setSelectedRecordId(recordId);
+    setSelectedRecordIds([]); // Clear batch selection when moving single record
+    setMoveModalOpen(true);
+  };
+
+  const handleMoveSuccess = () => {
+    fetchCollectionDetails(); // Refresh the records
+    setMoveModalOpen(false);
+    setSelectedRecordId(null);
+    setSelectedRecordIds([]);
+    setIsSelectionMode(false);
+  };
+
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedRecordIds([]);
+  };
+
+  const toggleRecordSelection = (recordId) => {
+    setSelectedRecordIds(prev => 
+      prev.includes(recordId) 
+        ? prev.filter(id => id !== recordId)
+        : [...prev, recordId]
+    );
+  };
+
+  const selectAllRecords = () => {
+    setSelectedRecordIds(records.map(record => record.id));
+  };
+
+  const clearSelection = () => {
+    setSelectedRecordIds([]);
+  };
+
+  const handleBatchMove = () => {
+    if (selectedRecordIds.length === 0) return;
+    setSelectedRecordId(null); // Clear single record selection
+    setMoveModalOpen(true);
+  };
+
+  const handleBatchRemove = async () => {
+    if (selectedRecordIds.length === 0) return;
+    
+    if (!window.confirm(`Are you sure you want to remove ${selectedRecordIds.length} documents from the collection?`)) {
+      return;
+    }
+
+    try {
+      const removePromises = selectedRecordIds.map(recordId => 
+        collectionsAPI.removeRecord(id, recordId)
+      );
+      
+      await Promise.all(removePromises);
+      fetchCollectionDetails();
+      setSelectedRecordIds([]);
+      setIsSelectionMode(false);
+    } catch (err) {
+      setError('Failed to remove documents from collection');
+      console.error('Error removing records:', err);
     }
   };
 
@@ -143,7 +213,63 @@ const CollectionDetails = () => {
             </div>
             <span>Created {new Date(collection.created_at).toLocaleDateString()}</span>
           </div>
+          {records.length > 0 && (
+            <button
+              onClick={toggleSelectionMode}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                isSelectionMode
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              {isSelectionMode ? 'Cancel Selection' : 'Select Multiple'}
+            </button>
+          )}
         </div>
+
+        {/* Batch Actions Toolbar */}
+        {isSelectionMode && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-blue-900">
+                  {selectedRecordIds.length} of {records.length} records selected
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={selectAllRecords}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Select All
+                  </button>
+                  <button
+                    onClick={clearSelection}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Clear Selection
+                  </button>
+                </div>
+              </div>
+              
+              {selectedRecordIds.length > 0 && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleBatchMove}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Move to Collection
+                  </button>
+                  <button
+                    onClick={handleBatchRemove}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Remove from Collection
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -176,17 +302,33 @@ const CollectionDetails = () => {
           {records.map((record) => (
             <div
               key={record.id}
-              className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 overflow-hidden"
+              className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border overflow-hidden ${
+                isSelectionMode && selectedRecordIds.includes(record.id)
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200'
+              }`}
             >
               <div className="p-6">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-green-100 rounded-lg p-2">
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                  <div className="flex items-start gap-3 flex-1">
+                    {isSelectionMode && (
+                      <div className="mt-1">
+                        <input
+                          type="checkbox"
+                          checked={selectedRecordIds.includes(record.id)}
+                          onChange={() => toggleRecordSelection(record.id)}
+                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
                       </div>
+                    )}
+                    
+                    <div className="bg-green-100 rounded-lg p-2">
+                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    
+                    <div className="flex-1">
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
                           Record #{record.id}
@@ -200,51 +342,76 @@ const CollectionDetails = () => {
                           )}
                         </div>
                       </div>
-                    </div>
 
-                    {/* Document Content Preview */}
-                    {record.content && (
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Content Preview:</h4>
-                        <p className="text-gray-600 text-sm line-clamp-3">
-                          {record.content}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Metadata */}
-                    {record.metadata && Object.keys(record.metadata).length > 0 && (
-                      <div className="mb-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-2">Metadata:</h4>
-                        <div className="grid grid-cols-2 gap-2">
-                          {Object.entries(record.metadata).map(([key, value]) => (
-                            <div key={key} className="text-sm">
-                              <span className="text-gray-500">{key}:</span>
-                              <span className="text-gray-700 ml-1">{value}</span>
-                            </div>
-                          ))}
+                      {/* Document Content Preview */}
+                      {record.content && (
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4 mt-3">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Content Preview:</h4>
+                          <p className="text-gray-600 text-sm line-clamp-3">
+                            {record.content}
+                          </p>
                         </div>
-                      </div>
-                    )}
+                      )}
+
+                      {/* Metadata */}
+                      {record.metadata && Object.keys(record.metadata).length > 0 && (
+                        <div className="mb-4">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">Metadata:</h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            {Object.entries(record.metadata).map(([key, value]) => (
+                              <div key={key} className="text-sm">
+                                <span className="text-gray-500">{key}:</span>
+                                <span className="text-gray-700 ml-1">{value}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => handleRemoveRecord(record.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                      title="Remove from collection"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </div>
+                  {!isSelectionMode && (
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={() => handleMoveRecord(record.id)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                        title="Move to another collection"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => handleRemoveRecord(record.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        title="Remove from collection"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Move Record Modal */}
+      <MoveRecordModal
+        isOpen={moveModalOpen}
+        onClose={() => {
+          setMoveModalOpen(false);
+          setSelectedRecordId(null);
+          setSelectedRecordIds([]);
+        }}
+        recordId={selectedRecordId}
+        recordIds={selectedRecordIds}
+        currentCollectionId={id}
+        onMoveSuccess={handleMoveSuccess}
+      />
     </div>
   );
 };

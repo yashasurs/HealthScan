@@ -74,6 +74,13 @@ export const collectionsAPI = {
   removeRecord: async (collectionId, recordId) => {
     const api = createApiService();
     return api.delete(`/collections/${collectionId}/records/${recordId}`);
+  },
+
+  // Move a record from one collection to another
+  moveRecord: async (fromCollectionId, toCollectionId, recordId) => {
+    const api = createApiService();
+    // Add the record to the new collection (this will automatically move it)
+    return api.put(`/collections/${toCollectionId}/records/${recordId}`);
   }
 };
 
