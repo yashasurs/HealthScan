@@ -16,6 +16,8 @@ import DashboardScreen from './screens/DashboardScreen';
 import QRGeneratorScreen from './screens/QRGeneratorScreen';
 import DocumentUploadScreen from './screens/DocumentUploadScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import FolderSystemScreen from './screens/FolderSystemScreen';
+import CollectionCreateScreen from './screens/CollectionCreateScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -32,6 +34,8 @@ function MainTabNavigator() {
             iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'Documents') {
             iconName = focused ? 'document' : 'document-outline';
+          } else if (route.name === 'Folders') {
+            iconName = focused ? 'folder' : 'folder-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -50,6 +54,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="QR Code" component={QRGeneratorScreen} />
       <Tab.Screen name="Documents" component={DocumentUploadScreen} />
+      <Tab.Screen name="Folders" component={FolderSystemScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -71,7 +76,11 @@ function AppNavigator() {
       <StatusBar style="light" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          <>
+            <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+            <Stack.Screen name="FolderSystem" component={FolderSystemScreen} />
+            <Stack.Screen name="CollectionCreate" component={CollectionCreateScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
