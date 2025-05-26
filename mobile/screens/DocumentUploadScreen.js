@@ -105,7 +105,10 @@ const DocumentUploadScreen = ({ route, navigation }) => {
         }}
       />
       
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        nestedScrollEnabled={true}
+      >
         {/* Collection Selection Section */}
         <View style={styles.collectionSection}>
           <View style={styles.sectionHeader}>

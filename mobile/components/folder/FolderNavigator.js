@@ -9,18 +9,23 @@ import FolderTree from './FolderTree';
  * Folder navigator component that provides folder-based navigation
  * for collections and records with organization capabilities
  */
-const FolderNavigator = ({ onRecordSelect, onCollectionSelect }) => {
+const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refreshing }) => {
   const [collections, setCollections] = useState([]);
   const [records, setRecords] = useState([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
 
   const apiService = useApiService();
-
   useEffect(() => {
     loadData();
   }, []);
+
+  // Also refresh data when refreshing prop changes to true
+  useEffect(() => {
+    if (refreshing) {
+      loadData();
+    }
+  }, [refreshing]);
 
   const loadData = async () => {
     setLoading(true);
@@ -46,7 +51,6 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect }) => {
       throw error;
     }
   };
-
   const loadAllRecords = async () => {
     try {
       const response = await apiService.records.getAll();
@@ -54,15 +58,6 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect }) => {
     } catch (error) {
       console.error('Error loading records:', error);
       throw error;
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await loadData();
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -126,10 +121,9 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect }) => {
         <View style={styles.titleSection}>
           <Ionicons name="folder-outline" size={24} color="#4A90E2" />
           <Text style={styles.title}>Folder System</Text>
-        </View>
-        <TouchableOpacity 
+        </View>        <TouchableOpacity 
           style={styles.refreshButton}
-          onPress={handleRefresh}
+          onPress={onRefresh}
           disabled={refreshing}
         >
           <Ionicons 
