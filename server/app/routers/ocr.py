@@ -16,7 +16,7 @@ router = APIRouter(
     tags=['ocr']
 )
 
-reader = easyocr.Reader(['en'], gpu=False)
+reader = easyocr.Reader(['en'], gpu=True)
 
 @router.get("/")
 def testing():

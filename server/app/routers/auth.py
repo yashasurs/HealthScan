@@ -63,11 +63,3 @@ def get_all_users(db: Session = Depends(database.get_db)):
     users = db.query(models.User).all()
     return users
 
-@router.get("/records", response_model=List[schemas.RecordResponse])
-def get_user_records(
-    db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(oauth2.get_current_user)
-):
-    """Get all records under the current user"""
-    records = db.query(models.Record).filter(models.Record.user_id == current_user.id).all()
-    return records
