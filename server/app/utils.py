@@ -6,7 +6,10 @@ from pydantic_ai.providers.google_gla import GoogleGLAProvider
 import os
 import qrcode
 import asyncio
+import io
 from dotenv import load_dotenv
+import markdown
+from weasyprint import HTML, CSS
 
 load_dotenv()
 
@@ -37,6 +40,26 @@ def make_qr(link: str):
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     return img
+
+
+def markdown_to_pdf_bytes(markdown_text: str) -> bytes:
+    """
+    Converts Markdown text to PDF bytes.
+
+    :param markdown_text: The Markdown content as a string.
+    :return: PDF file as bytes.
+    """
+    html_content = markdown.markdown(markdown_text, extensions=["extra", "smarty"])
+    css = """
+        body {
+            font-family: Arial, sans-serif;
+        }
+    """
+    pdf_io = io.BytesIO()
+    HTML(string=html_content).write_pdf(pdf_io, stylesheets=[CSS(string=css)])
+    return pdf_io.getvalue()
+
+
 
 
 
@@ -70,29 +93,56 @@ class GeminiAgent():
         return response.output
 
 
+
 if __name__ == "__main__":
-    # Test the make_qr function
-    import os
-    
-    def test_make_qr():
-        print("Testing make_qr function...")
-        # Generate a QR code for a test URL
-        test_url = "https://github.com/dynamite-123/ProjectSunga/tree/main"
-        qr_img = make_qr(test_url)
-        
-        # Save the QR code to a file
-        output_dir = os.path.dirname(os.path.abspath(__file__))
-        output_path = os.path.join(output_dir, "test_qr.png")
-        qr_img.save(output_path)
-        
-        print(f"QR code generated successfully and saved to: {output_path}")
-        print(f"QR code contains URL: {test_url}")
-        
-        return os.path.exists(output_path)
-    
-    # Run the test
-    test_result = test_make_qr()
-    print(f"QR code test {'passed' if test_result else 'failed'}")
+    # Test markdown_to_pdf_bytes with sample markdown content
+    sample_markdown = """
+## Anirudh Kashyap
+
+*   +91 6366201598
+*   anirudhkashyap321@gmail.com
+*   [github.com/dynamite-123](github.com/dynamite-123)
+*   LinkedIn
+
+### Education
+
+*   **JSS Science and Technology University, Mysore**
+    *   CGPA: 9.2/10
+    *   Bachelor of Engineering in Computer Science
+    *   Oct 2023 - Present
+
+### Project Experience
+
+*   **Smart Stock - Feb 2025 (PES University)**
+    *   Built with a team of four and shortlisted in the top 10 at a hackathon
+    *   Led backend development using Django REST Framework for a web app providing stock insights, recommendations, and sentiment analysis
+    *   Frontend built with React
+    *   GitHub: [https://github.com/dvnamite-L23/NextGen](https://github.com/dvnamite-L23/NextGen)
+*   **Raytracing in C++ - March 2025**
+    *   Built a program in C++ to demonstrate raytracing using the SDL library
+    *   GitHub: [https://github.com/dynamite-L23/Ravtracing](https://github.com/dynamite-L23/Ravtracing)
+*   **CRM Webapp - Dec 2024**
+    *   Built a customer relationship management app using Django framework
+    *   GitHub: [https://github.com/dynamite-L23/diango-crm](https://github.com/dynamite-L23/diango-crm)
+*   **API for CRUD operations - Sep 2024**
+    *   Built a simple RESTful API using FastAPI to handle CRUD (create, read, update, delete) operations
+    *   GitHub: [https://github.com/dynamite-123/Social_Media](https://github.com/dynamite-123/Social_Media)
+    """
+
+    pdf_bytes = markdown_to_pdf_bytes(sample_markdown)
+    output_path = "test_output.pdf"
+    with open(output_path, "wb") as f:
+        f.write(pdf_bytes)
+    print(f"PDF generated and saved to {output_path}")
+
+
+
+
+
+
+
+
+
     
     # The rest of the test code is commented out
     '''
