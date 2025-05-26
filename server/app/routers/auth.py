@@ -54,10 +54,6 @@ def delete_user(
     db.commit()
     return {"detail": "User deleted"}
 
-@router.get("/me")
-def read_users_me(current_user: models.User = Depends(oauth2.get_current_user)):
-    return current_user
-
 @router.get("/users")
 def get_all_users(db: Session = Depends(database.get_db)):
     users = db.query(models.User).all()
@@ -71,3 +67,32 @@ def get_user_records(
     """Get all records under the current user"""
     records = db.query(models.Record).filter(models.Record.user_id == current_user.id).all()
     return records
+
+@router.put("/user", response_model=schemas.UserOut)
+def update_user(
+    user_update: schemas.UserUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    user_obj = db.query(models.User).filter(models.User.id == current_user.id).first()
+    if not user_obj:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user_update.username:
+        # Check if username is taken by another user
+        if db.query(models.User).filter(models.User.username == user_update.username, models.User.id != current_user.id).first():
+            raise HTTPException(status_code=400, detail="Username already taken")
+        user_obj.username = user_update.username
+    if user_update.email:
+        # Check if email is taken by another user
+        if db.query(models.User).filter(models.User.email == user_update.email, models.User.id != current_user.id).first():
+            raise HTTPException(status_code=400, detail="Email already registered")
+        user_obj.email = user_update.email
+    db.commit()
+    db.refresh(user_obj)
+    return user_obj
+
+@router.get("/me", response_model=schemas.UserOut)
+def read_users_me(current_user: models.User = Depends(oauth2.get_current_user)):
+    return current_user

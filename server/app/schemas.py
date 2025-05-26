@@ -68,3 +68,15 @@ class MarkupResponse(BaseModel):
 class LinkInput(BaseModel):
     link: str = Field(..., description="The link to generate a QR code for.")
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+class UserOut(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+
+    class Config:
+        from_attributes = True
+
