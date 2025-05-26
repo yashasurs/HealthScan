@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
-from .routers import ocr, auth, collections, records
+from .routers import ocr, auth, collections, records, qr
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -22,6 +22,7 @@ app.include_router(ocr.router)
 app.include_router(auth.router)
 app.include_router(collections.router)
 app.include_router(records.router)
+app.include_router(qr.router)
 
 @app.get("/")
 def root():

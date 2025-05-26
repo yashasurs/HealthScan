@@ -1,27 +1,14 @@
 import React, { useState } from 'react';
 import { StyleSheet, ScrollView, Alert } from 'react-native';
-import { useAuth } from '../utils/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { Header } from '../components/common';
 import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
+import { useAuth } from '../Contexts/Authcontext';
 
 const ProfileScreen = () => {
-  const { user, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigation = useNavigation();
-  
-  // Fallback user data if API data is not yet loaded
-  const defaultUserData = {
-    name: 'User',
-    email: 'loading@example.com',
-    phone: 'Loading...',
-    role: 'User',
-    joinDate: 'Loading...',
-  };
-  
-  // Use API data if available, otherwise use default
-  const userData = user || defaultUserData;
-  
+  const { logout } = useAuth();
   const handleLogout = async () => {
     Alert.alert(
       'Confirm Logout',
@@ -31,15 +18,16 @@ const ProfileScreen = () => {
           text: 'Cancel',
           style: 'cancel',
         },
-        {
-          text: 'Logout',
+        {          text: 'Logout',
           onPress: async () => {
             setIsLoggingOut(true);
             try {
+              // Call the logout function from AuthContext
               await logout();
-              // Navigation is handled by the AppNavigator based on auth state
+              // No need to navigate, the AuthProvider will handle the navigation
+              setIsLoggingOut(false);
             } catch (error) {
-              Alert.alert('Logout Failed', error.message || 'Please try again');
+              Alert.alert('Error', 'Failed to logout');
               setIsLoggingOut(false);
             }
           },
@@ -58,24 +46,19 @@ const ProfileScreen = () => {
 
   const handleChangePassword = () => {
     Alert.alert('Coming Soon', 'This feature will be available in a future update.');
-  };
-  return (
+  };  return (
     <ScrollView style={styles.container}>
       <Header title="Profile" />
-      
       <ProfileHeader 
-        userData={userData} 
         onChangeAvatar={handleChangeAvatar} 
       />
       
-      <ProfileInfo userData={userData} />
+      <ProfileInfo />
       
       <ProfileActions 
         isLoggingOut={isLoggingOut}
         onEditProfile={handleEditProfile}
         onChangePassword={handleChangePassword}
-        onAuthTest={() => navigation.navigate('AuthTest')}
-        onNetworkTest={() => navigation.navigate('NetworkTest')}
         onLogout={handleLogout}
       />
     </ScrollView>
