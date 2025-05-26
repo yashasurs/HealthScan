@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../utils/apiService';
 import LoadingSpinner from '../components/LoadingSpinner';
 import MoveRecordModal from '../components/Document/MoveRecordModal';
+import RecordPreviewModal from '../components/Document/RecordPreviewModal';
 
 const CollectionDetails = () => {
   const { id } = useParams();
@@ -15,6 +16,9 @@ const CollectionDetails = () => {
   const [selectedRecordId, setSelectedRecordId] = useState(null);
   const [selectedRecordIds, setSelectedRecordIds] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [expandedRecords, setExpandedRecords] = useState(new Set());
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [previewRecord, setPreviewRecord] = useState(null);
 
   useEffect(() => {
     fetchCollectionDetails();
@@ -142,6 +146,56 @@ const CollectionDetails = () => {
       setError('Failed to remove documents from collection');
       console.error('Error removing records:', err);
     }
+  };
+
+  const toggleRecordExpansion = (recordId) => {
+    setExpandedRecords(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(recordId)) {
+        newExpanded.delete(recordId);
+      } else {
+        newExpanded.add(recordId);
+      }
+      return newExpanded;
+    });
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return 'Unknown size';
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  };
+
+  const getFileTypeDisplay = (fileType) => {
+    if (!fileType) return 'Unknown';
+    const typeMap = {
+      'application/pdf': 'PDF Document',
+      'image/jpeg': 'JPEG Image',
+      'image/jpg': 'JPG Image', 
+      'image/png': 'PNG Image',
+      'image/gif': 'GIF Image',
+      'image/webp': 'WebP Image',
+      'text/plain': 'Text File',
+      'application/msword': 'Word Document',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'Word Document'
+    };
+    return typeMap[fileType] || fileType.split('/')[1]?.toUpperCase() || 'Unknown';
+  };
+
+  const truncateContent = (content, maxLength = 200) => {
+    if (!content) return '';
+    return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+  };
+
+  const openPreviewModal = (record) => {
+    setPreviewRecord(record);
+    setPreviewModalOpen(true);
+  };
+
+  const closePreviewModal = () => {
+    setPreviewRecord(null);
+    setPreviewModalOpen(false);
   };
 
   if (loading) {
@@ -299,103 +353,231 @@ const CollectionDetails = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
-          {records.map((record) => (
-            <div
-              key={record.id}
-              className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border overflow-hidden ${
-                isSelectionMode && selectedRecordIds.includes(record.id)
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200'
-              }`}
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-3 flex-1">
-                    {isSelectionMode && (
-                      <div className="mt-1">
-                        <input
-                          type="checkbox"
-                          checked={selectedRecordIds.includes(record.id)}
-                          onChange={() => toggleRecordSelection(record.id)}
-                          className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                      </div>
-                    )}
-                    
-                    <div className="bg-green-100 rounded-lg p-2">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          Record #{record.id}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                          <span>Added {new Date(record.created_at).toLocaleDateString()}</span>
-                          {record.document_type && (
-                            <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
-                              {record.document_type}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Document Content Preview */}
-                      {record.content && (
-                        <div className="bg-gray-50 rounded-lg p-4 mb-4 mt-3">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Content Preview:</h4>
-                          <p className="text-gray-600 text-sm line-clamp-3">
-                            {record.content}
-                          </p>
+          {records.map((record) => {
+            const isExpanded = expandedRecords.has(record.id);
+            const isSelected = selectedRecordIds.includes(record.id);
+            
+            return (
+              <div
+                key={record.id}
+                className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border overflow-hidden ${
+                  isSelectionMode && isSelected
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200'
+                }`}
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3 flex-1">
+                      {isSelectionMode && (
+                        <div className="mt-1">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleRecordSelection(record.id)}
+                            className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
                         </div>
                       )}
+                      
+                      <div className="bg-green-100 rounded-lg p-2">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div>
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {record.filename || `Record #${record.id}`}
+                            </h3>                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => toggleRecordExpansion(record.id)}
+                                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                                title={isExpanded ? "Collapse details" : "Expand details"}
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                    </svg>
+                                    Less
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    More
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                onClick={() => openPreviewModal(record)}
+                                className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center gap-1"
+                                title="Full preview"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                Preview
+                              </button>
+                            </div>
+                          </div>
 
-                      {/* Metadata */}
-                      {record.metadata && Object.keys(record.metadata).length > 0 && (
-                        <div className="mb-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Metadata:</h4>
-                          <div className="grid grid-cols-2 gap-2">
-                            {Object.entries(record.metadata).map(([key, value]) => (
-                              <div key={key} className="text-sm">
-                                <span className="text-gray-500">{key}:</span>
-                                <span className="text-gray-700 ml-1">{value}</span>
+                          {/* File Information */}
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                            <div className="flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Added {new Date(record.created_at).toLocaleDateString()}</span>
+                            </div>
+                            
+                            {record.file_type && (
+                              <div className="flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span className="bg-gray-100 px-2 py-1 rounded-full text-xs">
+                                  {getFileTypeDisplay(record.file_type)}
+                                </span>
                               </div>
-                            ))}
+                            )}
+                            
+                            {record.file_size && (
+                              <div className="flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span>{formatFileSize(record.file_size)}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
+
+                        {/* Content Preview */}
+                        {record.content && (
+                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-sm font-medium text-gray-700">Content Preview:</h4>
+                              <div className="text-xs text-gray-500">
+                                {record.content.length} characters
+                              </div>
+                            </div>
+                            
+                            <div className="text-gray-600 text-sm leading-relaxed">
+                              {isExpanded ? (
+                                <div className="whitespace-pre-wrap max-h-96 overflow-y-auto">
+                                  {record.content}
+                                </div>
+                              ) : (
+                                <p className="line-clamp-3">
+                                  {truncateContent(record.content)}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Word count and reading time for expanded view */}
+                            {isExpanded && (
+                              <div className="mt-3 pt-3 border-t border-gray-200 flex items-center gap-4 text-xs text-gray-500">
+                                <span>
+                                  Words: {record.content.split(/\s+/).filter(word => word.length > 0).length}
+                                </span>
+                                <span>
+                                  Est. reading time: {Math.ceil(record.content.split(/\s+/).length / 200)} min
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Additional Details (Expanded View) */}
+                        {isExpanded && (
+                          <div className="space-y-3">
+                            {/* Record ID and technical details */}
+                            <div className="bg-blue-50 rounded-lg p-3">
+                              <h5 className="text-xs font-medium text-blue-900 mb-2">Technical Details</h5>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <span className="text-blue-700 font-medium">Record ID:</span>
+                                  <span className="text-blue-800 ml-1 font-mono">{record.id}</span>
+                                </div>
+                                <div>
+                                  <span className="text-blue-700 font-medium">Last Updated:</span>
+                                  <span className="text-blue-800 ml-1">{new Date(record.updated_at).toLocaleString()}</span>
+                                </div>
+                                {record.user_id && (
+                                  <div>
+                                    <span className="text-blue-700 font-medium">User ID:</span>
+                                    <span className="text-blue-800 ml-1">{record.user_id}</span>
+                                  </div>
+                                )}
+                                {record.collection_id && (
+                                  <div>
+                                    <span className="text-blue-700 font-medium">Collection ID:</span>
+                                    <span className="text-blue-800 ml-1 font-mono">{record.collection_id}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Content Analysis */}
+                            {record.content && (
+                              <div className="bg-green-50 rounded-lg p-3">
+                                <h5 className="text-xs font-medium text-green-900 mb-2">Content Analysis</h5>
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                  <div>
+                                    <span className="text-green-700 font-medium">Characters:</span>
+                                    <span className="text-green-800 ml-1">{record.content.length.toLocaleString()}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-green-700 font-medium">Lines:</span>
+                                    <span className="text-green-800 ml-1">{record.content.split('\n').length}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-green-700 font-medium">Paragraphs:</span>
+                                    <span className="text-green-800 ml-1">{record.content.split('\n\n').length}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>                  {!isSelectionMode && (
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={() => handleMoveRecord(record.id)}
-                        className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 border border-gray-200 hover:border-blue-300"
-                        title="Move to another collection"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                        </svg>
-                        <span className="text-sm font-medium">Move</span>
-                      </button>
-                      <button
-                        onClick={() => handleRemoveRecord(record.id)}
-                        className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 border border-gray-200 hover:border-red-300"
-                        title="Remove from collection"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span className="text-sm font-medium">Remove</span>
-                      </button>
-                    </div>
-                  )}
+
+                    {!isSelectionMode && (
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={() => handleMoveRecord(record.id)}
+                          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 border border-gray-200 hover:border-blue-300"
+                          title="Move to another collection"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                          </svg>
+                          <span className="text-sm font-medium">Move</span>
+                        </button>
+                        <button
+                          onClick={() => handleRemoveRecord(record.id)}
+                          className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 border border-gray-200 hover:border-red-300"
+                          title="Remove from collection"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          <span className="text-sm font-medium">Remove</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -411,6 +593,11 @@ const CollectionDetails = () => {
         recordIds={selectedRecordIds}
         currentCollectionId={id}
         onMoveSuccess={handleMoveSuccess}
+      />      {/* Record Preview Modal */}
+      <RecordPreviewModal
+        isOpen={previewModalOpen}
+        onClose={closePreviewModal}
+        record={previewRecord}
       />
     </div>
   );
