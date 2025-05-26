@@ -25,19 +25,18 @@ const UploadTab = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
-          <div className="flex-1">
-            <label className="block text-sm font-semibold text-gray-800 mb-2">
+          <div className="flex-1">            <label className="block text-sm font-semibold text-gray-800 mb-2">
               Choose Collection (Optional)
             </label>
             <p className="text-sm text-gray-600 mb-4">
-              Select a collection to organize your documents, or leave blank to process without storing
+              Select a collection to organize your documents, or leave blank to create independent records
             </p>
             <select
               className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm transition-all duration-200"
               value={selectedCollection}
               onChange={handleCollectionChange}
             >
-              <option value="">-- Process Without Collection --</option>
+              <option value="">-- Create Independent Records --</option>
               {collections.map(collection => (
                 <option key={collection.id} value={collection.id}>
                   📁 {collection.name}

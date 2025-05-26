@@ -26,7 +26,8 @@ const MobileIcon = () => (
   </svg>
 );
 
-const Home = () => {  return (
+const Home = () => {
+  return (
     <div className="bg-white">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -52,7 +53,7 @@ const Home = () => {  return (
                   </div>
                 </div>
               </div>
-              
+
               <div className="lg:col-span-6 flex justify-center lg:justify-end">
                 <div className="relative">
                   <div className="absolute -inset-4 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-2xl blur-xl opacity-30"></div>
@@ -64,9 +65,9 @@ const Home = () => {  return (
                         </div>
                         <span className="text-2xl font-bold text-gray-800">HealthScan</span>
                       </div>                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6">
-                        <img 
-                          src="/QR.svg" 
-                          alt="QR Code for HealthScan" 
+                        <img
+                          src="/QR.svg"
+                          alt="QR Code for HealthScan"
                           className="w-40 h-40 mx-auto"
                         />
                       </div>
@@ -76,7 +77,8 @@ const Home = () => {  return (
                     </div>
                   </div>
                 </div>
-              </div>            </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>{/* Features Section */}
@@ -92,7 +94,7 @@ const Home = () => {  return (
           <div className="grid gap-8 md:grid-cols-3 relative">
             {/* Connecting lines for desktop */}
             <div className="hidden md:block absolute top-16 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-indigo-300 via-indigo-400 to-indigo-300"></div>
-            
+
             <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
               <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
                 <ScanIcon />
@@ -104,7 +106,7 @@ const Home = () => {  return (
                 </p>
               </div>
             </div>
-            
+
             <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
               <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
                 <QrCodeIcon />
@@ -116,7 +118,7 @@ const Home = () => {  return (
                 </p>
               </div>
             </div>
-            
+
             <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
               <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
                 <MobileIcon />
@@ -155,7 +157,7 @@ const Home = () => {  return (
                     <p className="text-gray-600 leading-relaxed">Minimize the burden of physical record-keeping and storage space requirements.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start group">
                   <div className="flex-shrink-0 mr-4">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
@@ -169,7 +171,7 @@ const Home = () => {  return (
                     <p className="text-gray-600 leading-relaxed">Quick access to complete patient histories enables better diagnosis and treatment.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start group">
                   <div className="flex-shrink-0 mr-4">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
@@ -182,7 +184,7 @@ const Home = () => {  return (
                     <h4 className="text-xl font-semibold text-gray-900 mb-2">Works Offline</h4>                    <p className="text-gray-600 leading-relaxed">Designed to function in areas with limited internet connectivity.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start group">
                   <div className="flex-shrink-0 mr-4">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-200">
@@ -198,7 +200,7 @@ const Home = () => {  return (
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-12 lg:mt-0">
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-10"></div>
@@ -219,7 +221,7 @@ const Home = () => {  return (
                       </div>
                     </footer>
                   </blockquote>
-                  
+
                   <div className="mt-10 pt-8 border-t border-blue-200">
                     <div className="text-center">
                       <h4 className="text-xl font-semibold text-gray-900 mb-6">Our Impact in Numbers</h4>

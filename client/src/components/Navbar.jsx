@@ -52,7 +52,7 @@ const Navbar = () => {
     const navigationLinks = isAuthenticated 
     ? [
         { name: 'Home', path: '/home' },
-        { name: 'Dashboard', path: '/dashboard' },
+        { name: 'Records', path: '/records' },
         { name: 'Documents', path: '/documents' },
         { name: 'Collections', path: '/collections' },
       ]
@@ -69,7 +69,7 @@ const Navbar = () => {
               <img 
                 src="/Logo.png" 
                 alt="HealthScan Logo" 
-                className="h-54 p-2 group-hover:scale-105 transition-transform duration-200" 
+                className="h-19 p-2" 
               />
             </Link>
               {/* Desktop Navigation - hidden on mobile */}
