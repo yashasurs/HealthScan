@@ -7,6 +7,7 @@ import axios from 'axios';
  */
 export const createApiService = () => {
   const token = localStorage.getItem('token');
+  console.log('Creating API service with token:', token ? 'Token present' : 'No token');
   if (!token) {
     console.warn('No authentication token found. API calls may fail.');
   }
@@ -31,6 +32,49 @@ export const createApiService = () => {
   );
   
   return instance;
+};
+
+// Collections API
+export const collectionsAPI = {
+  getAll: async () => {
+    const api = createApiService();
+    return api.get('/collections/');
+  },
+  
+  getById: async (collectionId) => {
+    const api = createApiService();
+    return api.get(`/collections/${collectionId}`);
+  },
+  
+  create: async (collectionData) => {
+    const api = createApiService();
+    return api.post('/collections/', collectionData);
+  },
+  
+  update: async (collectionId, collectionData) => {
+    const api = createApiService();
+    return api.put(`/collections/${collectionId}`, collectionData);
+  },
+  
+  delete: async (collectionId) => {
+    const api = createApiService();
+    return api.delete(`/collections/${collectionId}`);
+  },
+  
+  getRecords: async (collectionId) => {
+    const api = createApiService();
+    return api.get(`/collections/${collectionId}/records`);
+  },
+  
+  addRecord: async (collectionId, recordId) => {
+    const api = createApiService();
+    return api.put(`/collections/${collectionId}/records/${recordId}`);
+  },
+  
+  removeRecord: async (collectionId, recordId) => {
+    const api = createApiService();
+    return api.delete(`/collections/${collectionId}/records/${recordId}`);
+  }
 };
 
 export default createApiService;

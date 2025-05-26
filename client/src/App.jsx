@@ -9,6 +9,7 @@ import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import Documents from './pages/Documents.jsx'
 import Collections from './pages/Collections.jsx'
+import CollectionDetails from './pages/CollectionDetails.jsx'
 import Records from './pages/Records.jsx'
 
 function App() {
@@ -34,6 +35,11 @@ function App() {
             <Route path='/collections' element={
               <ProtectedRoute>
                 <Collections />
+              </ProtectedRoute>
+            } />
+            <Route path='/collections/:id' element={
+              <ProtectedRoute>
+                <CollectionDetails />
               </ProtectedRoute>
             } />
             <Route path='/records' element={
