@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import createApiService from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -7,13 +7,18 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 const RecordDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
-  const [record, setRecord] = useState(null);
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();  const [record, setRecord] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Extract collection info from URL parameters
+  const searchParams = new URLSearchParams(location.search);
+  const fromCollectionId = searchParams.get('fromCollection');
+  const collectionName = searchParams.get('collectionName');
 
   useEffect(() => {
     if (isAuthenticated && id) {
@@ -145,33 +150,96 @@ const RecordDetail = () => {
       </div>
     );
   }
-
   if (error && !record) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
           <p>{error}</p>
         </div>
-        <button
-          onClick={() => navigate('/records')}
-          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-        >
-          Back to Records
-        </button>
+        <div className="flex gap-4">
+          {fromCollectionId ? (
+            <button
+              onClick={() => navigate(`/collections/${fromCollectionId}`)}
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+            >
+              Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
+            </button>
+          ) : null}
+          <button
+            onClick={() => navigate('/records')}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          >
+            Back to Records
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Breadcrumb */}
+    <div className="container mx-auto px-4 py-8">      {/* Breadcrumb */}
       <nav className="mb-6">
-        <button
-          onClick={() => navigate('/records')}
-          className="text-blue-500 hover:text-blue-700 font-medium"
-        >
-          ← Back to Records
-        </button>
+        <div className="flex items-center space-x-2 text-sm">
+          {fromCollectionId ? (
+            <>
+              <button
+                onClick={() => navigate('/collections')}
+                className="text-blue-500 hover:text-blue-700 font-medium"
+              >
+                Collections
+              </button>
+              <span className="text-gray-500">→</span>
+              <button
+                onClick={() => navigate(`/collections/${fromCollectionId}`)}
+                className="text-blue-500 hover:text-blue-700 font-medium"
+              >
+                {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
+              </button>
+              <span className="text-gray-500">→</span>
+              <span className="text-gray-700 font-medium">
+                {record?.filename || 'Record Details'}
+              </span>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/records')}
+                className="text-blue-500 hover:text-blue-700 font-medium"
+              >
+                Records
+              </button>
+              <span className="text-gray-500">→</span>
+              <span className="text-gray-700 font-medium">
+                {record?.filename || 'Record Details'}
+              </span>
+            </>
+          )}
+        </div>
+        
+        {/* Back button */}
+        <div className="mt-2">
+          {fromCollectionId ? (
+            <button
+              onClick={() => navigate(`/collections/${fromCollectionId}`)}
+              className="text-green-600 hover:text-green-800 font-medium flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/records')}
+              className="text-blue-500 hover:text-blue-700 font-medium flex items-center gap-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Records
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* Success message */}

@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 
 const PreviewModal = ({ item, type, isOpen, onClose }) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  // Determine if this is a record or collection first
+  const isRecord = type === 'record' || (item?.content !== undefined && item?.filename !== undefined);
+  const isCollection = type === 'collection' || (item?.name !== undefined && item?.records !== undefined);
+  
+  // Set default activeTab based on item type
+  const getDefaultTab = () => {
+    if (isRecord) {
+      return 'content'; // Records only show content tab
+    }
+    return 'overview'; // Collections show overview by default
+  };
+  
+  const [activeTab, setActiveTab] = useState(getDefaultTab());
 
   if (!isOpen || !item) return null;
-
-  // Determine if this is a record or collection
-  const isRecord = type === 'record' || (item.content !== undefined && item.filename !== undefined);
-  const isCollection = type === 'collection' || (item.name !== undefined && item.records !== undefined);
 
   // Helper functions for records
   const formatFileSize = (bytes) => {
@@ -102,18 +110,17 @@ const PreviewModal = ({ item, type, isOpen, onClose }) => {
 
   const recordStats = getRecordStats();
   const collectionStats = getCollectionStats();
-
   // Determine available tabs
   const getAvailableTabs = () => {
-    const tabs = [{ id: 'overview', label: 'Overview' }];
+    const tabs = [];
     
     if (isRecord) {
+      // Only show content tab for records
       if (item.content) tabs.push({ id: 'content', label: 'Content' });
-      tabs.push({ id: 'details', label: 'Details' });
-      if (recordStats) tabs.push({ id: 'analysis', label: 'Analysis' });
     }
     
     if (isCollection) {
+      tabs.push({ id: 'overview', label: 'Overview' });
       tabs.push({ id: 'records', label: 'Records' });
       tabs.push({ id: 'details', label: 'Details' });
     }

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MoveRecordModal from '../../components/Document/MoveRecordModal';
-import PreviewModal from '../../components/Document/PreviewModal';
 
 const CollectionDetails = () => {
   const { id } = useParams();
@@ -13,12 +12,9 @@ const CollectionDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [moveModalOpen, setMoveModalOpen] = useState(false);
-  const [selectedRecordId, setSelectedRecordId] = useState(null);
-  const [selectedRecordIds, setSelectedRecordIds] = useState([]);
+  const [selectedRecordId, setSelectedRecordId] = useState(null);  const [selectedRecordIds, setSelectedRecordIds] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [expandedRecords, setExpandedRecords] = useState(new Set());
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [previewRecord, setPreviewRecord] = useState(null);
 
   useEffect(() => {
     fetchCollectionDetails();
@@ -182,20 +178,12 @@ const CollectionDetails = () => {
     };
     return typeMap[fileType] || fileType.split('/')[1]?.toUpperCase() || 'Unknown';
   };
-
   const truncateContent = (content, maxLength = 200) => {
     if (!content) return '';
     return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
   };
-
-  const openPreviewModal = (record) => {
-    setPreviewRecord(record);
-    setPreviewModalOpen(true);
-  };
-
-  const closePreviewModal = () => {
-    setPreviewRecord(null);
-    setPreviewModalOpen(false);
+  const handleRecordClick = (record) => {
+    navigate(`/records/${record.id}?fromCollection=${id}&collectionName=${encodeURIComponent(collection?.name || 'Collection')}`);
   };
 
   if (loading) {
@@ -412,17 +400,16 @@ const CollectionDetails = () => {
                                     More
                                   </>
                                 )}
-                              </button>
-                              <button
-                                onClick={() => openPreviewModal(record)}
+                              </button>                              <button
+                                onClick={() => handleRecordClick(record)}
                                 className="text-green-600 hover:text-green-800 text-sm font-medium flex items-center gap-1"
-                                title="Full preview"
+                                title="View record details"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                                Preview
+                                View Details
                               </button>
                             </div>
                           </div>
@@ -579,9 +566,7 @@ const CollectionDetails = () => {
             );
           })}
         </div>
-      )}
-
-      {/* Move Record Modal */}
+      )}      {/* Move Record Modal */}
       <MoveRecordModal
         isOpen={moveModalOpen}
         onClose={() => {
@@ -593,12 +578,6 @@ const CollectionDetails = () => {
         recordIds={selectedRecordIds}
         currentCollectionId={id}
         onMoveSuccess={handleMoveSuccess}
-      />      {/* Record Preview Modal */}
-      <PreviewModal
-        isOpen={previewModalOpen}
-        onClose={closePreviewModal}
-        item={previewRecord}
-        type="record"
       />
     </div>
   );
