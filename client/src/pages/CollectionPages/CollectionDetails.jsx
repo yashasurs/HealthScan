@@ -218,33 +218,31 @@ const CollectionDetails = () => {
       </div>
     );
   }
-
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-3 sm:p-4 lg:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-4 mb-4">          <button
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-4">          <button
             onClick={() => navigate('/collections')}
-            className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium transition-colors"
+            className="flex items-center gap-2 text-gray-600 hover:text-blue-600 font-medium transition-colors text-sm sm:text-base self-start"
             title="Back to Collections"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             <span className="font-medium">Back</span>
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{collection.name}</h1>
+          </button>          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-words">{collection.name}</h1>
             {collection.description && (
-              <p className="text-gray-600 mt-2">{collection.description}</p>
+              <p className="text-gray-600 mt-2 text-sm sm:text-base">{collection.description}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-6 text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500">
           <div className="flex items-center gap-2">
             <div className="bg-blue-100 rounded-full p-1">
-              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -252,14 +250,14 @@ const CollectionDetails = () => {
           </div>
           <div className="flex items-center gap-2">
             <div className="bg-gray-100 rounded-full p-1">
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-8 0h8m-8 0V5a1 1 0 011-1h6a1 1 0 011 1v2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />              </svg>
             </div>
             <span>Created {formatDate(collection.created_at)}</span>
           </div>
           {records.length > 0 && (            <button
               onClick={toggleSelectionMode}
-              className={`inline-flex items-center gap-2 text-sm font-medium transition-colors ${
+              className={`inline-flex items-center gap-2 text-xs sm:text-sm font-medium transition-colors py-1 sm:py-0 ${
                 isSelectionMode
                   ? 'text-red-600 hover:text-red-800'
                   : 'text-gray-700 hover:text-blue-600'
@@ -282,24 +280,22 @@ const CollectionDetails = () => {
               )}
             </button>
           )}
-        </div>
-
-        {/* Batch Actions Toolbar */}
+        </div>        {/* Batch Actions Toolbar */}
         {isSelectionMode && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-blue-900">
+          <div className="mt-4 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <span className="text-xs sm:text-sm font-medium text-blue-900">
                   {selectedRecordIds.length} of {records.length} records selected
-                </span>
-                <div className="flex gap-2">                  <button
+                </span>                <div className="flex flex-wrap gap-2">                  <button
                     onClick={selectAllRecords}
                     className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:text-blue-900 transition-colors"
                   >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Select All
+                    <span className="hidden xs:inline">Select All</span>
+                    <span className="xs:hidden">All</span>
                   </button>                  <button
                     onClick={clearSelection}
                     className="inline-flex items-center gap-1 text-xs font-medium text-gray-700 hover:text-gray-900 transition-colors"
@@ -307,29 +303,31 @@ const CollectionDetails = () => {
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Clear Selection
+                    <span className="hidden xs:inline">Clear Selection</span>
+                    <span className="xs:hidden">Clear</span>
                   </button>
                 </div>
               </div>
-              
-              {selectedRecordIds.length > 0 && (
-                <div className="flex gap-2">                  <button
+                {selectedRecordIds.length > 0 && (
+                <div className="flex flex-wrap gap-2">                  <button
                     onClick={handleBatchMove}
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors text-xs sm:text-sm"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                     </svg>
-                    Move to Collection
+                    <span className="hidden sm:inline">Move to Collection</span>
+                    <span className="sm:hidden">Move</span>
                   </button>
                   <button
                     onClick={handleBatchRemove}
-                    className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 font-medium transition-colors"
+                    className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 font-medium transition-colors text-xs sm:text-sm"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Remove from Collection
+                    <span className="hidden sm:inline">Remove from Collection</span>
+                    <span className="sm:hidden">Remove</span>
                   </button>
                 </div>
               )}
@@ -351,25 +349,24 @@ const CollectionDetails = () => {
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-          </div>
-          <h3 className="text-2xl font-semibold text-gray-900 mb-3">No documents yet</h3>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto">
+          </div>          <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">No documents yet</h3>
+          <p className="text-gray-500 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base px-4">
             This collection is empty. Add documents to organize your content better.
           </p>          <button
             onClick={() => navigate('/documents')}
-            className="inline-flex items-center gap-3 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            className="inline-flex items-center gap-2 sm:gap-3 text-blue-600 hover:text-blue-800 font-medium transition-colors text-sm sm:text-base"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Browse Documents
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="hidden xs:inline">Browse Documents</span>
+            <span className="xs:hidden">Browse</span>
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-6">
+      ) : (        <div className="grid grid-cols-1 gap-4 sm:gap-6">
           {records.map((record) => {
             const isExpanded = expandedRecords.has(record.id);
             const isSelected = selectedRecordIds.includes(record.id);
@@ -383,9 +380,9 @@ const CollectionDetails = () => {
                     : 'border-gray-200'
                 }`}
               >
-                <div className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-3 flex-1">
+                <div className="p-3 sm:p-4 lg:p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-3 lg:space-y-0">
+                    <div className="flex items-start gap-2 sm:gap-3 flex-1">
                       {isSelectionMode && (
                         <div className="mt-1">
                           <input
@@ -398,53 +395,54 @@ const CollectionDetails = () => {
                       )}
                       
                       <div className="bg-green-100 rounded-lg p-2">
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                       </div>
                       
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
                               {record.filename || `Record #${record.id}`}
-                            </h3>                            <div className="flex items-center gap-2">
+                            </h3>                            <div className="flex flex-wrap items-center gap-2">
                               <button
                                 onClick={() => toggleRecordExpansion(record.id)}
-                                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                                className="text-blue-600 hover:text-blue-800 text-xs sm:text-sm font-medium flex items-center gap-1"
                                 title={isExpanded ? "Collapse details" : "Expand details"}
                               >
                                 {isExpanded ? (
                                   <>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                                     </svg>
-                                    Less
+                                    <span className="hidden xs:inline">Less</span>
                                   </>
                                 ) : (
                                   <>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                     </svg>
-                                    More
+                                    <span className="hidden xs:inline">More</span>
                                   </>
                                 )}
                               </button>                              <button
                                 onClick={() => handleRecordClick(record)}
-                                className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors"
+                                className="inline-flex items-center gap-1 sm:gap-2 text-green-600 hover:text-green-800 font-medium transition-colors text-xs sm:text-sm"
                                 title="View record details"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                                <span className="text-sm">View Details</span>
+                                <span className="hidden sm:inline">View Details</span>
+                                <span className="sm:hidden">View</span>
                               </button>
                             </div>
                           </div>
 
                           {/* File Information */}
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-3">
                             <div className="flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />                              </svg>

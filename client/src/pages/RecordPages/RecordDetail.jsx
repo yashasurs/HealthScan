@@ -145,23 +145,22 @@ const RecordDetail = () => {
         </div>
       </div>
     );
-  }
-  if (error && !record) {
+  }  if (error && !record) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 mb-4 text-sm sm:text-base">
           <p>{error}</p>
-        </div>        <div className="flex gap-3">
+        </div>        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           {fromCollectionId ? (            <button
               onClick={() => navigate(`/collections/${fromCollectionId}`)}
-              className="text-green-600 hover:text-green-800 font-medium transition-colors"
+              className="text-green-600 hover:text-green-800 font-medium transition-colors text-sm sm:text-base py-2 sm:py-0"
             >
               ← Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
             </button>
           ) : null}
           <button
             onClick={() => navigate('/records')}
-            className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            className="text-blue-600 hover:text-blue-800 font-medium transition-colors text-sm sm:text-base py-2 sm:py-0"
           >
             ← Back to Records
           </button>
@@ -169,35 +168,34 @@ const RecordDetail = () => {
       </div>
     );
   }
-
   return (
-    <div className="container mx-auto px-4 py-8">      {/* Breadcrumb */}
-      <nav className="mb-6">
-        <div className="flex items-center space-x-2 text-sm">          {fromCollectionId ? (            <>              <button
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">      {/* Breadcrumb */}
+      <nav className="mb-4 sm:mb-6">
+        <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm overflow-x-auto pb-2">          {fromCollectionId ? (            <>              <button
                 onClick={() => navigate('/collections')}
-                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors whitespace-nowrap"
               >
                 Collections
               </button>
               <span className="text-gray-500">→</span>              <button
                 onClick={() => navigate(`/collections/${fromCollectionId}`)}
-                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors whitespace-nowrap"
               >
                 {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
               </button>
               <span className="text-gray-500">→</span>
-              <span className="text-gray-700 font-medium">
+              <span className="text-gray-700 font-medium whitespace-nowrap">
                 {record?.filename || 'Record Details'}
               </span>
             </>
           ) : (            <>              <button
                 onClick={() => navigate('/records')}
-                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors whitespace-nowrap"
               >
                 Records
               </button>
               <span className="text-gray-500">→</span>
-              <span className="text-gray-700 font-medium">
+              <span className="text-gray-700 font-medium whitespace-nowrap">
                 {record?.filename || 'Record Details'}
               </span>
             </>
@@ -206,46 +204,46 @@ const RecordDetail = () => {
         
         {/* Back button */}        <div className="mt-2">          {fromCollectionId ? (            <button
               onClick={() => navigate(`/collections/${fromCollectionId}`)}
-              className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors text-sm sm:text-base py-2 sm:py-0"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
+              <span className="hidden xs:inline">Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}</span>
+              <span className="xs:hidden">Back</span>
             </button>
           ) : (            <button
               onClick={() => navigate('/records')}
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors text-sm sm:text-base py-2 sm:py-0"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-              Back to Records
+              <span className="hidden xs:inline">Back to Records</span>
+              <span className="xs:hidden">Back</span>
             </button>
           )}
         </div>
-      </nav>
-
-      {/* Success message */}
+      </nav>      {/* Success message */}
       {successMessage && (
-        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 sm:p-4 mb-4 text-sm sm:text-base">
           <p>{successMessage}</p>
         </div>
       )}
       
       {/* Error message */}
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 mb-4 text-sm sm:text-base">
           <p>{error}</p>
         </div>
       )}
 
       {record && (
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
           {/* Header */}
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{record.filename}</h1>              <div className="text-sm text-gray-500 space-y-1">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 sm:mb-6 space-y-4 lg:space-y-0">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 break-words">{record.filename}</h1>              <div className="text-xs sm:text-sm text-gray-500 space-y-1">
                 <div>Created: {formatDateTime(record.created_at)}</div>
                 <div>Updated: {formatDateTime(record.updated_at)}</div>
                 <div>Type: {record.file_type || 'Not specified'}</div>
@@ -253,21 +251,23 @@ const RecordDetail = () => {
               </div>
             </div>
             
-            {/* Action buttons */}            <div className="flex space-x-3">              <button
+            {/* Action buttons */}
+            <div className="flex flex-row gap-2 sm:gap-3 lg:flex-shrink-0">              <button
                 onClick={handleDownloadPDF}
-                className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base"
                 title="Download as PDF"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Download PDF
+                <span className="hidden sm:inline">Download PDF</span>
+                <span className="sm:hidden">PDF</span>
               </button>
                 <button
                 onClick={handleEditToggle}
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isEditing ? (
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   ) : (
@@ -278,50 +278,51 @@ const RecordDetail = () => {
               </button>
                 <button
                 onClick={handleDeleteRecord}
-                className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 font-medium transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-red-600 hover:text-red-800 font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
                 Delete
               </button>
             </div>
           </div>
-          
-          {/* Content */}
+            {/* Content */}
           {isEditing ? (
             <div>
               <textarea
                 value={editedContent}
                 onChange={handleContentChange}
-                className="w-full h-96 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                className="w-full h-64 sm:h-80 lg:h-96 p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs sm:text-sm resize-none"
                 placeholder="Record content..."
-              />              <div className="mt-4 flex justify-end">                <button
+              />              <div className="mt-3 sm:mt-4 flex justify-end">                <button
                   onClick={handleUpdateRecord}
-                  className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed py-2 sm:py-0 text-sm sm:text-base"
                   disabled={isLoading}
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Saving...
+                      <span className="hidden sm:inline">Saving...</span>
+                      <span className="sm:hidden">...</span>
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Save Changes
+                      <span className="hidden sm:inline">Save Changes</span>
+                      <span className="sm:hidden">Save</span>
                     </>
                   )}
                 </button>
               </div>            </div>
           ) : (
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 min-h-[400px]">
-              <div className="markdown-content">
+            <div className="bg-gray-50 p-3 sm:p-4 lg:p-6 rounded-lg border border-gray-200 min-h-[300px] sm:min-h-[400px]">
+              <div className="markdown-content text-sm sm:text-base">
                 <ReactMarkdown>{record.content}</ReactMarkdown>
               </div>
             </div>
