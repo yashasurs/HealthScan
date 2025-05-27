@@ -151,21 +151,19 @@ const RecordDetail = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
           <p>{error}</p>
-        </div>
-        <div className="flex gap-4">
-          {fromCollectionId ? (
-            <button
+        </div>        <div className="flex gap-3">
+          {fromCollectionId ? (            <button
               onClick={() => navigate(`/collections/${fromCollectionId}`)}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+              className="text-green-600 hover:text-green-800 font-medium transition-colors"
             >
-              Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
+              ← Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
             </button>
           ) : null}
           <button
             onClick={() => navigate('/records')}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+            className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
-            Back to Records
+            ← Back to Records
           </button>
         </div>
       </div>
@@ -175,19 +173,15 @@ const RecordDetail = () => {
   return (
     <div className="container mx-auto px-4 py-8">      {/* Breadcrumb */}
       <nav className="mb-6">
-        <div className="flex items-center space-x-2 text-sm">
-          {fromCollectionId ? (
-            <>
-              <button
+        <div className="flex items-center space-x-2 text-sm">          {fromCollectionId ? (            <>              <button
                 onClick={() => navigate('/collections')}
-                className="text-blue-500 hover:text-blue-700 font-medium"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
               >
                 Collections
               </button>
-              <span className="text-gray-500">→</span>
-              <button
+              <span className="text-gray-500">→</span>              <button
                 onClick={() => navigate(`/collections/${fromCollectionId}`)}
-                className="text-blue-500 hover:text-blue-700 font-medium"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
               >
                 {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
               </button>
@@ -196,11 +190,9 @@ const RecordDetail = () => {
                 {record?.filename || 'Record Details'}
               </span>
             </>
-          ) : (
-            <>
-              <button
+          ) : (            <>              <button
                 onClick={() => navigate('/records')}
-                className="text-blue-500 hover:text-blue-700 font-medium"
+                className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
               >
                 Records
               </button>
@@ -212,22 +204,18 @@ const RecordDetail = () => {
           )}
         </div>
         
-        {/* Back button */}
-        <div className="mt-2">
-          {fromCollectionId ? (
-            <button
+        {/* Back button */}        <div className="mt-2">          {fromCollectionId ? (            <button
               onClick={() => navigate(`/collections/${fromCollectionId}`)}
-              className="text-green-600 hover:text-green-800 font-medium flex items-center gap-1"
+              className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to {collectionName ? decodeURIComponent(collectionName) : 'Collection'}
             </button>
-          ) : (
-            <button
+          ) : (            <button
               onClick={() => navigate('/records')}
-              className="text-blue-500 hover:text-blue-700 font-medium flex items-center gap-1"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -265,30 +253,36 @@ const RecordDetail = () => {
               </div>
             </div>
             
-            {/* Action buttons */}
-            <div className="flex space-x-3">
-              <button
+            {/* Action buttons */}            <div className="flex space-x-3">              <button
                 onClick={handleDownloadPDF}
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors"
                 title="Download as PDF"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                PDF
+                Download PDF
               </button>
-              
-              <button
+                <button
                 onClick={handleEditToggle}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
               >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isEditing ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  )}
+                </svg>
                 {isEditing ? 'Cancel' : 'Edit'}
               </button>
-              
-              <button
+                <button
                 onClick={handleDeleteRecord}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                className="inline-flex items-center gap-2 text-red-600 hover:text-red-800 font-medium transition-colors"
               >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
                 Delete
               </button>
             </div>
@@ -302,17 +296,30 @@ const RecordDetail = () => {
                 onChange={handleContentChange}
                 className="w-full h-96 p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 placeholder="Record content..."
-              />
-              <div className="mt-4 flex justify-end">
-                <button
+              />              <div className="mt-4 flex justify-end">                <button
                   onClick={handleUpdateRecord}
-                  className="px-6 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Saving...' : 'Save Changes'}
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Changes
+                    </>
+                  )}
                 </button>
-              </div>
-            </div>          ) : (
+              </div>            </div>
+          ) : (
             <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 min-h-[400px]">
               <div className="markdown-content">
                 <ReactMarkdown>{record.content}</ReactMarkdown>
