@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MoveRecordModal from '../../components/Document/MoveRecordModal';
-import RecordPreviewModal from '../../components/Document/RecordPreviewModal';
+import PreviewModal from '../../components/Document/PreviewModal';
 
 const CollectionDetails = () => {
   const { id } = useParams();
@@ -594,10 +594,11 @@ const CollectionDetails = () => {
         currentCollectionId={id}
         onMoveSuccess={handleMoveSuccess}
       />      {/* Record Preview Modal */}
-      <RecordPreviewModal
+      <PreviewModal
         isOpen={previewModalOpen}
         onClose={closePreviewModal}
-        record={previewRecord}
+        item={previewRecord}
+        type="record"
       />
     </div>
   );
