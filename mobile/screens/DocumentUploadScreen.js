@@ -37,21 +37,20 @@ const DocumentUploadScreen = ({ route, navigation }) => {
         uri: doc.uri,
         type: doc.type || 'image/jpeg',
         name: doc.name || 'image.jpg'
-      }));
-
-      const response = await apiService.ocr.processFiles(files);
+      }));      const response = await apiService.ocr.processFiles(files);
       
       setUploadStatus('');
       setDocuments([]);
       
       Alert.alert(
         "Upload Successful",
-        `${response.data.length} document(s) have been processed and uploaded.`,
+        `${response.data.length} record(s) have been processed and uploaded.`,
         [
           { 
             text: "View Folder System", 
             onPress: () => {
-              navigation.navigate('FolderSystem');
+              // Pass parameter to indicate records were added
+              navigation.navigate('FolderSystem', { recordsAdded: true });
             }
           },
           { 
@@ -78,7 +77,7 @@ const DocumentUploadScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Header 
-        title="Document Upload" 
+        title="Record Upload" 
         rightAction={{
           icon: 'folder-outline',
           onPress: handleNavigateToFolderSystem
@@ -92,10 +91,10 @@ const DocumentUploadScreen = ({ route, navigation }) => {
         <View style={styles.uploadSection}>
           <View style={styles.sectionHeader}>
             <Ionicons name="cloud-upload-outline" size={20} color="#4A90E2" />
-            <Text style={styles.sectionTitle}>Upload Documents</Text>
+            <Text style={styles.sectionTitle}>Upload Records</Text>
           </View>
           <Text style={styles.sectionSubtitle}>
-            Select documents to process with OCR
+            Select records to process with OCR
           </Text>
           
           <DocumentUploader onDocumentPicked={handleDocumentPicked} />

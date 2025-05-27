@@ -29,12 +29,12 @@ const DocumentList = ({ documents, onRemoveDocument, onUploadAll }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>
-        Uploaded Documents ({documents.length})
+        Uploaded Records ({documents.length})
       </Text>
       
       {documents.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>No documents uploaded yet</Text>
+          <Text style={styles.emptyStateText}>No records uploaded yet</Text>
         </View>
       ) : (
         <FlatList

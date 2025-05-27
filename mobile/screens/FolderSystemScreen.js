@@ -8,17 +8,29 @@ import { useApiService } from '../services/apiService';
  * Folder System Screen - Main interface for organizing documents in collections
  * Provides a hierarchical folder view with drag-and-drop organization capabilities
  */
-const FolderSystemScreen = ({ navigation }) => {
+const FolderSystemScreen = ({ navigation, route }) => {
   const [collections, setCollections] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showOrganizer, setShowOrganizer] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
   const apiService = useApiService();
 
+  // Load collections on initial render
   useEffect(() => {
     loadCollections();
   }, []);
+  
+  // Check if navigated from document upload with new records
+  useEffect(() => {
+    if (route.params?.recordsAdded) {
+      // Trigger a refresh when records are added
+      setRefreshTrigger(prev => prev + 1);
+      // Reset the parameter to prevent multiple refreshes
+      navigation.setParams({ recordsAdded: false });
+    }
+  }, [route.params?.recordsAdded]);
   const loadCollections = async () => {
     try {
       const response = await apiService.collections.getAll();
@@ -41,7 +53,6 @@ const FolderSystemScreen = ({ navigation }) => {
       }
     }
   };
-
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -64,14 +75,15 @@ const FolderSystemScreen = ({ navigation }) => {
   };
 
   const handleRecordMoved = () => {
-    // Refresh data after record is moved
+    // Increment refresh trigger to force automatic refresh
+    setRefreshTrigger(prev => prev + 1);
+    // Also refresh collections
     loadCollections();
   };
   const handleNavigateToUpload = () => {
     navigation.navigate('Documents');
   };
-  
-  return (
+    return (
     <View style={styles.container}>
       <Header 
         title="Folder System"
@@ -88,6 +100,7 @@ const FolderSystemScreen = ({ navigation }) => {
           onCollectionSelect={handleCollectionSelect}
           onRefresh={handleRefresh}
           refreshing={refreshing}
+          refreshTrigger={refreshTrigger}
         />
       </View>
 
