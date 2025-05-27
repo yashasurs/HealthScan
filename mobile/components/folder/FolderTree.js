@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { ConfirmationModal } from '../common';
+import { useApiService } from '../../services/apiService';
 
 /**
  * Hierarchical folder tree component for organizing collections and records
@@ -12,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
  * @param {Function} props.onRecordSelect - Callback when record is selected
  * @param {Function} props.onRefresh - Callback when user refreshes the list
  * @param {boolean} props.refreshing - Whether the list is currently refreshing
+ * @param {Function} props.onCollectionDelete - Callback when collection is deleted
+ * @param {Function} props.onRecordDelete - Callback when record is deleted
  */
 const FolderTree = ({
   collections = [],
@@ -20,9 +24,13 @@ const FolderTree = ({
   onCollectionSelect,
   onRecordSelect,
   onRefresh,
-  refreshing = false
+  refreshing = false,
+  onCollectionDelete,
+  onRecordDelete
 }) => {
   const [expandedCollections, setExpandedCollections] = useState(new Set());
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(null);
 
   const toggleCollection = (collectionId) => {
     const newExpanded = new Set(expandedCollections);
@@ -37,11 +45,31 @@ const FolderTree = ({
   const getRecordsForCollection = (collectionId) => {
     return records.filter(record => record.collection_id === collectionId);
   };
-
   const getUnorganizedRecords = () => {
     return records.filter(record => !record.collection_id);
   };
 
+  const handleDeletePress = (item, type) => {
+    setDeleteItem({ ...item, type });
+    setConfirmDeleteVisible(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteItem) {
+      if (deleteItem.type === 'collection') {
+        onCollectionDelete?.(deleteItem.id);
+      } else if (deleteItem.type === 'record') {
+        onRecordDelete?.(deleteItem.id);
+      }
+    }
+    setConfirmDeleteVisible(false);
+    setDeleteItem(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setConfirmDeleteVisible(false);
+    setDeleteItem(null);
+  };
   const renderRecord = (record) => (
     <TouchableOpacity
       key={record.id}
@@ -58,11 +86,19 @@ const FolderTree = ({
         <View style={styles.recordInfo}>
           <Text style={styles.recordName} numberOfLines={1}>
             {record.filename}
-          </Text>
-          <Text style={styles.recordMeta}>
-            {record.file_type?.split('/')[1]} • {Math.round(record.file_size / 1024)}KB
+          </Text>          <Text style={styles.recordMeta}>
+            {record.file_type?.split('/')[1] || 'Unknown'} • {Math.round((record.file_size || 0) / 1024)}KB
           </Text>
         </View>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            handleDeletePress(record, 'record');
+          }}
+        >
+          <Ionicons name="trash-outline" size={16} color="#dc3545" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -112,11 +148,21 @@ const FolderTree = ({
                 <Text style={styles.collectionMeta}>
                   {collectionRecords.length} document{collectionRecords.length !== 1 ? 's' : ''}
                 </Text>
-              </View>
+              </View>            </View>
+            <View style={styles.collectionActions}>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleDeletePress(collection, 'collection');
+                }}
+              >
+                <Ionicons name="trash-outline" size={16} color="#dc3545" />
+              </TouchableOpacity>
+              {isSelected && (
+                <Ionicons name="checkmark-circle" size={16} color="#4A90E2" style={styles.checkmark} />
+              )}
             </View>
-            {isSelected && (
-              <Ionicons name="checkmark-circle" size={16} color="#4A90E2" />
-            )}
           </View>
         </TouchableOpacity>
 
@@ -162,10 +208,21 @@ const FolderTree = ({
             <Text style={styles.sectionCount}>({unorganizedRecords.length})</Text>
           </View>
           <View style={styles.recordsList}>
-            {unorganizedRecords.map(renderRecord)}
-          </View>
+            {unorganizedRecords.map(renderRecord)}          </View>
         </View>
-      )}
+      )}      <ConfirmationModal
+        visible={confirmDeleteVisible}
+        title={deleteItem?.type === 'collection' ? 'Delete Collection' : 'Delete Document'}
+        message={
+          deleteItem?.type === 'collection'
+            ? `Are you sure you want to delete the collection "${deleteItem?.name || 'Unknown'}"? This will remove the collection but not the documents inside it.`
+            : `Are you sure you want to delete the document "${deleteItem?.filename || 'Unknown'}"? This action cannot be undone.`
+        }
+        onConfirm={handleDeleteConfirm}
+        onClose={handleDeleteCancel}
+        confirmText="Delete"
+        confirmColor="#dc3545"
+      />
     </View>
   );
 };
@@ -191,8 +248,7 @@ const styles = StyleSheet.create({
   selectedCollection: {
     backgroundColor: '#e3f2fd',
     borderColor: '#4A90E2',
-  },
-  collectionContent: {
+  },  collectionContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -201,6 +257,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  collectionActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  deleteButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  checkmark: {
+    marginLeft: 8,
   },
   expandButton: {
     marginRight: 8,
