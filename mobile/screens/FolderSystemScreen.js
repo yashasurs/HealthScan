@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { Header } from '../components/common';
 import { FolderNavigator, RecordOrganizer } from '../components/folder';
+import { RecordViewer } from '../components/document';
 import { useApiService } from '../services/apiService';
 
 /**
  * Folder System Screen - Main interface for organizing documents in collections
  * Provides a hierarchical folder view with drag-and-drop organization capabilities
  */
-const FolderSystemScreen = ({ navigation, route }) => {
-  const [collections, setCollections] = useState([]);
+const FolderSystemScreen = ({ navigation, route }) => {  const [collections, setCollections] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showOrganizer, setShowOrganizer] = useState(false);
+  const [showRecordViewer, setShowRecordViewer] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -63,8 +64,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
       setRefreshing(false);
     }
   };
-
   const handleRecordSelect = (record) => {
+    setSelectedRecord(record);
+    setShowRecordViewer(true);
+  };
+
+  const handleRecordLongPress = (record) => {
     setSelectedRecord(record);
     setShowOrganizer(true);
   };
@@ -72,10 +77,15 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const handleCollectionSelect = (collectionId) => {
     // Could navigate to collection details or perform other actions
     console.log('Selected collection:', collectionId);
+  };  const handleRecordMoved = () => {
+    // Increment refresh trigger to force automatic refresh
+    setRefreshTrigger(prev => prev + 1);
+    // Also refresh collections
+    loadCollections();
   };
 
-  const handleRecordMoved = () => {
-    // Increment refresh trigger to force automatic refresh
+  const handleRecordDeleted = (recordId) => {
+    // Trigger a refresh when a record is deleted
     setRefreshTrigger(prev => prev + 1);
     // Also refresh collections
     loadCollections();
@@ -94,17 +104,15 @@ const FolderSystemScreen = ({ navigation, route }) => {
         }}
       />
       
-      <View style={styles.content}>
-        <FolderNavigator
+      <View style={styles.content}>        <FolderNavigator
           onRecordSelect={handleRecordSelect}
+          onRecordLongPress={handleRecordLongPress}
           onCollectionSelect={handleCollectionSelect}
           onRefresh={handleRefresh}
           refreshing={refreshing}
           refreshTrigger={refreshTrigger}
         />
-      </View>
-
-      {showOrganizer && (
+      </View>      {showOrganizer && (
         <RecordOrganizer
           visible={showOrganizer}
           onClose={() => {
@@ -114,6 +122,18 @@ const FolderSystemScreen = ({ navigation, route }) => {
           record={selectedRecord}
           collections={collections}
           onRecordMoved={handleRecordMoved}
+        />
+      )}
+
+      {showRecordViewer && (
+        <RecordViewer
+          visible={showRecordViewer}
+          onClose={() => {
+            setShowRecordViewer(false);
+            setSelectedRecord(null);
+          }}
+          record={selectedRecord}
+          onRecordDeleted={handleRecordDeleted}
         />
       )}
     </View>

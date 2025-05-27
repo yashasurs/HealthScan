@@ -11,11 +11,12 @@ import FolderTree from './FolderTree';
  */
 const FolderNavigator = ({ 
   onRecordSelect, 
+  onRecordLongPress,
   onCollectionSelect, 
   onRefresh, 
   refreshing,
   refreshTrigger = 0 
-}) => {  const [collections, setCollections] = useState([]);
+}) => {const [collections, setCollections] = useState([]);
   const [records, setRecords] = useState([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -225,6 +226,7 @@ const FolderNavigator = ({
           selectedCollectionId={selectedCollectionId}
           onCollectionSelect={handleCollectionSelect}
           onRecordSelect={handleRecordSelect}
+          onRecordLongPress={onRecordLongPress}
           onRefresh={onRefresh}
           refreshing={refreshing}
           onCollectionDelete={handleDeleteCollection}

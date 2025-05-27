@@ -23,6 +23,7 @@ const FolderTree = ({
   selectedCollectionId,
   onCollectionSelect,
   onRecordSelect,
+  onRecordLongPress,
   onRefresh,
   refreshing = false,
   onCollectionDelete,
@@ -69,12 +70,12 @@ const FolderTree = ({
   const handleDeleteCancel = () => {
     setConfirmDeleteVisible(false);
     setDeleteItem(null);
-  };
-  const renderRecord = (record) => (
+  };  const renderRecord = (record) => (
     <TouchableOpacity
       key={record.id}
       style={styles.recordItem}
       onPress={() => onRecordSelect?.(record)}
+      onLongPress={() => onRecordLongPress?.(record)}
     >
       <View style={styles.recordContent}>
         <Ionicons 
