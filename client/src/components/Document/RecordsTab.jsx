@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import LoadingSpinner from '../LoadingSpinner';
 import { formatDate } from '../../utils/dateUtils';
 
@@ -207,11 +208,9 @@ const RecordsTab = ({
                         <div className="flex items-center justify-between mb-3">
                           <h5 className="font-medium text-gray-900">Extracted Content</h5>
                           <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded">OCR Result</span>
+                        </div>                        <div className="markdown-content max-h-64 overflow-auto">
+                          <ReactMarkdown>{record.content}</ReactMarkdown>
                         </div>
-                        <div 
-                          className="text-sm text-gray-800 max-h-64 overflow-auto leading-relaxed"
-                          dangerouslySetInnerHTML={{ __html: record.content }} 
-                        />
                       </div>
                     </div>
                   )}

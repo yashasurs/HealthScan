@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { formatDate, formatDateTime } from '../../utils/dateUtils';
 
 const PreviewModal = ({ item, type, isOpen, onClose }) => {
@@ -50,15 +51,19 @@ const PreviewModal = ({ item, type, isOpen, onClose }) => {
       console.error('Failed to copy text: ', err);
     }
   };
-
   const downloadAsTextFile = () => {
-    const content = isRecord ? item.content : `Collection: ${item.name}\n\nDescription: ${item.description || 'No description'}\n\nRecords:\n${item.records?.map(r => `- ${r.filename || r.id}`).join('\n') || 'No records'}`;
+    const content = isRecord ? item.content : `# ${item.name}\n\n${item.description ? `## Description\n${item.description}\n\n` : ''}## Records\n${item.records?.map(r => `- ${r.filename || r.id}`).join('\n') || 'No records'}`;
     const filename = isRecord ? (item.filename || `record-${item.id}`) : `collection-${item.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
     
+    // Check if content looks like markdown (contains # headers, *, etc.)
+    const hasMarkdown = content.includes('#') || content.includes('*') || content.includes('_') || content.includes('`');
+    const fileExtension = hasMarkdown ? 'md' : 'txt';
+    const mimeType = hasMarkdown ? 'text/markdown' : 'text/plain';
+    
     const element = document.createElement('a');
-    const file = new Blob([content], { type: 'text/plain' });
+    const file = new Blob([content], { type: mimeType });
     element.href = URL.createObjectURL(file);
-    element.download = `${filename}.txt`;
+    element.download = `${filename}.${fileExtension}`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -286,11 +291,19 @@ const PreviewModal = ({ item, type, isOpen, onClose }) => {
                     Download
                   </button>
                 </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <pre className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed font-mono">
-                  {item.content}
-                </pre>
+              </div>              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="markdown-content">
+                  <ReactMarkdown>{item.content}</ReactMarkdown>
+                </div>
+                {/* Debug info */}
+                {process.env.NODE_ENV === 'development' && (
+                  <details className="mt-4 text-xs text-gray-500">
+                    <summary>Debug: Raw Content</summary>
+                    <pre className="mt-2 p-2 bg-gray-100 rounded text-[10px] overflow-auto max-h-20">
+                      {item.content}
+                    </pre>
+                  </details>
+                )}
               </div>
             </div>
           )}

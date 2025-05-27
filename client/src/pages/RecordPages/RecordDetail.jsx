@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import createApiService from '../../utils/apiService';
@@ -311,10 +312,11 @@ const RecordDetail = () => {
                   {isLoading ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 whitespace-pre-wrap min-h-[400px] font-mono text-sm leading-relaxed">
-              {record.content}
+            </div>          ) : (
+            <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 min-h-[400px]">
+              <div className="markdown-content">
+                <ReactMarkdown>{record.content}</ReactMarkdown>
+              </div>
             </div>
           )}
         </div>

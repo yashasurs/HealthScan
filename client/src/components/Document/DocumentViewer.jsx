@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import LoadingSpinner from '../LoadingSpinner';
 import { formatDateTime } from '../../utils/dateUtils';
 
@@ -57,9 +58,10 @@ const DocumentViewer = ({ record, onClose }) => {
             ) : loadError ? (
               <div className="text-red-500 text-center py-4">
                 Failed to load document content
+              </div>            ) : (
+              <div className="markdown-content">
+                <ReactMarkdown>{record.content}</ReactMarkdown>
               </div>
-            ) : (
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: record.content }} />
             )}
           </div>
           

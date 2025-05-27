@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { formatDateTime } from '../../utils/dateUtils';
 
 const RecordPreviewModal = ({ record, isOpen, onClose }) => {
@@ -38,12 +39,16 @@ const RecordPreviewModal = ({ record, isOpen, onClose }) => {
       console.error('Failed to copy text: ', err);
     }
   };
-
   const downloadAsTextFile = () => {
+    // Check if content looks like markdown (contains # headers, *, etc.)
+    const hasMarkdown = record.content.includes('#') || record.content.includes('*') || record.content.includes('_') || record.content.includes('`');
+    const fileExtension = hasMarkdown ? 'md' : 'txt';
+    const mimeType = hasMarkdown ? 'text/markdown' : 'text/plain';
+    
     const element = document.createElement('a');
-    const file = new Blob([record.content], { type: 'text/plain' });
+    const file = new Blob([record.content], { type: mimeType });
     element.href = URL.createObjectURL(file);
-    element.download = `${record.filename || `record-${record.id}`}.txt`;
+    element.download = `${record.filename || `record-${record.id}`}.${fileExtension}`;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -140,11 +145,10 @@ const RecordPreviewModal = ({ record, isOpen, onClose }) => {
                     Download
                   </button>
                 </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <pre className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed font-mono">
-                  {record.content}
-                </pre>
+              </div>              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="markdown-content">
+                  <ReactMarkdown>{record.content}</ReactMarkdown>
+                </div>
               </div>
             </div>
           )}
