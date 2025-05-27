@@ -15,10 +15,19 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   const isAuthenticated = !!token;
-
   const getToken = async () => {
     try {
+      // If we already have a token in memory, use it
+      if (token) return token;
+      
+      // Otherwise fetch it from storage
       const storedToken = await AsyncStorage.getItem("token");
+      
+      // If found in storage, update the state
+      if (storedToken && !token) {
+        setToken(storedToken);
+      }
+      
       return storedToken;
     } catch (error) {
       console.error("Failed to retrieve token from AsyncStorage", error);

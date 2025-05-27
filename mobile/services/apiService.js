@@ -16,13 +16,17 @@ const createApiService = (token) => {
       'Authorization': token ? `Bearer ${token}` : '',
       'Content-Type': 'application/json'
     }
-  });
-  // Add response interceptor for debugging and error handling
+  });  // Add response interceptor for debugging and error handling
   instance.interceptors.response.use(
     response => {
       return response;
     },
     error => {
+      // If 401 Unauthorized, token may be invalid
+      if (error.response && error.response.status === 401) {
+        console.warn('API call returned 401 Unauthorized - token may be invalid');
+        // The logout will be handled at the component level
+      }
       return Promise.reject(error);
     }
   );
@@ -40,9 +44,35 @@ export const useApiService = () => {
   const getAuthenticatedApi = async () => {
     const currentToken = token || await getToken();
     return createApiService(currentToken);
-  };
-  return {
+  };  return {
     getAuthenticatedApi,
+    // Collections API
+    collections: {
+      getAll: async () => {
+        const api = await getAuthenticatedApi();
+        return api.get('/collections/');
+      },
+      create: async (collectionData) => {
+        const api = await getAuthenticatedApi();
+        return api.post('/collections/', collectionData);
+      },
+      delete: async (collectionId) => {
+        const api = await getAuthenticatedApi();
+        return api.delete(`/collections/${collectionId}`);
+      },
+      getRecords: async (collectionId) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/collections/${collectionId}/records`);
+      },
+      addRecord: async (collectionId, recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.put(`/collections/${collectionId}/records/${recordId}`);
+      },
+      removeRecord: async (collectionId, recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.delete(`/collections/${collectionId}/records/${recordId}`);
+      }
+    },
     // Records API
     records: {
       getAll: async () => {
@@ -59,10 +89,9 @@ export const useApiService = () => {
           params: { content }
         });
       }
-    },
-    // OCR API
+    },// OCR API
     ocr: {
-      processFiles: async (files, collectionId = null) => {
+      processFiles: async (files) => {
         const api = await getAuthenticatedApi();
         const formData = new FormData();
         
@@ -71,10 +100,7 @@ export const useApiService = () => {
         });
 
         let url = '/ocr/get-text';
-        if (collectionId) {
-          url += `?collection_id=${collectionId}`;
-        }
-
+        
         return api.post(url, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'

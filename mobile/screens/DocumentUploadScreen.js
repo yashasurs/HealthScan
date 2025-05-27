@@ -3,39 +3,20 @@ import { StyleSheet, View, ScrollView, Alert, ActivityIndicator, Text, Touchable
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/common';
 import { DocumentUploader, DocumentList } from '../components/document';
-import { CollectionPicker } from '../components/collection';
 import { useApiService } from '../services/apiService';
 
 const DocumentUploadScreen = ({ route, navigation }) => {
   const [documents, setDocuments] = useState([]);
-  const [selectedCollectionId, setSelectedCollectionId] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
 
   const apiService = useApiService();
-  const preSelectedCollection = route?.params?.preSelectedCollection;
-
-  useEffect(() => {
-    if (preSelectedCollection) {
-      setSelectedCollectionId(preSelectedCollection);
-    }
-  }, [preSelectedCollection]);
 
   const handleDocumentPicked = (document) => {
     setDocuments([...documents, document]);
   };
-
   const handleRemoveDocument = (documentToRemove) => {
     setDocuments(documents.filter(doc => doc.uri !== documentToRemove.uri));
-  };
-
-  const handleCreateNewCollection = () => {
-    navigation.navigate('CollectionCreate', {
-      records: [], // No pre-selected records for new collection
-      onCollectionCreated: (newCollection) => {
-        setSelectedCollectionId(newCollection.id);
-      }
-    });
   };
 
   const handleNavigateToFolderSystem = () => {
@@ -51,15 +32,14 @@ const DocumentUploadScreen = ({ route, navigation }) => {
     setUploading(true);
     setUploadStatus('Uploading and processing documents...');
 
-    try {
-      // Convert picked documents to file objects for the API
+    try {      // Convert picked documents to file objects for the API
       const files = documents.map(doc => ({
         uri: doc.uri,
         type: doc.type || 'image/jpeg',
         name: doc.name || 'image.jpg'
       }));
 
-      const response = await apiService.ocr.processFiles(files, selectedCollectionId);
+      const response = await apiService.ocr.processFiles(files);
       
       setUploadStatus('');
       setDocuments([]);
@@ -104,38 +84,10 @@ const DocumentUploadScreen = ({ route, navigation }) => {
           onPress: handleNavigateToFolderSystem
         }}
       />
-      
-      <ScrollView 
+        <ScrollView 
         style={styles.content}
         nestedScrollEnabled={true}
       >
-        {/* Collection Selection Section */}
-        <View style={styles.collectionSection}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="folder" size={20} color="#4A90E2" />
-            <Text style={styles.sectionTitle}>Choose Collection</Text>
-          </View>
-          <Text style={styles.sectionSubtitle}>
-            Select where to organize your uploaded documents
-          </Text>
-          
-          <CollectionPicker
-            selectedCollectionId={selectedCollectionId}
-            onCollectionSelect={setSelectedCollectionId}
-            preSelectedCollection={preSelectedCollection}
-          />
-          
-          <View style={styles.collectionActions}>
-            <TouchableOpacity 
-              style={styles.createCollectionButton}
-              onPress={handleCreateNewCollection}
-            >
-              <Ionicons name="add-circle-outline" size={16} color="#4A90E2" />
-              <Text style={styles.createCollectionText}>Create New Collection</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Upload Section */}
         <View style={styles.uploadSection}>
           <View style={styles.sectionHeader}>
@@ -175,14 +127,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  collectionSection: {
-    marginBottom: 24,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#e9ecef',
-  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -199,26 +143,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 16,
     lineHeight: 20,
-  },
-  collectionActions: {
-    marginTop: 12,
-  },
-  createCollectionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
-  },
-  createCollectionText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#4A90E2',
-    marginLeft: 6,
   },
   uploadSection: {
     marginBottom: 24,
