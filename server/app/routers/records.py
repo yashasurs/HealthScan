@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from sqlalchemy.orm import Session
-from .. import schemas, models, database, oauth2
+from .. import schemas, models, database, oauth2, utils
+from fastapi.responses import StreamingResponse
+import io
+from ..utils import markdown_to_pdf_bytes
 
 
 router = APIRouter(
@@ -85,3 +88,24 @@ def delete_record(
     db.commit()
     
     return {"message": "Record deleted successfully"}
+
+@router.get("/{record_id}/pdf")
+def get_record_pdf(
+    record_id: str,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Get a PDF file generated from the record's content (assumed Markdown)."""
+    record = db.query(models.Record).filter(
+        models.Record.id == record_id,
+        models.Record.user_id == current_user.id
+    ).first()
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record not found"
+        )
+    pdf_bytes = markdown_to_pdf_bytes(record.content)
+    return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers={
+        "Content-Disposition": f"attachment; filename=record_{record_id}.pdf"
+    })

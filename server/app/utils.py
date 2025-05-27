@@ -62,6 +62,19 @@ def markdown_to_pdf_bytes(markdown_text: str) -> bytes:
 
 
 
+def merge_texts(texts: List[str], separator: str = "\n\n---\n\n") -> str:
+    """
+    Merges a list of texts into a single string using a separator.
+    
+    :param texts: A list of text strings to merge.
+    :param separator: The string to use as a separator between texts (default: "\n\n---\n\n").
+    :return: A single string containing all texts joined by the separator.
+    """
+    if not texts:
+        return ""
+    
+    return separator.join(texts)
+
 
 class GeminiAgent():
     def __init__(self):
@@ -77,79 +90,43 @@ class GeminiAgent():
     
     async def generate_markup(
             self,
-            texts: List[str],
+            merged_text: str = "",
+            separator: str = "\n\n---\n\n"
     ) -> List[MarkupResponse]:
         """
         Uses the LLM to format the input text as markup language, without changing its content.
+        The input text should contain multiple texts separated by the specified separator.
+        
+        :param merged_text: A single string containing multiple texts separated by the specified separator.
+        :param separator: The separator used to split the text into multiple parts (default: "\n\n---\n\n").
+        :return: A list of MarkupResponse objects, each containing formatted text.
         """
+            
         agent = Agent(
             self.model,
             result_type=List[MarkupResponse],
             system_prompt=(
-                "You are a formatter. You will receive a list of text excerpts. Format each text as well-structured Markdown, using headings, bullet points, and code blocks where appropriate. Organize the information for maximum readability. IMPORTANT: Do NOT change any content, do NOT add any new content, and do NOT delete any existing content. Preserve all original information exactly as provided - only format it using Markdown syntax. Return a list where each item corresponds to the formatted version of the input text at the same index."
+                "You are a formatter. You will receive input containing multiple text excerpts that were separated using a specific separator. Format each text as well-structured Markdown, using headings, bullet points, and code blocks where appropriate. Organize the information for maximum readability. IMPORTANT: Do NOT change any content, do NOT add any new content, and do NOT delete any existing content. Preserve all original information exactly as provided - only format it using Markdown syntax."
+                "\n\nYou MUST return a list of objects. Each object MUST have a 'markup' field containing the formatted text."
+                "\n\nCRITICAL REQUIREMENT: You MUST return EXACTLY the same number of objects as input texts, in the same order."
+                "\n\nExample format for 3 input texts:"
+                "\n[{'markup': 'formatted text 1'}, {'markup': 'formatted text 2'}, {'markup': 'formatted text 3'}]"
             ),
         )
-        response = await agent.run(texts)
+        
+        # Passing the input as a positional argument as the first parameter
+        response = await agent.run(merged_text)
+        
         return response.output
 
 
-
-if __name__ == "__main__":
-    # Test markdown_to_pdf_bytes with sample markdown content
-    sample_markdown = """
-## Anirudh Kashyap
-
-*   +91 6366201598
-*   anirudhkashyap321@gmail.com
-*   [github.com/dynamite-123](github.com/dynamite-123)
-*   LinkedIn
-
-### Education
-
-*   **JSS Science and Technology University, Mysore**
-    *   CGPA: 9.2/10
-    *   Bachelor of Engineering in Computer Science
-    *   Oct 2023 - Present
-
-### Project Experience
-
-*   **Smart Stock - Feb 2025 (PES University)**
-    *   Built with a team of four and shortlisted in the top 10 at a hackathon
-    *   Led backend development using Django REST Framework for a web app providing stock insights, recommendations, and sentiment analysis
-    *   Frontend built with React
-    *   GitHub: [https://github.com/dvnamite-L23/NextGen](https://github.com/dvnamite-L23/NextGen)
-*   **Raytracing in C++ - March 2025**
-    *   Built a program in C++ to demonstrate raytracing using the SDL library
-    *   GitHub: [https://github.com/dynamite-L23/Ravtracing](https://github.com/dynamite-L23/Ravtracing)
-*   **CRM Webapp - Dec 2024**
-    *   Built a customer relationship management app using Django framework
-    *   GitHub: [https://github.com/dynamite-L23/diango-crm](https://github.com/dynamite-L23/diango-crm)
-*   **API for CRUD operations - Sep 2024**
-    *   Built a simple RESTful API using FastAPI to handle CRUD (create, read, update, delete) operations
-    *   GitHub: [https://github.com/dynamite-123/Social_Media](https://github.com/dynamite-123/Social_Media)
-    """
-
-    pdf_bytes = markdown_to_pdf_bytes(sample_markdown)
-    output_path = "test_output.pdf"
-    with open(output_path, "wb") as f:
-        f.write(pdf_bytes)
-    print(f"PDF generated and saved to {output_path}")
-
-
-
-
-
-
-
-
-
     
-    # The rest of the test code is commented out
-    '''
 if __name__ == "__main__":
+
     async def main():
         agent = GeminiAgent()
-        texts = [
+        # Define sample texts
+        sample_texts = [
             """
             Anirudh Kashyap +91 6366201598 anirudhkashyap321@gmailcom github com /dynamite-123 linkedin EDUCATION JSS Science and Technology University, Mysore CGPA: 9.2/10 Bachelor of Engineering in Computer Science Oct 2023 present PROJECT EXPERIENCE Smart Stock - Feb 2025 PES University Built with a team of four and shortlisted in the top 10 at a hackathon Led backend development using Django REST Framework for a web app providing stock insights, recommendations, and sentiment analysis Frontend built with React: GitHub: https:L Lgithub com [dvnamite-L23 /NextGen 2 Raytracing in € - March 2025 Built a program in C to demonstrate raytracing using the SDL library: GitHub: https:L Lgithub com /dynamite-L23 [Ravtracing CRM Webapp Dec 2024 Built a customer relationship management app using Django framework GitHub: https LLgithubcomLdynamite-L23 /diango-crm API for CRUD operations Sep 2024 Built a simple RESTful API using FastAPI to handle CRUD (create, read; update, delete) operations GitHub: https:L Lgithub com /dynamite-123 [Social_Media App
             """,
@@ -162,8 +139,14 @@ if __name__ == "__main__":
             To exit full screen; press and hold Esc vinyas bharadwaj 8310055407 vinyasbharadwaj101@gmail com Mysore, Karnataka Profile Im always looking to connect with others who inspire me to be my best: have a strong passion for backend and API development, and I've gained experience with FastAPI , Django, other backend technologies_ Im also skilled in using API tools like Postman to test and refine my work. Im eager to keep learning and expanding my skills in these areas  and Im excited to explore new technologies that can help me grow and contribute to my work. Skills Django Backend Developer; Python Programming; API Development with FastAPI, Web Development Fundamentals Communication skills Education JSS Science And Technology University Ist semester: 9.63 GPA Excel Public School Shortlisted among the top 50 teams across India in the Atal  Innovation Marathon (AIM): developed an innovative design for a vertical axis wind turbine to surmount the inherent limitations of  conventional wind energy harvesting technologies_ Projects Customer Relationship Management (CRM) System Developed a CRM system with Django, featuring authentication mechanisms and a user-friendly, interactive Ul. Secure user authentication, dynamic and responsive interface for seamless user interaction: RESTful API for CRUD Operations Designed and implemented a RESTful API using FastAPI , capable of handling all CRUD (Create, Read, Update, Delete) operations_ The API is optimized for performance and scalability, full CRUD functionality, fast and lightweight, with asynchronous capabilities. Well-documented endpoints_ Accomplishments JEE Mains: 98.729 percentile KCET: ranked 135th in my state and We
             """
         ]
-        print("Input texts:\n", texts)
-        response = await agent.generate_markup(texts)
+        
+        # Merge the texts into a single string with the separator
+        separator = "\n\n---\n\n"
+        merged_text = merge_texts(sample_texts, separator)
+        
+        print("Input merged text length:", len(merged_text))
+
+        response = await agent.generate_markup(merged_text)
         print("\nFormatted output (type={}):\n".format(type(response)))
         print(f"Number of records: {len(response)}")
         for i, record in enumerate(response):
@@ -177,4 +160,3 @@ if __name__ == "__main__":
                 f.write(response[0].markup)
 
     asyncio.run(main())
-'''
