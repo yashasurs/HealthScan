@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collectionsAPI } from '../utils/apiService';
-import LoadingSpinner from '../components/LoadingSpinner';
+import { collectionsAPI } from '../../utils/apiService';
+import LoadingSpinner from '../../components/LoadingSpinner';
 
 const Collections = () => {
   const navigate = useNavigate();
