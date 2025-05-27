@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDate, formatDateTime } from '../../utils/dateUtils';
 
 const PreviewModal = ({ item, type, isOpen, onClose }) => {
   // Determine if this is a record or collection first
@@ -71,13 +72,12 @@ const PreviewModal = ({ item, type, isOpen, onClose }) => {
   };
 
   // Get subtitle
-  const getSubtitle = () => {
-    if (isRecord) {
-      return `${getFileTypeDisplay(item.file_type)} • ${formatFileSize(item.file_size)} • ${new Date(item.created_at).toLocaleDateString()}`;
+  const getSubtitle = () => {    if (isRecord) {
+      return `${getFileTypeDisplay(item.file_type)} • ${formatFileSize(item.file_size)} • ${formatDate(item.created_at)}`;
     }
     if (isCollection) {
       const recordCount = item.records?.length || 0;
-      return `${recordCount} document${recordCount !== 1 ? 's' : ''} • Created ${new Date(item.created_at).toLocaleDateString()}`;
+      return `${recordCount} document${recordCount !== 1 ? 's' : ''} • Created ${formatDate(item.created_at)}`;
     }
     return '';
   };
@@ -315,9 +315,8 @@ const PreviewModal = ({ item, type, isOpen, onClose }) => {
                               </span>
                             )}
                             {record.file_size && (
-                              <span>{formatFileSize(record.file_size)}</span>
-                            )}
-                            <span>Added {new Date(record.created_at).toLocaleDateString()}</span>
+                              <span>{formatFileSize(record.file_size)}</span>                            )}
+                            <span>Added {formatDate(record.created_at)}</span>
                           </div>
                           {record.content && (
                             <p className="text-sm text-gray-600 mt-2 line-clamp-2">
@@ -395,16 +394,15 @@ const PreviewModal = ({ item, type, isOpen, onClose }) => {
                   <div className={`${isRecord ? 'bg-green-50' : 'bg-blue-50'} rounded-lg p-4`}>
                     <h4 className={`font-medium ${isRecord ? 'text-green-900' : 'text-blue-900'} mb-2`}>Timestamps</h4>
                     <div className="space-y-2 text-sm">
-                      <div>
-                        <span className={`${isRecord ? 'text-green-700' : 'text-blue-700'} font-medium`}>Created:</span>
+                      <div>                        <span className={`${isRecord ? 'text-green-700' : 'text-blue-700'} font-medium`}>Created:</span>
                         <span className={`${isRecord ? 'text-green-800' : 'text-blue-800'} ml-2`}>
-                          {new Date(item.created_at).toLocaleString()}
+                          {formatDateTime(item.created_at)}
                         </span>
                       </div>
                       <div>
                         <span className={`${isRecord ? 'text-green-700' : 'text-blue-700'} font-medium`}>Updated:</span>
                         <span className={`${isRecord ? 'text-green-800' : 'text-blue-800'} ml-2`}>
-                          {new Date(item.updated_at).toLocaleString()}
+                          {formatDateTime(item.updated_at)}
                         </span>
                       </div>
                     </div>

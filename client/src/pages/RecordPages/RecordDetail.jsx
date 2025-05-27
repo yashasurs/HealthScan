@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import createApiService from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { formatDateTime } from '../../utils/dateUtils';
 
 const RecordDetail = () => {
   const { id } = useParams();
@@ -130,15 +131,9 @@ const RecordDetail = () => {
       });
     }
   };
-
   const showSuccessMessage = (message) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
   if (isLoading && !record) {
@@ -261,10 +256,9 @@ const RecordDetail = () => {
           {/* Header */}
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{record.filename}</h1>
-              <div className="text-sm text-gray-500 space-y-1">
-                <div>Created: {formatDate(record.created_at)}</div>
-                <div>Updated: {formatDate(record.updated_at)}</div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">{record.filename}</h1>              <div className="text-sm text-gray-500 space-y-1">
+                <div>Created: {formatDateTime(record.created_at)}</div>
+                <div>Updated: {formatDateTime(record.updated_at)}</div>
                 <div>Type: {record.file_type || 'Not specified'}</div>
                 <div>Size: {record.file_size ? `${Math.round(record.file_size / 1024)} KB` : 'Unknown'}</div>
               </div>

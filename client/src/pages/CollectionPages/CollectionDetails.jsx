@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { collectionsAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import MoveRecordModal from '../../components/Document/MoveRecordModal';
+import { formatDate, formatDateTime } from '../../utils/dateUtils';
 
 const CollectionDetails = () => {
   const { id } = useParams();
@@ -250,10 +251,9 @@ const CollectionDetails = () => {
           <div className="flex items-center gap-2">
             <div className="bg-gray-100 rounded-full p-1">
               <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-8 0h8m-8 0V5a1 1 0 011-1h6a1 1 0 011 1v2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
-              </svg>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4m-8 0h8m-8 0V5a1 1 0 011-1h6a1 1 0 011 1v2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z" />              </svg>
             </div>
-            <span>Created {new Date(collection.created_at).toLocaleDateString()}</span>
+            <span>Created {formatDate(collection.created_at)}</span>
           </div>
           {records.length > 0 && (
             <button
@@ -418,9 +418,8 @@ const CollectionDetails = () => {
                           <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                             <div className="flex items-center gap-1">
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              <span>Added {new Date(record.created_at).toLocaleDateString()}</span>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />                              </svg>
+                              <span>Added {formatDate(record.created_at)}</span>
                             </div>
                             
                             {record.file_type && (
@@ -491,10 +490,9 @@ const CollectionDetails = () => {
                                 <div>
                                   <span className="text-blue-700 font-medium">Record ID:</span>
                                   <span className="text-blue-800 ml-1 font-mono">{record.id}</span>
-                                </div>
-                                <div>
+                                </div>                                <div>
                                   <span className="text-blue-700 font-medium">Last Updated:</span>
-                                  <span className="text-blue-800 ml-1">{new Date(record.updated_at).toLocaleString()}</span>
+                                  <span className="text-blue-800 ml-1">{formatDateTime(record.updated_at)}</span>
                                 </div>
                                 {record.user_id && (
                                   <div>

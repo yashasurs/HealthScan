@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import createApiService from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { formatDateTime } from '../../utils/dateUtils';
 
 const Records = () => {
   const navigate = useNavigate();
@@ -93,13 +94,7 @@ const Records = () => {
         return new Date(b.updated_at) - new Date(a.updated_at);
       default:
         return new Date(b.created_at) - new Date(a.created_at);
-    }
-  });
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  };
+    }  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -167,10 +162,9 @@ const Records = () => {
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg text-gray-800 mb-1">{record.filename}</h3>
-                        <div className="text-sm text-gray-500 mb-2 space-y-1">
-                          <div>Created: {formatDate(record.created_at)}</div>
-                          <div>Updated: {formatDate(record.updated_at)}</div>
+                        <h3 className="font-semibold text-lg text-gray-800 mb-1">{record.filename}</h3>                        <div className="text-sm text-gray-500 mb-2 space-y-1">
+                          <div>Created: {formatDateTime(record.created_at)}</div>
+                          <div>Updated: {formatDateTime(record.updated_at)}</div>
                           <div>Type: {record.file_type || 'Not specified'} • Size: {record.file_size ? `${Math.round(record.file_size / 1024)} KB` : 'Unknown'}</div>
                         </div>
                         <p className="text-sm text-gray-600 line-clamp-2">{record.content.substring(0, 150)}...</p>

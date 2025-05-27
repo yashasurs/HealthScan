@@ -7,7 +7,7 @@ import Home from './pages/Home'
 import AuthProvider from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
-import Documents from './pages/Documents.jsx'
+import Documents from './pages/Upload.jsx'
 import Collections from './pages/CollectionPages/Collections.jsx'
 import CollectionDetails from './pages/CollectionPages/CollectionDetails.jsx'
 import Records from './pages/RecordPages/Records.jsx'
@@ -28,7 +28,7 @@ function App() {
                 <Home />
               </ProtectedRoute>
             } />
-            <Route path='/documents' element={
+            <Route path='/upload' element={
               <ProtectedRoute>
                 <Documents />
               </ProtectedRoute>

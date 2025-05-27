@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatDateTime } from '../../utils/dateUtils';
 
 const RecordPreviewModal = ({ record, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('content');
@@ -61,10 +62,9 @@ const RecordPreviewModal = ({ record, isOpen, onClose }) => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold">
-                {record.filename || `Record #${record.id}`}
-              </h2>
+                {record.filename || `Record #${record.id}`}              </h2>
               <p className="text-blue-100 text-sm mt-1">
-                {getFileTypeDisplay(record.file_type)} • {formatFileSize(record.file_size)} • {new Date(record.created_at).toLocaleDateString()}
+                {getFileTypeDisplay(record.file_type)} • {formatFileSize(record.file_size)} • {formatDateTime(record.created_at)}
               </p>
             </div>
             <button
@@ -173,15 +173,14 @@ const RecordPreviewModal = ({ record, isOpen, onClose }) => {
                   </div>
 
                   <div className="bg-green-50 rounded-lg p-4">
-                    <h4 className="font-medium text-green-900 mb-2">Timestamps</h4>
-                    <div className="space-y-2 text-sm">
+                    <h4 className="font-medium text-green-900 mb-2">Timestamps</h4>                    <div className="space-y-2 text-sm">
                       <div>
                         <span className="text-green-700 font-medium">Created:</span>
-                        <span className="text-green-800 ml-2">{new Date(record.created_at).toLocaleString()}</span>
+                        <span className="text-green-800 ml-2">{formatDateTime(record.created_at)}</span>
                       </div>
                       <div>
                         <span className="text-green-700 font-medium">Updated:</span>
-                        <span className="text-green-800 ml-2">{new Date(record.updated_at).toLocaleString()}</span>
+                        <span className="text-green-800 ml-2">{formatDateTime(record.updated_at)}</span>
                       </div>
                     </div>
                   </div>
