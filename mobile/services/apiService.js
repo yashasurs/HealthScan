@@ -9,7 +9,7 @@ const API_BASE_URL = 'http://10.0.2.2:8000';
  * @param {string} token - Authentication token
  * @returns {axios.AxiosInstance}
  */
-export const createApiService = (token) => {
+const createApiService = (token) => {
   const instance = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -17,15 +17,12 @@ export const createApiService = (token) => {
       'Content-Type': 'application/json'
     }
   });
-
   // Add response interceptor for debugging and error handling
   instance.interceptors.response.use(
     response => {
-      console.log(`API call to ${response.config.url} successful:`, response.status);
       return response;
     },
     error => {
-      console.error(`API call to ${error.config?.url} failed:`, error.response?.status, error.response?.data);
       return Promise.reject(error);
     }
   );
@@ -44,36 +41,8 @@ export const useApiService = () => {
     const currentToken = token || await getToken();
     return createApiService(currentToken);
   };
-
   return {
     getAuthenticatedApi,
-    // Collections API
-    collections: {
-      getAll: async () => {
-        const api = await getAuthenticatedApi();
-        return api.get('/collections/');
-      },
-      create: async (collectionData) => {
-        const api = await getAuthenticatedApi();
-        return api.post('/collections/', collectionData);
-      },
-      delete: async (collectionId) => {
-        const api = await getAuthenticatedApi();
-        return api.delete(`/collections/${collectionId}`);
-      },
-      getRecords: async (collectionId) => {
-        const api = await getAuthenticatedApi();
-        return api.get(`/collections/${collectionId}/records`);
-      },
-      addRecord: async (collectionId, recordId) => {
-        const api = await getAuthenticatedApi();
-        return api.put(`/collections/${collectionId}/records/${recordId}`);
-      },
-      removeRecord: async (collectionId, recordId) => {
-        const api = await getAuthenticatedApi();
-        return api.delete(`/collections/${collectionId}/records/${recordId}`);
-      }
-    },
     // Records API
     records: {
       getAll: async () => {
@@ -115,5 +84,3 @@ export const useApiService = () => {
     }
   };
 };
-
-export default createApiService;
