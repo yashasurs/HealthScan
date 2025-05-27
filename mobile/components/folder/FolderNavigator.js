@@ -9,16 +9,28 @@ import FolderTree from './FolderTree';
  * Folder navigator component that provides folder-based navigation
  * for collections and records with organization capabilities
  */
-const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refreshing }) => {
+const FolderNavigator = ({ 
+  onRecordSelect, 
+  onCollectionSelect, 
+  onRefresh, 
+  refreshing,
+  refreshTrigger = 0 
+}) => {
   const [collections, setCollections] = useState([]);
   const [records, setRecords] = useState([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const apiService = useApiService();
-  useEffect(() => {
+  const apiService = useApiService();  useEffect(() => {
     loadData();
   }, []);
+
+  // Refresh data when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger > 0) {
+      loadData();
+    }
+  }, [refreshTrigger]);
 
   // Also refresh data when refreshing prop changes to true
   useEffect(() => {
@@ -26,7 +38,6 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
       loadData();
     }
   }, [refreshing]);
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -38,7 +49,10 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
       console.error('Error loading data:', error);
       Alert.alert('Error', 'Failed to load collections and records');
     } finally {
-      setLoading(false);
+      // Short timeout to ensure UI update is visible
+      setTimeout(() => {
+        setLoading(false);
+      }, 300);
     }
   };
 
@@ -114,7 +128,6 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
   if (loading) {
     return <LoadingOverlay message="Loading folder structure..." />;
   }
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -122,18 +135,17 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
           <Ionicons name="folder-outline" size={24} color="#4A90E2" />
           <Text style={styles.title}>Folder System</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.refreshButton}
-          onPress={onRefresh}
-          disabled={refreshing}
-        >
-          <Ionicons 
-            name="refresh" 
-            size={20} 
-            color="#4A90E2" 
-            style={refreshing ? styles.spinning : null}
-          />
-        </TouchableOpacity>
+        {/* Auto-refresh indicator replaces manual refresh button */}
+        {refreshing && (
+          <View style={styles.refreshIndicator}>
+            <Ionicons 
+              name="sync" 
+              size={18} 
+              color="#4A90E2" 
+              style={styles.spinning}
+            />
+          </View>
+        )}
       </View>
 
       <View style={styles.statsSection}>
@@ -203,11 +215,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginLeft: 12,
-  },
-  refreshButton: {
+  },  refreshButton: {
     padding: 8,
     borderRadius: 20,
     backgroundColor: '#f8f9fa',
+  },
+  refreshIndicator: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(74, 144, 226, 0.1)',
   },
   spinning: {
     // Add animation here if needed
