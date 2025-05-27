@@ -72,8 +72,7 @@ export const useApiService = () => {
         const api = await getAuthenticatedApi();
         return api.delete(`/collections/${collectionId}/records/${recordId}`);
       }
-    },
-    // Records API
+    },    // Records API
     records: {
       getAll: async () => {
         const api = await getAuthenticatedApi();
@@ -88,6 +87,10 @@ export const useApiService = () => {
         return api.patch(`/records/${recordId}`, null, {
           params: { content }
         });
+      },
+      delete: async (recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.delete(`/records/${recordId}`);
       }
     },// OCR API
     ocr: {
