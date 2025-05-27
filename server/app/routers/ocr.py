@@ -9,7 +9,7 @@ from ..schemas import OCRResponse, RecordResponse
 from ..models import Record
 from ..database import get_db
 from ..oauth2 import get_current_user
-from ..utils import GeminiAgent
+from ..utils import GeminiAgent, merge_texts
 
 router = APIRouter(
     prefix='/ocr',
@@ -79,14 +79,19 @@ async def get_text(
         # Second pass: format all extracted texts in batch
         agent = GeminiAgent()
         try:
-            formatted_texts = await agent.generate_markup(extracted_texts)
+            # Merge texts into a single string with default separator
+            merged_text = merge_texts(extracted_texts)
+            
+            # Pass the merged text to the Gemini agent
+            markup_responses = await agent.generate_markup(merged_text)
+            
             # Extract markup content from MarkupResponse objects
-            formatted_texts = [text.markup for text in formatted_texts]
+            formatted_texts = [response.markup for response in markup_responses]
             
         except Exception as e:
             print(f"Error formatting content: {str(e)}")
             formatted_texts = extracted_texts  # fallback to raw text
-
+        
         for i, info in enumerate(file_info):
             markup = formatted_texts[i] if i < len(formatted_texts) else extracted_texts[i]
             
