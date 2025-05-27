@@ -19,14 +19,26 @@ const FolderSystemScreen = ({ navigation }) => {
   useEffect(() => {
     loadCollections();
   }, []);
-
   const loadCollections = async () => {
     try {
       const response = await apiService.collections.getAll();
       setCollections(response.data);
     } catch (error) {
       console.error('Error loading collections:', error);
-      Alert.alert('Error', 'Failed to load collections');
+      // Handle unauthorized errors
+      if (error.response && error.response.status === 401) {
+        Alert.alert(
+          'Authentication Error', 
+          'Your session has expired. Please log in again.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Error', 
+          'Failed to load collections. Please try again later.',
+          [{ text: 'OK' }]
+        );
+      }
     }
   };
 
