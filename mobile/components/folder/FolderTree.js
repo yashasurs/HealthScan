@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 /**
@@ -10,13 +10,17 @@ import { Ionicons } from '@expo/vector-icons';
  * @param {string} props.selectedCollectionId - Currently selected collection ID
  * @param {Function} props.onCollectionSelect - Callback when collection is selected
  * @param {Function} props.onRecordSelect - Callback when record is selected
+ * @param {Function} props.onRefresh - Callback when user refreshes the list
+ * @param {boolean} props.refreshing - Whether the list is currently refreshing
  */
 const FolderTree = ({
   collections = [],
   records = [],
   selectedCollectionId,
   onCollectionSelect,
-  onRecordSelect
+  onRecordSelect,
+  onRefresh,
+  refreshing = false
 }) => {
   const [expandedCollections, setExpandedCollections] = useState(new Set());
 
@@ -141,6 +145,13 @@ const FolderTree = ({
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         style={styles.collectionsList}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor="#4A90E2"
+          />
+        }
       />
 
       {unorganizedRecords.length > 0 && (

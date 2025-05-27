@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApiService } from '../../services/apiService';
 import { LoadingOverlay } from '../common';
@@ -121,7 +121,8 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
         <View style={styles.titleSection}>
           <Ionicons name="folder-outline" size={24} color="#4A90E2" />
           <Text style={styles.title}>Folder System</Text>
-        </View>        <TouchableOpacity 
+        </View>
+        <TouchableOpacity 
           style={styles.refreshButton}
           onPress={onRefresh}
           disabled={refreshing}
@@ -130,7 +131,7 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
             name="refresh" 
             size={20} 
             color="#4A90E2" 
-            style={refreshing && styles.spinning}
+            style={refreshing ? styles.spinning : null}
           />
         </TouchableOpacity>
       </View>
@@ -171,6 +172,8 @@ const FolderNavigator = ({ onRecordSelect, onCollectionSelect, onRefresh, refres
           selectedCollectionId={selectedCollectionId}
           onCollectionSelect={handleCollectionSelect}
           onRecordSelect={handleRecordSelect}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
         />
       </View>
     </View>
