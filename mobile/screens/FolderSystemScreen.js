@@ -55,10 +55,10 @@ const FolderSystemScreen = ({ navigation }) => {
     // Refresh data after record is moved
     loadCollections();
   };
-
   const handleNavigateToUpload = () => {
     navigation.navigate('Documents');
   };
+  
   return (
     <View style={styles.container}>
       <Header 
@@ -79,16 +79,18 @@ const FolderSystemScreen = ({ navigation }) => {
         />
       </View>
 
-      <RecordOrganizer
-        visible={showOrganizer}
-        onClose={() => {
-          setShowOrganizer(false);
-          setSelectedRecord(null);
-        }}
-        record={selectedRecord}
-        collections={collections}
-        onRecordMoved={handleRecordMoved}
-      />
+      {showOrganizer && (
+        <RecordOrganizer
+          visible={showOrganizer}
+          onClose={() => {
+            setShowOrganizer(false);
+            setSelectedRecord(null);
+          }}
+          record={selectedRecord}
+          collections={collections}
+          onRecordMoved={handleRecordMoved}
+        />
+      )}
     </View>
   );
 };
