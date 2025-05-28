@@ -5,11 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
-
-// Import AuthProvider and useAuth
 import { AuthProvider, useAuth } from './Contexts/Authcontext';
-
-// Import Screens
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import DashboardScreen from './screens/DashboardScreen';
@@ -17,7 +13,6 @@ import QRGeneratorScreen from './screens/QRGeneratorScreen';
 import DocumentUploadScreen from './screens/DocumentUploadScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import FolderSystemScreen from './screens/FolderSystemScreen';
-import CollectionCreateScreen from './screens/CollectionCreateScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -79,7 +74,6 @@ function AppNavigator() {
           <>
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
             <Stack.Screen name="FolderSystem" component={FolderSystemScreen} />
-            <Stack.Screen name="CollectionCreate" component={CollectionCreateScreen} />
           </>
         ) : (
           <>

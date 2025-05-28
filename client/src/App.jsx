@@ -7,10 +7,11 @@ import Home from './pages/Home'
 import AuthProvider from './context/AuthContext'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
-import Documents from './pages/Documents.jsx'
-import Collections from './pages/Collections.jsx'
-import CollectionDetails from './pages/CollectionDetails.jsx'
-import Records from './pages/Records.jsx'
+import Documents from './pages/Upload.jsx'
+import Collections from './pages/CollectionPages/Collections.jsx'
+import CollectionDetails from './pages/CollectionPages/CollectionDetails.jsx'
+import Records from './pages/RecordPages/Records.jsx'
+import RecordDetail from './pages/RecordPages/RecordDetail.jsx'
 
 function App() {
   
@@ -27,7 +28,7 @@ function App() {
                 <Home />
               </ProtectedRoute>
             } />
-            <Route path='/documents' element={
+            <Route path='/upload' element={
               <ProtectedRoute>
                 <Documents />
               </ProtectedRoute>
@@ -45,6 +46,11 @@ function App() {
             <Route path='/records' element={
               <ProtectedRoute>
                 <Records />
+              </ProtectedRoute>
+            } />
+            <Route path='/records/:id' element={
+              <ProtectedRoute>
+                <RecordDetail />
               </ProtectedRoute>
             } />
             <Route path='/' element={<Home />} />

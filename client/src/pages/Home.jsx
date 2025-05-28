@@ -96,7 +96,7 @@ const Home = () => {
             <div className="hidden md:block absolute top-16 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-indigo-300 via-indigo-400 to-indigo-300"></div>
 
             <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white mb-6 mx-auto relative z-10">
                 <ScanIcon />
               </div>
               <div className="text-center">
@@ -108,7 +108,7 @@ const Home = () => {
             </div>
 
             <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white mb-6 mx-auto relative z-10">
                 <QrCodeIcon />
               </div>
               <div className="text-center">
@@ -120,7 +120,7 @@ const Home = () => {
             </div>
 
             <div className="relative bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-6 mx-auto relative z-10">
+              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 text-white mb-6 mx-auto relative z-10">
                 <MobileIcon />
               </div>
               <div className="text-center">
@@ -211,7 +211,7 @@ const Home = () => {
                     </div>
                     <footer>
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 h-16 w-16 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        <div className="flex-shrink-0 rounded-full bg-blue-600 h-16 w-16 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                           DR
                         </div>
                         <div className="ml-4">

@@ -21,7 +21,7 @@ const DocumentUploader = ({ onDocumentPicked }) => {  const pickDocument = async
   return (
     <View style={styles.uploadSection}>
       <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
-        <Text style={styles.uploadButtonText}>Select Document</Text>
+        <Text style={styles.uploadButtonText}>Select Record</Text>
       </TouchableOpacity>
       <Text style={styles.uploadInfo}>
         Supported formats: PDF, DOC, DOCX, JPG, PNG

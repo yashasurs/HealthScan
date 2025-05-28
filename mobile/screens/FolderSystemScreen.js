@@ -2,34 +2,58 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { Header } from '../components/common';
 import { FolderNavigator, RecordOrganizer } from '../components/folder';
+import { RecordViewer } from '../components/document';
 import { useApiService } from '../services/apiService';
 
 /**
  * Folder System Screen - Main interface for organizing documents in collections
  * Provides a hierarchical folder view with drag-and-drop organization capabilities
  */
-const FolderSystemScreen = ({ navigation }) => {
-  const [collections, setCollections] = useState([]);
+const FolderSystemScreen = ({ navigation, route }) => {  const [collections, setCollections] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showOrganizer, setShowOrganizer] = useState(false);
+  const [showRecordViewer, setShowRecordViewer] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
   const apiService = useApiService();
 
+  // Load collections on initial render
   useEffect(() => {
     loadCollections();
   }, []);
-
+  
+  // Check if navigated from document upload with new records
+  useEffect(() => {
+    if (route.params?.recordsAdded) {
+      // Trigger a refresh when records are added
+      setRefreshTrigger(prev => prev + 1);
+      // Reset the parameter to prevent multiple refreshes
+      navigation.setParams({ recordsAdded: false });
+    }
+  }, [route.params?.recordsAdded]);
   const loadCollections = async () => {
     try {
       const response = await apiService.collections.getAll();
       setCollections(response.data);
     } catch (error) {
       console.error('Error loading collections:', error);
-      Alert.alert('Error', 'Failed to load collections');
+      // Handle unauthorized errors
+      if (error.response && error.response.status === 401) {
+        Alert.alert(
+          'Authentication Error', 
+          'Your session has expired. Please log in again.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Error', 
+          'Failed to load collections. Please try again later.',
+          [{ text: 'OK' }]
+        );
+      }
     }
   };
-
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -40,8 +64,12 @@ const FolderSystemScreen = ({ navigation }) => {
       setRefreshing(false);
     }
   };
-
   const handleRecordSelect = (record) => {
+    setSelectedRecord(record);
+    setShowRecordViewer(true);
+  };
+
+  const handleRecordLongPress = (record) => {
     setSelectedRecord(record);
     setShowOrganizer(true);
   };
@@ -49,17 +77,23 @@ const FolderSystemScreen = ({ navigation }) => {
   const handleCollectionSelect = (collectionId) => {
     // Could navigate to collection details or perform other actions
     console.log('Selected collection:', collectionId);
+  };  const handleRecordMoved = () => {
+    // Increment refresh trigger to force automatic refresh
+    setRefreshTrigger(prev => prev + 1);
+    // Also refresh collections
+    loadCollections();
   };
 
-  const handleRecordMoved = () => {
-    // Refresh data after record is moved
+  const handleRecordDeleted = (recordId) => {
+    // Trigger a refresh when a record is deleted
+    setRefreshTrigger(prev => prev + 1);
+    // Also refresh collections
     loadCollections();
   };
   const handleNavigateToUpload = () => {
     navigation.navigate('Documents');
   };
-  
-  return (
+    return (
     <View style={styles.container}>
       <Header 
         title="Folder System"
@@ -70,16 +104,15 @@ const FolderSystemScreen = ({ navigation }) => {
         }}
       />
       
-      <View style={styles.content}>
-        <FolderNavigator
+      <View style={styles.content}>        <FolderNavigator
           onRecordSelect={handleRecordSelect}
+          onRecordLongPress={handleRecordLongPress}
           onCollectionSelect={handleCollectionSelect}
           onRefresh={handleRefresh}
           refreshing={refreshing}
+          refreshTrigger={refreshTrigger}
         />
-      </View>
-
-      {showOrganizer && (
+      </View>      {showOrganizer && (
         <RecordOrganizer
           visible={showOrganizer}
           onClose={() => {
@@ -89,6 +122,18 @@ const FolderSystemScreen = ({ navigation }) => {
           record={selectedRecord}
           collections={collections}
           onRecordMoved={handleRecordMoved}
+        />
+      )}
+
+      {showRecordViewer && (
+        <RecordViewer
+          visible={showRecordViewer}
+          onClose={() => {
+            setShowRecordViewer(false);
+            setSelectedRecord(null);
+          }}
+          record={selectedRecord}
+          onRecordDeleted={handleRecordDeleted}
         />
       )}
     </View>

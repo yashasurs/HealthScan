@@ -53,8 +53,9 @@ const Navbar = () => {
     ? [
         { name: 'Home', path: '/home' },
         { name: 'Records', path: '/records' },
-        { name: 'Documents', path: '/documents' },
         { name: 'Collections', path: '/collections' },
+        { name: 'Upload', path: '/upload' },
+        ,
       ]
     : [
         { name: 'Home', path: '/' },

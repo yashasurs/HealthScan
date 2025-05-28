@@ -2,10 +2,10 @@ import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
 /**
- * Patient information card component with hardcoded values
+ * Patient information card component
  */
 const PatientInfoCard = () => {
-  // Hardcoded patient data
+  // Patient data
   const patientData = {
     name: "John Doe",
     age: 42,

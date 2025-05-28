@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import LoadingSpinner from '../LoadingSpinner';
+import { formatDateTime } from '../../utils/dateUtils';
 
 const DocumentViewer = ({ record, onClose }) => {
   const [imageUrl, setImageUrl] = useState(null);
@@ -39,12 +41,11 @@ const DocumentViewer = ({ record, onClose }) => {
         {/* Content */}
         <div className="p-4 overflow-y-auto flex-grow">
           {/* Document metadata */}
-          <div className="mb-4 text-sm text-gray-500">
-            <p><strong>Size:</strong> {Math.round(record.file_size / 1024)} KB</p>
+          <div className="mb-4 text-sm text-gray-500">            <p><strong>Size:</strong> {Math.round(record.file_size / 1024)} KB</p>
             <p><strong>Type:</strong> {record.file_type}</p>
-            <p><strong>Created:</strong> {new Date(record.created_at).toLocaleString()}</p>
+            <p><strong>Created:</strong> {formatDateTime(record.created_at)}</p>
             {record.updated_at && (
-              <p><strong>Updated:</strong> {new Date(record.updated_at).toLocaleString()}</p>
+              <p><strong>Updated:</strong> {formatDateTime(record.updated_at)}</p>
             )}
           </div>
               {/* Document content */}
@@ -57,9 +58,10 @@ const DocumentViewer = ({ record, onClose }) => {
             ) : loadError ? (
               <div className="text-red-500 text-center py-4">
                 Failed to load document content
+              </div>            ) : (
+              <div className="markdown-content">
+                <ReactMarkdown>{record.content}</ReactMarkdown>
               </div>
-            ) : (
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: record.content }} />
             )}
           </div>
           

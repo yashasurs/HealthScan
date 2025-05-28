@@ -1,1 +1,5 @@
-export { default as CollectionPicker } from './CollectionPicker';
+import CollectionPicker from './CollectionPicker';
+
+export {
+  CollectionPicker
+};

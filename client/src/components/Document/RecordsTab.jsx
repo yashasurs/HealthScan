@@ -1,5 +1,7 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import LoadingSpinner from '../LoadingSpinner';
+import { formatDate } from '../../utils/dateUtils';
 
 const RecordsTab = ({ 
   collections, 
@@ -148,10 +150,9 @@ const RecordsTab = ({
                               {record.file_type}
                             </span>
                             <span className="flex items-center">
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
-                              {new Date(record.created_at).toLocaleDateString()}
+                              {formatDate(record.created_at)}
                             </span>
                           </div>
                         </div>
@@ -207,11 +208,9 @@ const RecordsTab = ({
                         <div className="flex items-center justify-between mb-3">
                           <h5 className="font-medium text-gray-900">Extracted Content</h5>
                           <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded">OCR Result</span>
+                        </div>                        <div className="markdown-content max-h-64 overflow-auto">
+                          <ReactMarkdown>{record.content}</ReactMarkdown>
                         </div>
-                        <div 
-                          className="text-sm text-gray-800 max-h-64 overflow-auto leading-relaxed"
-                          dangerouslySetInnerHTML={{ __html: record.content }} 
-                        />
                       </div>
                     </div>
                   )}

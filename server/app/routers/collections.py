@@ -37,6 +37,45 @@ async def get_all_collections(
     collections = db.query(Collection).filter(Collection.user_id == current_user.id).all()
     return collections
 
+@router.get("/{collection_id}", response_model=CollectionResponse)
+async def get_collection(
+    collection_id: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Get a specific collection by ID"""
+    collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    return collection
+
+@router.put("/{collection_id}", response_model=CollectionResponse)
+async def update_collection(
+    collection_id: str,
+    collection: CollectionCreate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Update a collection"""
+    db_collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not db_collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    db_collection.name = collection.name
+    db_collection.description = collection.description
+    db.commit()
+    db.refresh(db_collection)
+    return db_collection
+
 @router.get("/{collection_id}/records", response_model=List[RecordResponse])
 async def get_records_from_collection(
     collection_id: str,

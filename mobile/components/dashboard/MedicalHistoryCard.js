@@ -1,12 +1,43 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 
 /**
  * Medical history card component showing list of medical records
- * @param {array} medicalRecords - Array of medical records
- * @param {function} onRecordPress - Function to call when a record is pressed
  */
-const MedicalHistoryCard = ({ medicalRecords, onRecordPress }) => {
+const MedicalHistoryCard = () => {
+  // Mock medical records
+  const medicalRecords = [
+    {
+      id: "MR001",
+      date: "May 15, 2025",
+      type: "General Checkup",
+      doctor: "Dr. Johnson",
+      description: "Routine health examination"
+    },
+    {
+      id: "MR002",
+      date: "April 3, 2025",
+      type: "Blood Test",
+      doctor: "Dr. Williams",
+      description: "Complete blood count and metabolic panel"
+    },
+    {
+      id: "MR003",
+      date: "March 10, 2025",
+      type: "Vaccination",
+      doctor: "Dr. Martinez",
+      description: "Influenza vaccine administered"
+    }
+  ];
+
+  const handleRecordPress = (record) => {
+    Alert.alert(
+      record.type,
+      `Date: ${record.date}\nDoctor: ${record.doctor}\n\n${record.description}`,
+      [{ text: 'OK' }]
+    );
+  };
+
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Medical History</Text>
@@ -14,7 +45,7 @@ const MedicalHistoryCard = ({ medicalRecords, onRecordPress }) => {
         <TouchableOpacity 
           key={record.id} 
           style={styles.recordItem}
-          onPress={() => onRecordPress && onRecordPress(record)}
+          onPress={() => handleRecordPress(record)}
         >
           <View style={styles.recordIcon}></View>
           <View style={styles.recordContent}>

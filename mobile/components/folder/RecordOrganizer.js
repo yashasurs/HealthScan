@@ -15,7 +15,7 @@ import { LoadingOverlay } from '../common';
 
 /**
  * Record organizer component for moving records between collections
- * and managing document organization
+ * and managing record organization
  */
 const RecordOrganizer = ({ 
   visible, 
@@ -49,17 +49,16 @@ const RecordOrganizer = ({
         if (record.collection_id) {
           await apiService.collections.removeRecord(record.collection_id, record.id);
         }
-        
-        // Add to new collection if one is selected
+          // Add to new collection if one is selected
         if (selectedCollectionId) {
           await apiService.collections.addRecord(selectedCollectionId, record.id);
         }
         
-        Alert.alert('Success', 'Document moved successfully');
+        // Notify parent component for automatic refresh
         onRecordMoved?.();
         onClose();
       } else {
-        Alert.alert('Info', 'Document is already in the selected collection');
+        Alert.alert('Info', 'Record is already in the selected collection');
       }
     } catch (error) {
       console.error('Error moving record:', error);
@@ -80,12 +79,10 @@ const RecordOrganizer = ({
       const response = await apiService.collections.create({
         name: newCollectionName.trim(),
         description: `Collection for organizing documents`
-      });
-
-      // Immediately move the record to the new collection
+      });      // Immediately move the record to the new collection
       await apiService.collections.addRecord(response.data.id, record.id);
       
-      Alert.alert('Success', 'Collection created and document moved successfully');
+      // Notify parent component for automatic refresh instead of showing alert
       setNewCollectionName('');
       setShowCreateForm(false);
       onRecordMoved?.();
