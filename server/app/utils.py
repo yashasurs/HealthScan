@@ -8,8 +8,12 @@ import qrcode
 import asyncio
 import io
 from dotenv import load_dotenv
+from PIL import Image
+import numpy as np
 import markdown
 from weasyprint import HTML, CSS
+import pytesseract
+import cv2
 
 load_dotenv()
 
@@ -28,6 +32,62 @@ def hash(password: str):
 def verify(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
+    
+def process_single_image_tesseract(image_data: bytes, filename: str, file_size: int, file_type: str) -> dict:
+    """
+    Process a single image with Tesseract OCR (much faster than EasyOCR)
+    """
+    try:
+        # Convert bytes to numpy array for faster processing
+        nparr = np.frombuffer(image_data, np.uint8)
+        
+        # Decode image directly with OpenCV (faster than PIL)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        if img is None:
+            raise ValueError("Could not decode image")
+        
+        # Convert to grayscale for faster OCR
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        # Optimize image size for speed (resize if too large)
+        height, width = gray.shape
+        if width > 2000 or height > 2000:
+            scale_factor = min(2000/width, 2000/height)
+            new_width = int(width * scale_factor)
+            new_height = int(height * scale_factor)
+            gray = cv2.resize(gray, (new_width, new_height), interpolation=cv2.INTER_AREA)
+        
+        # Apply threshold for better text contrast
+        _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        
+        # Convert back to PIL Image for pytesseract
+        pil_image = Image.fromarray(thresh)
+        
+        # Use pytesseract with optimized configuration
+        extracted_text = pytesseract.image_to_string(
+            pil_image,
+            config='--psm 6 --oem 3'  # Page segmentation mode 6, OCR Engine Mode 3
+        )
+        
+        return {
+            'success': True,
+            'extracted_text': extracted_text.strip(),
+            'filename': filename,
+            'file_size': file_size,
+            'file_type': file_type,
+            'error': None
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'extracted_text': None,
+            'filename': filename,
+            'file_size': file_size,
+            'file_type': file_type,
+            'error': str(e)
+        }
 
 def make_qr(link: str):
     qr = qrcode.QRCode(
@@ -160,3 +220,4 @@ if __name__ == "__main__":
                 f.write(response[0].markup)
 
     asyncio.run(main())
+
