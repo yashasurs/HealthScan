@@ -9,6 +9,7 @@ import {
   Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Markdown from 'react-native-markdown-display';
 import { useApiService } from '../../services/apiService';
 
 /**
@@ -99,17 +100,16 @@ const RecordViewer = ({
         </View>
 
         {/* Content */}
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.contentHeader}>
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>          <View style={styles.contentHeader}>
             <View style={styles.contentHeaderLeft}>
               <Ionicons name="document-text" size={20} color="#4A90E2" />
-              <Text style={styles.contentTitle}>OCR Processed Content</Text>
+              <Text style={styles.contentTitle}>OCR Content (Markdown Formatted)</Text>
             </View>
-          </View>
-
-          <View style={styles.contentCard}>
+          </View><View style={styles.contentCard}>
             {record.content ? (
-              <Text style={styles.contentText}>{record.content}</Text>
+              <Markdown style={markdownStyles}>
+                {record.content}
+              </Markdown>
             ) : (
               <View style={styles.emptyContent}>
                 <Ionicons name="document-outline" size={48} color="#ccc" />
@@ -314,5 +314,112 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 });
+
+// Markdown styles for better content formatting
+const markdownStyles = {
+  body: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    fontFamily: 'System',
+  },
+  heading1: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginTop: 20,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e1e1',
+    paddingBottom: 8,
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  heading3: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginTop: 12,
+    marginBottom: 6,
+  },
+  paragraph: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    marginBottom: 12,
+  },
+  list_item: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#333',
+    marginBottom: 4,
+  },
+  bullet_list: {
+    marginBottom: 12,
+  },
+  ordered_list: {
+    marginBottom: 12,
+  },
+  code_inline: {
+    backgroundColor: '#f0f0f0',
+    color: '#e11d48',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
+    fontSize: 14,
+    fontFamily: 'monospace',
+  },
+  code_block: {
+    backgroundColor: '#f8f8f8',
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#4A90E2',
+  },
+  blockquote: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#ddd',
+    paddingLeft: 12,
+    marginVertical: 8,
+    fontStyle: 'italic',
+    color: '#666',
+  },
+  strong: {
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+  },
+  em: {
+    fontStyle: 'italic',
+  },
+  table: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    marginVertical: 8,
+  },
+  th: {
+    backgroundColor: '#f5f5f5',
+    fontWeight: 'bold',
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+  },
+  td: {
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  hr: {
+    backgroundColor: '#ddd',
+    height: 1,
+    marginVertical: 16,
+  }
+};
 
 export default RecordViewer;
