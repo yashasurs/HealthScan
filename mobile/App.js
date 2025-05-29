@@ -10,9 +10,9 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import QRGeneratorScreen from './screens/QRGeneratorScreen';
-import DocumentUploadScreen from './screens/DocumentUploadScreen';
+import RecordUploadScreen from './screens/RecordUploadScreen';
 import ProfileScreen from './screens/ProfileScreen';
-import FolderSystemScreen from './screens/FolderSystemScreen';
+import CollectionSystemScreen from './screens/CollectionSystemScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -22,15 +22,14 @@ function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          if (route.name === 'Dashboard') {
+          let iconName;          if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'QR Code') {
             iconName = focused ? 'qr-code' : 'qr-code-outline';
-          } else if (route.name === 'Documents') {
+          } else if (route.name === 'Records') {
             iconName = focused ? 'document' : 'document-outline';
-          } else if (route.name === 'Folders') {
-            iconName = focused ? 'folder' : 'folder-outline';
+          } else if (route.name === 'Collections') {
+            iconName = focused ? 'library' : 'library-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -42,14 +41,13 @@ function MainTabNavigator() {
           backgroundColor: '#fff',
           borderTopColor: '#f0f0f0',
           paddingTop: 5,
-        },
-        headerShown: false,
+        },        headerShown: false,
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="QR Code" component={QRGeneratorScreen} />
-      <Tab.Screen name="Documents" component={DocumentUploadScreen} />
-      <Tab.Screen name="Folders" component={FolderSystemScreen} />
+      <Tab.Screen name="Records" component={RecordUploadScreen} />
+      <Tab.Screen name="Collections" component={CollectionSystemScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -73,7 +71,7 @@ function AppNavigator() {
         {isAuthenticated ? (
           <>
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-            <Stack.Screen name="FolderSystem" component={FolderSystemScreen} />
+            <Stack.Screen name="CollectionSystem" component={CollectionSystemScreen} />
           </>
         ) : (
           <>

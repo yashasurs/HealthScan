@@ -62,7 +62,7 @@ const RecordOrganizer = ({
       }
     } catch (error) {
       console.error('Error moving record:', error);
-      Alert.alert('Error', 'Failed to move document');
+      Alert.alert('Error', 'Failed to move record');
     } finally {
       setMoving(false);
     }
@@ -78,7 +78,7 @@ const RecordOrganizer = ({
     try {
       const response = await apiService.collections.create({
         name: newCollectionName.trim(),
-        description: `Collection for organizing documents`
+        description: `Collection for organizing records`
       });      // Immediately move the record to the new collection
       await apiService.collections.addRecord(response.data.id, record.id);
       
@@ -149,18 +149,16 @@ const RecordOrganizer = ({
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color="#666" />
           </TouchableOpacity>
-          <Text style={styles.title}>Organize Document</Text>
+          <Text style={styles.title}>Organize Record</Text>
           <View style={styles.placeholder} />
-        </View>
-
-        <View style={styles.documentInfo}>
-          <View style={styles.documentHeader}>
+        </View>        <View style={styles.recordInfo}>
+          <View style={styles.recordHeader}>
             <Ionicons name="document-text" size={24} color="#4A90E2" />
-            <View style={styles.documentDetails}>
-              <Text style={styles.documentName} numberOfLines={1}>
+            <View style={styles.recordDetails}>
+              <Text style={styles.recordName} numberOfLines={1}>
                 {record.filename}
               </Text>
-              <Text style={styles.documentMeta}>
+              <Text style={styles.recordMeta}>
                 {record.file_type?.split('/')[1]} • {Math.round(record.file_size / 1024)}KB
               </Text>
             </View>
@@ -263,13 +261,13 @@ const RecordOrganizer = ({
               styles.moveButtonText,
               (moving || selectedCollectionId === record.collection_id) && styles.disabledButtonText
             ]}>
-              {moving ? 'Moving...' : 'Move Document'}
+              {moving ? 'Moving...' : 'Move Record'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {(moving || creating) && (
-          <LoadingOverlay message={moving ? "Moving document..." : "Creating collection..."} />
+          <LoadingOverlay message={moving ? "Moving record..." : "Creating collection..."} />
         )}
       </View>
     </Modal>
@@ -300,29 +298,28 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 40,
-  },
-  documentInfo: {
+  },  recordInfo: {
     padding: 20,
     backgroundColor: '#f8f9fa',
     marginHorizontal: 20,
     marginVertical: 16,
     borderRadius: 12,
   },
-  documentHeader: {
+  recordHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  documentDetails: {
+  recordDetails: {
     marginLeft: 12,
     flex: 1,
   },
-  documentName: {
+  recordName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
     marginBottom: 4,
   },
-  documentMeta: {
+  recordMeta: {
     fontSize: 12,
     color: '#666',
   },
