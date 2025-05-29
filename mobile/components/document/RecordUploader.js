@@ -7,19 +7,21 @@ import * as DocumentPicker from 'expo-document-picker';
  * @param {Object} props
  * @param {Function} props.onRecordPicked - Callback when record is selected
  */
-const RecordUploader = ({ onRecordPicked }) => {const pickDocument = async () => {
+const RecordUploader = ({ onRecordPicked }) => {
+  const pickRecord = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       type: '*/*',
       copyToCacheDirectory: true,
     });
-      if (result.canceled === false) {
+    
+    if (result.canceled === false) {
       onRecordPicked(result.assets[0]);
     }
   };
 
   return (
     <View style={styles.uploadSection}>
-      <TouchableOpacity style={styles.uploadButton} onPress={pickDocument}>
+      <TouchableOpacity style={styles.uploadButton} onPress={pickRecord}>
         <Text style={styles.uploadButtonText}>Select Record</Text>
       </TouchableOpacity>
       <Text style={styles.uploadInfo}>

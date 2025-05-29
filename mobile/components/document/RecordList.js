@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
-import RecordItem from './DocumentItem';
+import RecordItem from './RecordItem';
 
 /**
  * Record list component
@@ -17,7 +17,8 @@ const RecordList = ({ records, onRemoveRecord, onUploadAll }) => {
     />
   );
   
-  const renderFooter = () => (    <TouchableOpacity 
+  const renderFooter = () => (
+    <TouchableOpacity 
       style={styles.submitButton}
       onPress={onUploadAll}
     >
@@ -25,7 +26,9 @@ const RecordList = ({ records, onRemoveRecord, onUploadAll }) => {
     </TouchableOpacity>
   );
 
-  return (    <View style={styles.container}>      <Text style={styles.sectionTitle}>
+  return (
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>
         Uploaded Records ({records.length})
       </Text>
       

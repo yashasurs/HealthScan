@@ -5,35 +5,41 @@ import { Header } from '../components/common';
 import { RecordUploader, RecordList } from '../components/document';
 import { useApiService } from '../services/apiService';
 
-const DocumentUploadScreen = ({ route, navigation }) => {
+const RecordUploadScreen = ({ route, navigation }) => {
   const [records, setRecords] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
 
   const apiService = useApiService();
+  
   const handleRecordPicked = (record) => {
     setRecords([...records, record]);
-  };  const handleRemoveRecord = (recordToRemove) => {
+  };
+  
+  const handleRemoveRecord = (recordToRemove) => {
     setRecords(records.filter(doc => doc.uri !== recordToRemove.uri));
+  };  const handleNavigateToCollectionSystem = () => {
+    navigation.navigate('CollectionSystem');
   };
 
-  const handleNavigateToFolderSystem = () => {
-    navigation.navigate('FolderSystem');
-  };
-
-  const handleUploadAll = async () => {    if (records.length === 0) {
+  const handleUploadAll = async () => {
+    if (records.length === 0) {
       Alert.alert('Error', 'Please select at least one record to upload');
       return;
     }
 
-    setUploading(true);    setUploadStatus('Uploading and processing records...');
+    setUploading(true);
+    setUploadStatus('Uploading and processing records...');
 
-    try {      // Convert picked records to file objects for the API
+    try {
+      // Convert picked records to file objects for the API
       const files = records.map(doc => ({
         uri: doc.uri,
         type: doc.type || 'image/jpeg',
         name: doc.name || 'image.jpg'
-      }));      const response = await apiService.ocr.processFiles(files);
+      }));
+      
+      const response = await apiService.ocr.processFiles(files);
       
       setUploadStatus('');
       setRecords([]);
@@ -43,10 +49,11 @@ const DocumentUploadScreen = ({ route, navigation }) => {
         `${response.data.length} record(s) have been processed and uploaded.`,
         [
           { 
-            text: "View Folder System", 
+            text: "View Collections", 
             onPress: () => {
               // Pass parameter to indicate records were added
-              navigation.navigate('FolderSystem', { recordsAdded: true });
+              // Use the screen name exactly as defined in the stack navigator
+              navigation.navigate('CollectionSystem', { recordsAdded: true });
             }
           },
           { 
@@ -61,7 +68,8 @@ const DocumentUploadScreen = ({ route, navigation }) => {
     } catch (error) {
       console.error('Upload error:', error);
       setUploadStatus('');
-      Alert.alert(        'Upload Failed',
+      Alert.alert(
+        'Upload Failed',
         error.response?.data?.detail || 'Failed to upload records. Please try again.'
       );
     } finally {
@@ -75,10 +83,11 @@ const DocumentUploadScreen = ({ route, navigation }) => {
         title="Record Upload" 
         rightAction={{
           icon: 'folder-outline',
-          onPress: handleNavigateToFolderSystem
+          onPress: handleNavigateToCollectionSystem
         }}
       />
-        <ScrollView 
+      
+      <ScrollView 
         style={styles.content}
         nestedScrollEnabled={true}
       >
@@ -93,7 +102,9 @@ const DocumentUploadScreen = ({ route, navigation }) => {
           </Text>
           
           <RecordUploader onRecordPicked={handleRecordPicked} />
-        </View>        {/* Record List */}
+        </View>
+        
+        {/* Record List */}
         <RecordList 
           records={records}
           onRemoveRecord={handleRemoveRecord}
@@ -110,6 +121,7 @@ const DocumentUploadScreen = ({ route, navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -154,4 +166,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DocumentUploadScreen;
+export default RecordUploadScreen;

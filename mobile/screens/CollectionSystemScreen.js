@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { Header } from '../components/common';
-import { FolderNavigator, RecordOrganizer } from '../components/folder';
+import { CollectionNavigator, RecordOrganizer } from '../components/collection';
 import { RecordViewer } from '../components/document';
 import { useApiService } from '../services/apiService';
 
@@ -9,7 +9,8 @@ import { useApiService } from '../services/apiService';
  * Collection System Screen - Main interface for organizing records in collections
  * Provides a hierarchical collection view with drag-and-drop organization capabilities
  */
-const CollectionSystemScreen = ({ navigation, route }) => {  const [collections, setCollections] = useState([]);
+const CollectionSystemScreen = ({ navigation, route }) => {
+  const [collections, setCollections] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showOrganizer, setShowOrganizer] = useState(false);
   const [showRecordViewer, setShowRecordViewer] = useState(false);
@@ -32,6 +33,7 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
       navigation.setParams({ recordsAdded: false });
     }
   }, [route.params?.recordsAdded]);
+
   const loadCollections = async () => {
     try {
       const response = await apiService.collections.getAll();
@@ -54,6 +56,7 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
       }
     }
   };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -64,6 +67,7 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
       setRefreshing(false);
     }
   };
+
   const handleRecordSelect = (record) => {
     setSelectedRecord(record);
     setShowRecordViewer(true);
@@ -77,7 +81,9 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
   const handleCollectionSelect = (collectionId) => {
     // Could navigate to collection details or perform other actions
     console.log('Selected collection:', collectionId);
-  };  const handleRecordMoved = () => {
+  };
+
+  const handleRecordMoved = () => {
     // Increment refresh trigger to force automatic refresh
     setRefreshTrigger(prev => prev + 1);
     // Also refresh collections
@@ -90,11 +96,14 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
     // Also refresh collections
     loadCollections();
   };
+
   const handleNavigateToUpload = () => {
     navigation.navigate('Records');
   };
-    return (
-    <View style={styles.container}>      <Header 
+
+  return (
+    <View style={styles.container}>
+      <Header 
         title="Collection System"
         subtitle="Organize your records"
         rightAction={{
@@ -102,8 +111,8 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
           onPress: handleNavigateToUpload
         }}
       />
-      
-      <View style={styles.content}>        <FolderNavigator
+        <View style={styles.content}>
+        <CollectionNavigator
           onRecordSelect={handleRecordSelect}
           onRecordLongPress={handleRecordLongPress}
           onCollectionSelect={handleCollectionSelect}
@@ -111,7 +120,9 @@ const CollectionSystemScreen = ({ navigation, route }) => {  const [collections,
           refreshing={refreshing}
           refreshTrigger={refreshTrigger}
         />
-      </View>      {showOrganizer && (
+      </View>
+
+      {showOrganizer && (
         <RecordOrganizer
           visible={showOrganizer}
           onClose={() => {
