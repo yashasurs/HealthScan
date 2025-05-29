@@ -5,14 +5,15 @@ import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
  * A loading overlay component that covers the parent component
  * @param {boolean} visible - Whether the loading overlay should be visible
  * @param {string} text - Optional text to display under the loading indicator
+ * @param {string} message - Alternative prop for text (for backward compatibility)
  */
-const LoadingOverlay = ({ visible, text }) => {
-  if (!visible) return null;
+const LoadingOverlay = ({ visible = true, text, message }) => {
+  const displayText = text || message;
   
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#000" />
-      {text && <Text style={styles.text}>{text}</Text>}
+      {displayText && <Text style={styles.text}>{displayText}</Text>}
     </View>
   );
 };
