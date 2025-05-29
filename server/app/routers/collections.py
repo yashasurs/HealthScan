@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
-from ..models import Collection, Record
+from ..models import Collection, Record, Share
 from ..schemas import CollectionCreate, CollectionResponse, RecordResponse
 from ..oauth2 import get_current_user
 
@@ -183,3 +183,46 @@ async def delete_collection(
     db.commit()
     
     return {"message": "Collection deleted successfully"}
+
+@router.get("/share/{share_token}")
+async def access_shared_collection(
+    share_token: str,
+    db: Session = Depends(get_db)
+):
+    """Access a collection via secure share token (no auth required)"""
+    
+    # Find the share
+    share = db.query(Share).filter(
+        Share.share_token == share_token,
+        Share.is_active == True,
+        Share.collection_id.isnot(None)
+    ).first()
+    
+    if not share:
+        raise HTTPException(status_code=404, detail="Invalid or expired share link")
+    
+    # Get the collection
+    collection = db.query(Collection).filter(Collection.id == share.collection_id).first()
+    
+    if not collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Get records in collection
+    records = db.query(Record).filter(Record.collection_id == share.collection_id).all()
+    
+    return {
+        "collection": {
+            "id": collection.id,
+            "name": collection.name,
+            "description": collection.description,
+            "created_at": collection.created_at
+        },
+        "records": [
+            {
+                "id": record.id,
+                "filename": record.filename,
+                "content": record.content,
+                "created_at": record.created_at
+            } for record in records
+        ]
+    }
