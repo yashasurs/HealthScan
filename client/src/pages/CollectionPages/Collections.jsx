@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { collectionsAPI } from '../../utils/apiService';
+import { collectionsAPI, createApiService } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import PreviewModal from '../../components/Document/PreviewModal';
 
@@ -8,6 +8,9 @@ const Collections = () => {
   const navigate = useNavigate();  const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrLoadingCollectionId, setQrLoadingCollectionId] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState(null);
@@ -126,6 +129,105 @@ const Collections = () => {
     setSelectedCollection(null);
     setFormData({ name: '', description: '' });
     setError('');
+  };  const handleDownloadCollectionQR = async (collectionId, collectionName) => {
+    if (qrLoading) return; // Prevent multiple concurrent requests
+    
+    setQrLoading(true);
+    setQrLoadingCollectionId(collectionId);
+    setError('');
+    setSuccessMessage('');
+    
+    try {
+      console.log('Generating QR code for collection:', collectionId, collectionName);
+      
+      // Create API service instance with proper authentication
+      const api = createApiService();
+      
+      // Make request to QR endpoint
+      const response = await api.post(`/qr/collection/${collectionId}`, null, {
+        responseType: 'blob', // Important: expect binary data
+        headers: {
+          'Accept': 'image/png'
+        }
+      });
+      
+      // Validate response
+      if (!response.data) {
+        throw new Error('No QR code data received from server');
+      }
+      
+      // Create download link
+      const blob = new Blob([response.data], { type: 'image/png' });
+      const url = window.URL.createObjectURL(blob);
+      
+      // Generate safe filename
+      const safeCollectionName = collectionName
+        .replace(/[^a-z0-9]/gi, '_')
+        .toLowerCase()
+        .substring(0, 50); // Limit filename length
+      
+      const filename = `collection_${safeCollectionName}_qr_${new Date().getTime()}.png`;
+      
+      // Create and trigger download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up object URL
+      window.URL.revokeObjectURL(url);
+      
+      // Show success message
+      setSuccessMessage(`QR code for "${collectionName}" downloaded successfully!`);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+      console.log('QR code download completed successfully:', filename);
+      
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+      
+      // Handle different types of errors
+      let errorMessage = 'Failed to generate QR code. Please try again.';
+      
+      if (error.response) {
+        // Server responded with error
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 404) {
+          errorMessage = 'Collection not found. It may have been deleted.';
+        } else if (status === 401) {
+          errorMessage = 'Authentication failed. Please log in again.';
+        } else if (status === 403) {
+          errorMessage = 'You do not have permission to access this collection.';
+        } else if (status >= 500) {
+          errorMessage = 'Server error occurred while generating QR code.';
+        } else if (data && typeof data === 'string') {
+          errorMessage = data;
+        }
+      } else if (error.request) {
+        // Network error
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (error.message) {
+        // Other errors
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Clear error message after 5 seconds
+      setTimeout(() => setError(''), 5000);
+      
+    } finally {
+      setQrLoading(false);
+      setQrLoadingCollectionId(null);
+    }
   };
 
   if (loading) {
@@ -155,7 +257,13 @@ const Collections = () => {
         <div className="bg-red-50 border border-red-300 text-red-700 px-3 sm:px-4 py-3 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base">
           {error}
         </div>
-      )}      {collections.length === 0 ? (
+      )}
+
+      {successMessage && (
+        <div className="bg-green-50 border border-green-300 text-green-700 px-3 sm:px-4 py-3 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base">
+          {successMessage}
+        </div>
+      )}{collections.length === 0 ? (
         <div className="text-center py-12 sm:py-16 px-4">
           <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 text-gray-300">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" className="w-full h-full">
@@ -227,6 +335,29 @@ const Collections = () => {
                       <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
+                    </button>                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownloadCollectionQR(collection.id, collection.name);
+                      }}
+                      disabled={qrLoadingCollectionId === collection.id}
+                      className={`p-1.5 sm:p-2 rounded-lg transition-all duration-200 ${
+                        qrLoadingCollectionId === collection.id
+                          ? 'text-gray-300 cursor-not-allowed'
+                          : 'text-gray-400 hover:text-purple-600 hover:bg-purple-50'
+                      }`}
+                      title={qrLoadingCollectionId === collection.id ? "Generating QR code..." : "Download QR code"}
+                    >
+                      {qrLoadingCollectionId === collection.id ? (
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                      )}
                     </button>
                   </div>
                 </div>
