@@ -19,6 +19,11 @@ class UserLogin(BaseModel):
 
 class UserCreate(UserLogin):
     email: EmailStr
+    blood_group: str
+    aadhar: Optional[str] = None
+    allergies: Optional[str] = None
+    doctor_name: Optional[str] = None
+    visit_date: Optional[datetime] = None
 
 class UserDelete(BaseModel):
     user_id: int
@@ -75,11 +80,21 @@ class LinkInput(BaseModel):
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
+    blood_group: Optional[str] = None
+    aadhar: Optional[str] = None
+    allergies: Optional[str] = None
+    doctor_name: Optional[str] = None
+    visit_date: Optional[datetime] = None
 
 class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
+    blood_group: str
+    aadhar: Optional[str] = None
+    allergies: Optional[str] = None
+    doctor_name: Optional[str] = None
+    visit_date: Optional[datetime] = None
 
     class Config:
         from_attributes = True
