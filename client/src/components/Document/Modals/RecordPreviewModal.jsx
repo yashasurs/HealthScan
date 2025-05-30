@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { formatDateTime } from '../../utils/dateUtils';
+import { formatDateTime } from '../../../utils/dateUtils';
 
 const RecordPreviewModal = ({ record, isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState('content');

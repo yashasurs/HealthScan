@@ -252,3 +252,40 @@ async def access_shared_collection(
             } for record in records
         ]
     }
+
+@router.get("/share/{share_token}/record/{record_id}/pdf")
+async def get_shared_collection_record_pdf(
+    share_token: str,
+    record_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get a PDF file for a specific record within a shared collection (no auth required)"""
+    
+    # Find the collection share
+    share = db.query(Share).filter(
+        Share.share_token == share_token,
+        Share.is_active == True,
+        Share.collection_id.isnot(None)
+    ).first()
+    
+    if not share:
+        raise HTTPException(status_code=404, detail="Invalid or expired share link")
+    
+    # Get the specific record and verify it belongs to the shared collection
+    record = db.query(Record).filter(
+        Record.id == record_id,
+        Record.collection_id == share.collection_id
+    ).first()
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found in this collection")
+    
+    # Generate PDF from markdown content
+    from ..utils import markdown_to_pdf_bytes
+    from fastapi.responses import StreamingResponse
+    import io
+    
+    pdf_bytes = markdown_to_pdf_bytes(record.content)
+    return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers={
+        "Content-Disposition": f"attachment; filename={record.filename or f'record_{record_id}'}.pdf"
+    })

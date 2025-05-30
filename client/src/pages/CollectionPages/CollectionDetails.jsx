@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { collectionsAPI, createApiService } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import MoveRecordModal from '../../components/Document/MoveRecordModal';
+import MoveRecordModal from '../../components/Document/Modals/MoveRecordModal';
 import { formatDate, formatDateTime } from '../../utils/dateUtils';
 
 const CollectionDetails = () => {
@@ -799,19 +800,13 @@ const CollectionDetails = () => {
                         </div>
 
                         {/* Content Preview */}
-                        {record.content && (
-                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                            <div className="flex items-center justify-between mb-2">
+                        {record.content && (                          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div className="flex items-center mb-2">
                               <h4 className="text-sm font-medium text-gray-700">Content Preview:</h4>
-                              <div className="text-xs text-gray-500">
-                                {record.content.length} characters
-                              </div>
-                            </div>
-                            
-                            <div className="text-gray-600 text-sm leading-relaxed">
+                            </div><div className="text-gray-600 text-sm leading-relaxed">
                               {isExpanded ? (
-                                <div className="whitespace-pre-wrap max-h-96 overflow-y-auto">
-                                  {record.content}
+                                <div className="markdown-content max-h-96 overflow-y-auto">
+                                  <ReactMarkdown>{record.content}</ReactMarkdown>
                                 </div>
                               ) : (
                                 <p className="line-clamp-3">
@@ -819,70 +814,6 @@ const CollectionDetails = () => {
                                 </p>
                               )}
                             </div>
-
-                            {/* Word count and reading time for expanded view */}
-                            {isExpanded && (
-                              <div className="mt-3 pt-3 border-t border-gray-200 flex items-center gap-4 text-xs text-gray-500">
-                                <span>
-                                  Words: {record.content.split(/\s+/).filter(word => word.length > 0).length}
-                                </span>
-                                <span>
-                                  Est. reading time: {Math.ceil(record.content.split(/\s+/).length / 200)} min
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Additional Details (Expanded View) */}
-                        {isExpanded && (
-                          <div className="space-y-3">
-                            {/* Record ID and technical details */}
-                            <div className="bg-blue-50 rounded-lg p-3">
-                              <h5 className="text-xs font-medium text-blue-900 mb-2">Technical Details</h5>
-                              <div className="grid grid-cols-2 gap-2 text-xs">
-                                <div>
-                                  <span className="text-blue-700 font-medium">Record ID:</span>
-                                  <span className="text-blue-800 ml-1 font-mono">{record.id}</span>
-                                </div>                                <div>
-                                  <span className="text-blue-700 font-medium">Last Updated:</span>
-                                  <span className="text-blue-800 ml-1">{formatDateTime(record.updated_at)}</span>
-                                </div>
-                                {record.user_id && (
-                                  <div>
-                                    <span className="text-blue-700 font-medium">User ID:</span>
-                                    <span className="text-blue-800 ml-1">{record.user_id}</span>
-                                  </div>
-                                )}
-                                {record.collection_id && (
-                                  <div>
-                                    <span className="text-blue-700 font-medium">Collection ID:</span>
-                                    <span className="text-blue-800 ml-1 font-mono">{record.collection_id}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Content Analysis */}
-                            {record.content && (
-                              <div className="bg-green-50 rounded-lg p-3">
-                                <h5 className="text-xs font-medium text-green-900 mb-2">Content Analysis</h5>
-                                <div className="grid grid-cols-3 gap-2 text-xs">
-                                  <div>
-                                    <span className="text-green-700 font-medium">Characters:</span>
-                                    <span className="text-green-800 ml-1">{record.content.length.toLocaleString()}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-green-700 font-medium">Lines:</span>
-                                    <span className="text-green-800 ml-1">{record.content.split('\n').length}</span>
-                                  </div>
-                                  <div>
-                                    <span className="text-green-700 font-medium">Paragraphs:</span>
-                                    <span className="text-green-800 ml-1">{record.content.split('\n\n').length}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>

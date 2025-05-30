@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collectionsAPI } from '../../utils/apiService';
+import { collectionsAPI } from '../../../utils/apiService';
 
 const MoveRecordModal = ({ isOpen, onClose, recordId, recordIds, currentCollectionId, onMoveSuccess }) => {
   const [collections, setCollections] = useState([]);

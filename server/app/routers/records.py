@@ -170,3 +170,32 @@ async def access_shared_record(
         "file_type": record.file_type,
         "created_at": record.created_at
     }
+
+@router.get("/share/{share_token}/pdf")
+async def get_shared_record_pdf(
+    share_token: str,
+    db: Session = Depends(database.get_db)
+):
+    """Get a PDF file generated from a shared record's content (no auth required)"""
+    
+    # Find the share
+    share = db.query(models.Share).filter(
+        models.Share.share_token == share_token,
+        models.Share.is_active == True,
+        models.Share.record_id.isnot(None)
+    ).first()
+    
+    if not share:
+        raise HTTPException(status_code=404, detail="Invalid or expired share link")
+    
+    # Get the record
+    record = db.query(models.Record).filter(models.Record.id == share.record_id).first()
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    # Generate PDF from markdown content
+    pdf_bytes = markdown_to_pdf_bytes(record.content)
+    return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers={
+        "Content-Disposition": f"attachment; filename={record.filename or f'shared_record_{share_token[:8]}'}.pdf"
+    })

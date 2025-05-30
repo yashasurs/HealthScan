@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { collectionsAPI, createApiService } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import PreviewModal from '../../components/Document/PreviewModal';
 
 const Collections = () => {
   const navigate = useNavigate();  const [collections, setCollections] = useState([]);
@@ -10,12 +9,9 @@ const Collections = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [qrLoading, setQrLoading] = useState(false);
-  const [qrLoadingCollectionId, setQrLoadingCollectionId] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [qrLoadingCollectionId, setQrLoadingCollectionId] = useState(null);  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState(null);
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [previewCollection, setPreviewCollection] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     description: ''
@@ -103,24 +99,13 @@ const Collections = () => {
 
   const handleCollectionClick = (collection) => {
     navigate(`/collections/${collection.id}`);
-  };
-  const openEditModal = (collection) => {
+  };  const openEditModal = (collection) => {
     setSelectedCollection(collection);
     setFormData({
       name: collection.name,
       description: collection.description || ''
     });
     setShowEditModal(true);
-  };
-
-  const openPreviewModal = (collection) => {
-    setPreviewCollection(collection);
-    setPreviewModalOpen(true);
-  };
-
-  const closePreviewModal = () => {
-    setPreviewModalOpen(false);
-    setPreviewCollection(null);
   };
 
   const closeModals = () => {
@@ -299,19 +284,6 @@ const Collections = () => {
                       {collection.name}
                     </h3>
                   </div>                  <div className="flex gap-0.5 sm:gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openPreviewModal(collection);
-                      }}
-                      className="p-1.5 sm:p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
-                      title="Preview collection"
-                    >
-                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -521,18 +493,9 @@ const Collections = () => {
                 >
                   Update Collection
                 </button>
-              </div>
-            </form>          </div>
+              </div>            </form>          </div>
         </div>
       )}
-
-      {/* Collection Preview Modal */}
-      <PreviewModal
-        isOpen={previewModalOpen}
-        onClose={closePreviewModal}
-        item={previewCollection}
-        type="collection"
-      />
     </div>
   );
 };

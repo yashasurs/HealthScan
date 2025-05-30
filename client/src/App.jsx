@@ -10,8 +10,10 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Documents from './pages/Upload.jsx'
 import Collections from './pages/CollectionPages/Collections.jsx'
 import CollectionDetails from './pages/CollectionPages/CollectionDetails.jsx'
+import SharedCollection from './pages/CollectionPages/SharedCollection.jsx'
 import Records from './pages/RecordPages/Records.jsx'
 import RecordDetail from './pages/RecordPages/RecordDetail.jsx'
+import SharedRecord from './pages/RecordPages/SharedRecord.jsx'
 import Profile from './pages/Profile.jsx'
 
 function App() {
@@ -24,6 +26,8 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
+            <Route path='/records/share' element={<SharedRecord />} />
+            <Route path='/collections/share' element={<SharedCollection />} />
             <Route path='/home' element={
               <ProtectedRoute>
                 <Home />

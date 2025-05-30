@@ -2,10 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import axios from 'axios'
 import createApiService from '../utils/apiService'
-import { 
-  UploadTab,
-  DebugInfo
-} from '../components/Document'
+import UploadTab from '../components/Document/UploadTab'
+import DebugInfo from '../components/Document/DebugInfo'
 
 const Documents = () => {
   const { isAuthenticated, user } = useAuth();
