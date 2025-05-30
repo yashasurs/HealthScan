@@ -11,7 +11,7 @@ const UserPlusIcon = () => (
 const Register = () => {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center py-8 px-4 bg-gray-50">
-            <div className="w-full max-w-md space-y-6">
+            <div className="w-full max-w-lg space-y-6">
                 <div className="text-center">
                     <div className="mx-auto h-10 w-10 rounded-full bg-black flex items-center justify-center mb-3">
                         <UserPlusIcon />
