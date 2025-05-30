@@ -43,13 +43,42 @@ def get_record(
     return record
 
 @router.patch("/{record_id}")
+def update_record(
+    record_id: str,
+    record_update: schemas.RecordUpdate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Update a record's fields"""
+    record = db.query(models.Record).filter(
+        models.Record.id == record_id,
+        models.Record.user_id == current_user.id
+    ).first()
+    
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record not found"
+        )
+    
+    # Update only the fields that are provided
+    if record_update.filename is not None:
+        record.filename = record_update.filename
+    if record_update.content is not None:
+        record.content = record_update.content
+        
+    db.commit()
+    
+    return {"message": "Record updated successfully"}
+
+@router.patch("/{record_id}/content")
 def update_record_content(
     record_id: str,
     content: str,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Update only the content of a record"""
+    """Update only the content of a record (backward compatibility)"""
     record = db.query(models.Record).filter(
         models.Record.id == record_id,
         models.Record.user_id == current_user.id

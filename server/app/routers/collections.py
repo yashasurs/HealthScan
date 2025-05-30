@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
 from ..models import Collection, Record, Share
-from ..schemas import CollectionCreate, CollectionResponse, RecordResponse
+from ..schemas import CollectionCreate, CollectionResponse, RecordResponse, CollectionUpdate
 from ..oauth2 import get_current_user
 
 router = APIRouter(
@@ -72,6 +72,32 @@ async def update_collection(
     
     db_collection.name = collection.name
     db_collection.description = collection.description
+    db.commit()
+    db.refresh(db_collection)
+    return db_collection
+
+@router.patch("/{collection_id}", response_model=CollectionResponse)
+async def update_collection_partial(
+    collection_id: str,
+    collection_update: CollectionUpdate,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Partially update a collection"""
+    db_collection = db.query(Collection).filter(
+        Collection.id == collection_id,
+        Collection.user_id == current_user.id
+    ).first()
+    
+    if not db_collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Update only the fields that are provided
+    if collection_update.name is not None:
+        db_collection.name = collection_update.name
+    if collection_update.description is not None:
+        db_collection.description = collection_update.description
+        
     db.commit()
     db.refresh(db_collection)
     return db_collection

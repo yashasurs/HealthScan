@@ -35,6 +35,10 @@ class RecordBase(BaseModel):
 class RecordCreate(RecordBase):
     collection_id: Optional[str] = None
 
+class RecordUpdate(BaseModel):
+    filename: Optional[str] = None
+    content: Optional[str] = None
+
 class RecordResponse(RecordBase):
     id: str
     user_id: int
@@ -51,6 +55,10 @@ class CollectionBase(BaseModel):
 
 class CollectionCreate(CollectionBase):
     pass
+
+class CollectionUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
 
 class CollectionResponse(CollectionBase):
     id: str
