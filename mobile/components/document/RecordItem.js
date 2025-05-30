@@ -11,7 +11,8 @@ const RecordItem = ({ record, onRemove }) => {
   const fileExtension = record.name.split('.').pop().toUpperCase();
   const fileSizeKB = (record.size / 1024).toFixed(2);
 
-  return (    <View style={styles.recordItem}>
+  return (
+    <View style={styles.recordItem}>
       <View style={styles.recordIcon}>
         <Text style={styles.recordIconText}>
           {fileExtension}

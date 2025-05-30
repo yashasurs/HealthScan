@@ -17,7 +17,16 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
 
     hashed_password = utils.hash(user.password)
 
-    new_user = models.User(email=user.email, username=user.username, password=hashed_password)
+    new_user = models.User(
+        email=user.email,
+        username=user.username,
+        password=hashed_password,
+        blood_group=user.blood_group,
+        aadhar=user.aadhar,
+        allergies=user.allergies,
+        doctor_name=user.doctor_name,
+        visit_date=user.visit_date
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -80,6 +89,16 @@ def update_user(
         if db.query(models.User).filter(models.User.email == user_update.email, models.User.id != current_user.id).first():
             raise HTTPException(status_code=400, detail="Email already registered")
         user_obj.email = user_update.email
+    if user_update.blood_group:
+        user_obj.blood_group = user_update.blood_group
+    if user_update.aadhar is not None:
+        user_obj.aadhar = user_update.aadhar
+    if user_update.allergies is not None:
+        user_obj.allergies = user_update.allergies
+    if user_update.doctor_name is not None:
+        user_obj.doctor_name = user_update.doctor_name
+    if user_update.visit_date is not None:
+        user_obj.visit_date = user_update.visit_date
     db.commit()
     db.refresh(user_obj)
     return user_obj

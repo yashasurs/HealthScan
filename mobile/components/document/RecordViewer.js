@@ -121,9 +121,8 @@ const RecordViewer = ({
             )}
           </View>
 
-          {/* Metadata Section */}
-          <View style={styles.metadataSection}>
-            <Text style={styles.sectionTitle}>Document Information</Text>
+          {/* Metadata Section */}          <View style={styles.metadataSection}>
+            <Text style={styles.sectionTitle}>Record Information</Text>
             <View style={styles.metadataCard}>
               <View style={styles.metadataRow}>
                 <Text style={styles.metadataLabel}>Filename:</Text>

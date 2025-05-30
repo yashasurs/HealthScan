@@ -3,20 +3,21 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl, Modal,
 import { Ionicons } from '@expo/vector-icons';
 import { useApiService } from '../../services/apiService';
 import { LoadingOverlay } from '../common';
-import FolderTree from './FolderTree';
+import CollectionTree from './CollectionTree';
 
 /**
  * Collection navigator component that provides collection-based navigation
  * for collections and records with organization capabilities
  */
-const FolderNavigator = ({ 
+const CollectionNavigator = ({ 
   onRecordSelect, 
   onRecordLongPress,
   onCollectionSelect, 
   onRefresh, 
   refreshing,
   refreshTrigger = 0 
-}) => {const [collections, setCollections] = useState([]);
+}) => {
+  const [collections, setCollections] = useState([]);
   const [records, setRecords] = useState([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,9 @@ const FolderNavigator = ({
   const [newCollectionDescription, setNewCollectionDescription] = useState('');
   const [creating, setCreating] = useState(false);
 
-  const apiService = useApiService();  useEffect(() => {
+  const apiService = useApiService();
+
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -42,6 +45,7 @@ const FolderNavigator = ({
       loadData();
     }
   }, [refreshing]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -69,6 +73,7 @@ const FolderNavigator = ({
       throw error;
     }
   };
+
   const loadAllRecords = async () => {
     try {
       const response = await apiService.records.getAll();
@@ -87,6 +92,7 @@ const FolderNavigator = ({
   const handleRecordSelect = (record) => {
     onRecordSelect?.(record);
   };
+
   const createNewCollection = () => {
     setShowCreateModal(true);
   };
@@ -126,6 +132,7 @@ const FolderNavigator = ({
     setNewCollectionDescription('');
     setShowCreateModal(false);
   };
+
   const moveRecordToCollection = async (recordId, targetCollectionId) => {
     try {
       if (targetCollectionId) {
@@ -173,9 +180,11 @@ const FolderNavigator = ({
   if (loading) {
     return <LoadingOverlay message="Loading collection structure..." />;
   }
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>        <View style={styles.titleSection}>
+      <View style={styles.header}>
+        <View style={styles.titleSection}>
           <Ionicons name="library-outline" size={24} color="#4A90E2" />
           <Text style={styles.title}>Collection System</Text>
         </View>
@@ -197,7 +206,8 @@ const FolderNavigator = ({
           <Text style={styles.statNumber}>{collections.length}</Text>
           <Text style={styles.statLabel}>Collections</Text>
         </View>
-        <View style={styles.statDivider} />        <View style={styles.statItem}>
+        <View style={styles.statDivider} />
+        <View style={styles.statItem}>
           <Text style={styles.statNumber}>{records.length}</Text>
           <Text style={styles.statLabel}>Records</Text>
         </View>
@@ -218,7 +228,10 @@ const FolderNavigator = ({
           <Ionicons name="add-circle-outline" size={20} color="#4A90E2" />
           <Text style={styles.actionText}>New Collection</Text>
         </TouchableOpacity>
-      </View>      <View style={styles.treeContainer}>        <FolderTree
+      </View>
+
+      <View style={styles.treeContainer}>
+        <CollectionTree
           collections={collections}
           records={records}
           selectedCollectionId={selectedCollectionId}
@@ -323,10 +336,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     marginLeft: 12,
-  },  refreshButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
   },
   refreshIndicator: {
     padding: 8,
@@ -386,7 +395,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4A90E2',
     marginLeft: 8,
-  },  treeContainer: {
+  },
+  treeContainer: {
     flex: 1,
     paddingHorizontal: 20,
   },
@@ -484,4 +494,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FolderNavigator;
+export default CollectionNavigator;

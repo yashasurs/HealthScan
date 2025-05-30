@@ -17,7 +17,7 @@ import { useApiService } from '../../services/apiService';
  * @param {Function} props.onCollectionDelete - Callback when collection is deleted
  * @param {Function} props.onRecordDelete - Callback when record is deleted
  */
-const FolderTree = ({
+const CollectionTree = ({
   collections = [],
   records = [],
   selectedCollectionId,
@@ -46,6 +46,7 @@ const FolderTree = ({
   const getRecordsForCollection = (collectionId) => {
     return records.filter(record => record.collection_id === collectionId);
   };
+
   const getUnorganizedRecords = () => {
     return records.filter(record => !record.collection_id);
   };
@@ -70,7 +71,9 @@ const FolderTree = ({
   const handleDeleteCancel = () => {
     setConfirmDeleteVisible(false);
     setDeleteItem(null);
-  };  const renderRecord = (record) => (
+  };
+
+  const renderRecord = (record) => (
     <TouchableOpacity
       key={record.id}
       style={styles.recordItem}
@@ -87,7 +90,8 @@ const FolderTree = ({
         <View style={styles.recordInfo}>
           <Text style={styles.recordName} numberOfLines={1}>
             {record.filename}
-          </Text>          <Text style={styles.recordMeta}>
+          </Text>
+          <Text style={styles.recordMeta}>
             {record.file_type?.split('/')[1] || 'Unknown'} • {Math.round((record.file_size || 0) / 1024)}KB
           </Text>
         </View>
@@ -137,7 +141,7 @@ const FolderTree = ({
                 name="folder"
                 size={20}
                 color={isSelected ? "#4A90E2" : "#666"}
-                style={styles.folderIcon}
+                style={styles.collectionIcon}
               />
               <View>
                 <Text style={[
@@ -145,10 +149,12 @@ const FolderTree = ({
                   isSelected && styles.selectedText
                 ]}>
                   {collection.name}
-                </Text>                <Text style={styles.collectionMeta}>
+                </Text>
+                <Text style={styles.collectionMeta}>
                   {collectionRecords.length} record{collectionRecords.length !== 1 ? 's' : ''}
                 </Text>
-              </View>            </View>
+              </View>
+            </View>
             <View style={styles.collectionActions}>
               <TouchableOpacity
                 style={styles.deleteButton}
@@ -170,7 +176,8 @@ const FolderTree = ({
           <View style={styles.recordsList}>
             {collectionRecords.length > 0 ? (
               collectionRecords.map(renderRecord)
-            ) : (              <View style={styles.emptyRecords}>
+            ) : (
+              <View style={styles.emptyRecords}>
                 <Text style={styles.emptyText}>No records in this collection</Text>
               </View>
             )}
@@ -202,15 +209,20 @@ const FolderTree = ({
       {unorganizedRecords.length > 0 && (
         <View style={styles.unorganizedSection}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="folder-open-outline" size={18} color="#999" />            <Text style={styles.sectionTitle}>Unorganized Records</Text>
+            <Ionicons name="folder-open-outline" size={18} color="#999" />
+            <Text style={styles.sectionTitle}>Unorganized Records</Text>
             <Text style={styles.sectionCount}>({unorganizedRecords.length})</Text>
           </View>
           <View style={styles.recordsList}>
-            {unorganizedRecords.map(renderRecord)}          </View>
+            {unorganizedRecords.map(renderRecord)}
+          </View>
         </View>
-      )}      <ConfirmationModal
+      )}
+
+      <ConfirmationModal
         visible={confirmDeleteVisible}
-        title={deleteItem?.type === 'collection' ? 'Delete Collection' : 'Delete Record'}        message={
+        title={deleteItem?.type === 'collection' ? 'Delete Collection' : 'Delete Record'}
+        message={
           deleteItem?.type === 'collection'
             ? `Are you sure you want to delete the collection "${deleteItem?.name || 'Unknown'}"? This will remove the collection but not the records inside it.`
             : `Are you sure you want to delete the record "${deleteItem?.filename || 'Unknown'}"? This action cannot be undone.`
@@ -245,7 +257,8 @@ const styles = StyleSheet.create({
   selectedCollection: {
     backgroundColor: '#e3f2fd',
     borderColor: '#4A90E2',
-  },  collectionContent: {
+  },
+  collectionContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -270,7 +283,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     padding: 4,
   },
-  folderIcon: {
+  collectionIcon: {
     marginRight: 12,
   },
   collectionName: {
@@ -353,4 +366,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FolderTree;
+export default CollectionTree;
