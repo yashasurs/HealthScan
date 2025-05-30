@@ -12,9 +12,9 @@ const RecordDetail = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();  const [record, setRecord] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState(null);  const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
+  const [editedFilename, setEditedFilename] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
   // Extract collection info from URL parameters
@@ -47,27 +47,44 @@ const RecordDetail = () => {
       setIsLoading(false);
     }
   };
-
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
     if (!isEditing) {
       setEditedContent(record.content);
+      setEditedFilename(record.filename);
     }
   };
-
   const handleContentChange = (e) => {
     setEditedContent(e.target.value);
   };
 
+  const handleFilenameChange = (e) => {
+    setEditedFilename(e.target.value);
+  };
   const handleUpdateRecord = async () => {
     if (!record) return;
+
+    // Validate inputs
+    if (!editedFilename.trim()) {
+      setError('Filename cannot be empty');
+      return;
+    }
 
     try {
       setIsLoading(true);
       const api = createApiService();
-      await api.patch(`/records/${record.id}?content=${encodeURIComponent(editedContent)}`);
       
-      setRecord({ ...record, content: editedContent });
+      // Update both filename and content
+      await api.patch(`/records/${record.id}`, {
+        filename: editedFilename.trim(),
+        content: editedContent
+      });
+      
+      setRecord({ 
+        ...record, 
+        filename: editedFilename.trim(),
+        content: editedContent 
+      });
       setIsEditing(false);
       showSuccessMessage('Record updated successfully');
     } catch (error) {
@@ -164,8 +181,7 @@ const RecordDetail = () => {
       console.error('Error downloading QR code:', error);
       setError('Failed to generate QR code. Please try again.');
     }
-  };
-  const showSuccessMessage = (message) => {
+  };  const showSuccessMessage = (message) => {
     setSuccessMessage(message);
     setTimeout(() => setSuccessMessage(''), 3000);
   };
@@ -274,9 +290,26 @@ const RecordDetail = () => {
       {record && (
         <div className="bg-white rounded-lg shadow-md p-3 sm:p-6">
           {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 sm:mb-6 space-y-4 lg:space-y-0">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2 break-words">{record.filename}</h1>              <div className="text-xs sm:text-sm text-gray-500 space-y-1">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-4 sm:mb-6 space-y-4 lg:space-y-0">            <div className="flex-1 min-w-0">
+              {isEditing ? (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Record Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editedFilename}
+                    onChange={handleFilenameChange}
+                    className="w-full text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 bg-white border border-blue-300 rounded px-3 py-2"
+                    placeholder="Enter record name..."
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 mb-2">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 break-words">{record.filename}</h1>
+                </div>
+              )}
+              <div className="text-xs sm:text-sm text-gray-500 space-y-1">
                 <div>Created: {formatDateTime(record.created_at)}</div>
                 <div>Updated: {formatDateTime(record.updated_at)}</div>
                 <div>Type: {record.file_type || 'Not specified'}</div>
@@ -329,16 +362,18 @@ const RecordDetail = () => {
                 Delete
               </button>
             </div>
-          </div>
-            {/* Content */}
+          </div>          {/* Content */}
           {isEditing ? (
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Record Content
+              </label>
               <textarea
                 value={editedContent}
                 onChange={handleContentChange}
                 className="w-full h-64 sm:h-80 lg:h-96 p-3 sm:p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-xs sm:text-sm resize-none"
                 placeholder="Record content..."
-              />              <div className="mt-3 sm:mt-4 flex justify-end">                <button
+              /><div className="mt-3 sm:mt-4 flex justify-end">                <button
                   onClick={handleUpdateRecord}
                   className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed py-2 sm:py-0 text-sm sm:text-base"
                   disabled={isLoading}

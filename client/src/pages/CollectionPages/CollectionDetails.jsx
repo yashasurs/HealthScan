@@ -13,8 +13,12 @@ const CollectionDetails = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [qrLoading, setQrLoading] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState('');
   const [moveModalOpen, setMoveModalOpen] = useState(false);
-  const [selectedRecordId, setSelectedRecordId] = useState(null);  const [selectedRecordIds, setSelectedRecordIds] = useState([]);
+  const [selectedRecordId, setSelectedRecordId] = useState(null);const [selectedRecordIds, setSelectedRecordIds] = useState([]);
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [expandedRecords, setExpandedRecords] = useState(new Set());
 
@@ -294,6 +298,73 @@ const CollectionDetails = () => {
   };
 
   /**
+   * Handles editing collection name
+   */
+  const handleEditName = () => {
+    setIsEditingName(true);
+    setEditedName(collection.name);
+  };
+
+  const handleSaveName = async () => {
+    if (!editedName.trim()) {
+      setError('Collection name cannot be empty');
+      return;
+    }
+
+    try {
+      const api = createApiService();
+      await api.patch(`/collections/${collection.id}`, {
+        name: editedName.trim()
+      });
+      
+      setCollection({ ...collection, name: editedName.trim() });
+      setIsEditingName(false);
+      setSuccessMessage('Collection name updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating collection name:', error);
+      setError('Failed to update collection name. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setEditedName('');
+  };
+
+  /**
+   * Handles editing collection description
+   */
+  const handleEditDescription = () => {
+    setIsEditingDescription(true);
+    setEditedDescription(collection.description || '');
+  };
+
+  const handleSaveDescription = async () => {
+    try {
+      const api = createApiService();
+      await api.patch(`/collections/${collection.id}`, {
+        description: editedDescription.trim()
+      });
+      
+      setCollection({ ...collection, description: editedDescription.trim() });
+      setIsEditingDescription(false);
+      setSuccessMessage('Collection description updated successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('Error updating collection description:', error);
+      setError('Failed to update collection description. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
+  const handleCancelEditDescription = () => {
+    setIsEditingDescription(false);
+    setEditedDescription('');
+  };
+
+  /**
    * Helper function to show success messages
    */
   const showSuccessMessage = (message) => {
@@ -354,11 +425,110 @@ const CollectionDetails = () => {
             </svg>
             <span className="font-medium">Back</span>
           </button>          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-words">{collection.name}</h1>
-            {collection.description && (
-              <p className="text-gray-600 mt-2 text-sm sm:text-base">{collection.description}</p>
+            {isEditingName ? (
+              <div className="flex items-center gap-2 mb-2">
+                <input
+                  type="text"
+                  value={editedName}
+                  onChange={(e) => setEditedName(e.target.value)}
+                  className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 bg-white border border-blue-300 rounded px-2 py-1 flex-1 min-w-0"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveName();
+                    if (e.key === 'Escape') handleCancelEditName();
+                  }}
+                />
+                <button
+                  onClick={handleSaveName}
+                  className="text-green-600 hover:text-green-800 p-1"
+                  title="Save"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={handleCancelEditName}
+                  className="text-red-600 hover:text-red-800 p-1"
+                  title="Cancel"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mb-2 group">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-words">{collection.name}</h1>
+                <button
+                  onClick={handleEditName}
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 p-1 transition-all"
+                  title="Edit collection name"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              </div>
             )}
-          </div>          {/* QR Code Download Button */}
+            
+            {isEditingDescription ? (
+              <div className="flex items-start gap-2">
+                <textarea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  className="text-gray-600 text-sm sm:text-base bg-white border border-blue-300 rounded px-2 py-1 flex-1 min-w-0 resize-none"
+                  rows="2"
+                  placeholder="Add a description..."
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSaveDescription();
+                    }
+                    if (e.key === 'Escape') handleCancelEditDescription();
+                  }}
+                />
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={handleSaveDescription}
+                    className="text-green-600 hover:text-green-800 p-1"
+                    title="Save"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleCancelEditDescription}
+                    className="text-red-600 hover:text-red-800 p-1"
+                    title="Cancel"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 group">
+                {collection.description ? (
+                  <p className="text-gray-600 mt-2 text-sm sm:text-base">{collection.description}</p>
+                ) : (
+                  <p className="text-gray-400 mt-2 text-sm sm:text-base italic">No description</p>
+                )}
+                <button
+                  onClick={handleEditDescription}
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 p-1 transition-all mt-1"
+                  title="Edit description"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>{/* QR Code Download Button */}
           <div className="flex-shrink-0">
             <button
               onClick={handleDownloadCollectionQR}

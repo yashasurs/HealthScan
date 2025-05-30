@@ -190,7 +190,7 @@ const UploadTab = ({
               className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform ${
                 isUploading || files.length === 0
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                  : 'bg-gradient bg-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
               }`}
             >
               {isUploading ? (
