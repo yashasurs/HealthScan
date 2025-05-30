@@ -11,9 +11,14 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=True)
+    aadhar = Column(String(12), nullable=True)  # Optional 12-digit Aadhar number
+    allergies = Column(Text, nullable=True)
+    doctor_name = Column(String(100), nullable=True)
+    visit_date = Column(DateTime, nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
+    blood_group = Column(String(3), nullable=False)  # Blood group (e.g., A+, O-, etc.)
     
     # Relationships
     collections = relationship("Collection", back_populates="owner", cascade="all, delete-orphan")
