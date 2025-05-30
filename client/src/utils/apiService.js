@@ -84,4 +84,22 @@ export const collectionsAPI = {
   }
 };
 
+// User API
+export const userAPI = {
+  getCurrentUser: async () => {
+    const api = createApiService();
+    return api.get('/me');
+  },
+  
+  updateUser: async (userData) => {
+    const api = createApiService();
+    return api.put('/user', userData);
+  },
+  
+  deleteUser: async () => {
+    const api = createApiService();
+    return api.delete('/user');
+  }
+};
+
 export default createApiService;
