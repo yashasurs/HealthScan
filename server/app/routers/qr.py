@@ -59,9 +59,9 @@ async def create_collection_qr(
     db.commit()
     db.refresh(share)
     
-    # Create secure share URL with token - FIX THE PATH HERE
-    base_url = os.getenv('BASE_URL', 'http://localhost:8000')
-    share_url = f"{base_url}/collections/share?token={share.share_token}"  # Changed from /share/collection/
+    # Use frontend URL for QR code
+    frontend_base_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+    share_url = f"{frontend_base_url}/collections/share?token={share.share_token}"
     
     try:
         img = make_qr(share_url)
