@@ -44,24 +44,23 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
   
-  
-  const handleLogout = () => {
+    const handleLogout = () => {
     logout();
-    
   };
-    const navigationLinks = isAuthenticated 
+
+  // Check if user is on profile page
+  const isOnProfilePage = location.pathname === '/profile';const navigationLinks = isAuthenticated 
     ? [
         { name: 'Home', path: '/home' },
         { name: 'Records', path: '/records' },
         { name: 'Collections', path: '/collections' },
-        { name: 'Upload', path: '/upload' },
-        ,
+        { name: 'Upload', path: '/upload' }
       ]
     : [
         { name: 'Home', path: '/' },
         { name: 'Features', path: '/#features' },
         { name: 'About', path: '/#about' },
-      ];  return (
+      ];return (
     <nav 
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100"
     >      <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
@@ -90,14 +89,25 @@ const Navbar = () => {
           <div className="hidden md:flex md:items-center md:space-x-6">
             {isAuthenticated ? (
               <div className="flex items-center space-x-6">
-                <div className="flex items-center">
-                  <div className="text-gray-500 mr-2">
-                    <UserIcon />
-                  </div>
-                </div>
+                <Link 
+                  to="/profile"
+                  className={`flex items-center p-2 rounded-full transition-all duration-200 ${
+                    isOnProfilePage 
+                      ? 'bg-blue-100 text-blue-600' 
+                      : 'text-gray-500 hover:text-blue-500 hover:bg-gray-100'
+                  }`}
+                  title="View Profile"
+                >
+                  <UserIcon />
+                  {user?.username && (
+                    <span className="ml-2 text-sm font-medium">
+                      {user.username}
+                    </span>
+                  )}
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-md font-semibold text-red-500 cursor-pointer transition-all duration-200"
+                  className="text-md font-semibold text-red-500 hover:text-red-600 cursor-pointer transition-all duration-200"
                 >
                   Log out
                 </button>
@@ -140,21 +150,33 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
-          </div>{/* Authentication in mobile menu */}
+          </div>          {/* Authentication in mobile menu */}
           <div className="mt-4 pt-3 border-t border-gray-200">
             {isAuthenticated ? (
               <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="text-gray-500 mr-2">
+                <Link
+                  to="/profile"
+                  className={`flex items-center py-2 transition-all duration-200 ${
+                    isOnProfilePage 
+                      ? 'text-blue-600 font-medium' 
+                      : 'text-gray-600 hover:text-blue-500'
+                  }`}
+                >
+                  <div className="text-current mr-2">
                     <UserIcon />
                   </div>
-                  <span className="text-gray-600">
-                    {user?.username || 'User'}
+                  <span>
+                    {user?.username || 'Profile'}
                   </span>
-                </div>
+                  {isOnProfilePage && (
+                    <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                      Current
+                    </span>
+                  )}
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left py-2 text-gray-500 hover:text-blue-500 transition-all duration-200"
+                  className="block w-full text-left py-2 text-gray-500 hover:text-red-500 transition-all duration-200"
                 >
                   Log out
                 </button>

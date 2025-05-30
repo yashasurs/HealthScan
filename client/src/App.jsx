@@ -12,6 +12,7 @@ import Collections from './pages/CollectionPages/Collections.jsx'
 import CollectionDetails from './pages/CollectionPages/CollectionDetails.jsx'
 import Records from './pages/RecordPages/Records.jsx'
 import RecordDetail from './pages/RecordPages/RecordDetail.jsx'
+import Profile from './pages/Profile.jsx'
 
 function App() {
   
@@ -51,6 +52,11 @@ function App() {
             <Route path='/records/:id' element={
               <ProtectedRoute>
                 <RecordDetail />
+              </ProtectedRoute>
+            } />
+            <Route path='/profile' element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             } />
             <Route path='/' element={<Home />} />
