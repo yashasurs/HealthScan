@@ -157,9 +157,8 @@ const RecordOrganizer = ({
             <View style={styles.recordDetails}>
               <Text style={styles.recordName} numberOfLines={1}>
                 {record.filename}
-              </Text>
-              <Text style={styles.recordMeta}>
-                {record.file_type?.split('/')[1]} • {Math.round(record.file_size / 1024)}KB
+              </Text>              <Text style={styles.recordMeta}>
+                {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {Math.round((record.file_size || 0) / 1024)}KB
               </Text>
             </View>
           </View>

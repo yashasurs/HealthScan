@@ -1,34 +1,29 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useApiService } from '../../services/apiService';
 
 /**
  * Medical history card component showing list of medical records
  */
 const MedicalHistoryCard = () => {
-  // Mock medical records
-  const medicalRecords = [
-    {
-      id: "MR001",
-      date: "May 15, 2025",
-      type: "General Checkup",
-      doctor: "Dr. Johnson",
-      description: "Routine health examination"
-    },
-    {
-      id: "MR002",
-      date: "April 3, 2025",
-      type: "Blood Test",
-      doctor: "Dr. Williams",
-      description: "Complete blood count and metabolic panel"
-    },
-    {
-      id: "MR003",
-      date: "March 10, 2025",
-      type: "Vaccination",
-      doctor: "Dr. Martinez",
-      description: "Influenza vaccine administered"
-    }
-  ];
+  const [medicalRecords, setMedicalRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const apiService = useApiService();
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const response = await apiService.records.getAll();
+        setMedicalRecords(response.data);
+      } catch (error) {
+        console.error('Error fetching medical records:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecords();
+  }, []);
 
   const handleRecordPress = (record) => {
     Alert.alert(
@@ -37,24 +32,36 @@ const MedicalHistoryCard = () => {
       [{ text: 'OK' }]
     );
   };
-
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Medical History</Text>
-      {medicalRecords.map((record) => (
-        <TouchableOpacity 
-          key={record.id} 
-          style={styles.recordItem}
-          onPress={() => handleRecordPress(record)}
-        >
-          <View style={styles.recordIcon}></View>
-          <View style={styles.recordContent}>
-            <Text style={styles.recordTitle}>{record.type}</Text>
-            <Text style={styles.recordDetails}>{record.date} • {record.doctor}</Text>
-            <Text style={styles.recordDescription}>{record.description}</Text>
-          </View>
-        </TouchableOpacity>
-      ))}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : medicalRecords.length > 0 ? (
+        medicalRecords.map((record) => (
+          <TouchableOpacity 
+            key={record.id} 
+            style={styles.recordItem}
+            onPress={() => handleRecordPress(record)}
+          >
+            <View style={styles.recordIcon}></View>
+            <View style={styles.recordContent}>
+              <Text style={styles.recordTitle}>{record.title || "Medical Record"}</Text>
+              <Text style={styles.recordDetails}>
+                {new Date(record.created_at).toLocaleDateString()} • {record.doctor_name || "No doctor specified"}
+              </Text>
+              <Text style={styles.recordDescription}>{record.description || "No description available"}</Text>
+            </View>
+          </TouchableOpacity>
+        ))
+      ) : (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No medical records found</Text>
+          <Text style={styles.emptyStateSubText}>Your medical history will appear here</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -70,6 +77,29 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
+    minHeight: 200,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  emptyStateSubText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
   cardTitle: {
     fontSize: 18,

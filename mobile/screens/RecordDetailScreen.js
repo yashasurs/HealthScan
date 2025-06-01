@@ -111,10 +111,10 @@ const RecordDetailScreen = ({ navigation, route }) => {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
-            {record.filename}
+            {record.filename || 'Untitled Record'}
           </Text>
           <Text style={styles.headerSubtitle}>
-            {record.file_type?.split('/')[1] || 'Unknown'} • {formatFileSize(record.file_size || 0)}
+            {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {formatFileSize(record.file_size || 0)}
           </Text>
         </View>
         <TouchableOpacity 

@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Alert, ActivityIndicator, Text } from 'react-native';
+import { 
+  StyleSheet, 
+  View, 
+  ScrollView, 
+  Alert, 
+  ActivityIndicator, 
+  Text,
+  TouchableOpacity,
+  SafeAreaView
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/common';
 import { RecordUploader, RecordList } from '../components/document';
@@ -49,20 +58,14 @@ const RecordUploadScreen = ({ navigation }) => {
       Alert.alert(
         "Upload Successful",
         `${response.data.length} record(s) have been processed and uploaded.`,
-        [          { 
+        [
+          { 
             text: "View Collections", 
-            onPress: () => {
-              // Pass parameter to indicate records were added
-              // Use the screen name exactly as defined in the stack navigator
-              navigation.navigate('CollectionSystem', { recordsAdded: true });
-            }
+            onPress: () => navigation.navigate('CollectionSystem', { recordsAdded: true })
           },
           { 
             text: "Upload More", 
-            style: "cancel",
-            onPress: () => {
-              // Stay on current screen
-            }
+            style: "cancel"
           }
         ]
       );
@@ -79,7 +82,8 @@ const RecordUploadScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>      <Header 
+    <SafeAreaView style={styles.container}>
+      <Header 
         title="Upload Records" 
         rightAction={{
           icon: 'folder-outline',
@@ -87,60 +91,88 @@ const RecordUploadScreen = ({ navigation }) => {
         }}
       />
       
-      <ScrollView 
-        style={styles.content}
-        nestedScrollEnabled={true}
-      >
+      <ScrollView style={styles.content}>
         {/* Upload Section */}
-        <View style={styles.uploadSection}>
+        <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="cloud-upload-outline" size={20} color="#4A90E2" />
+            <Ionicons name="cloud-upload-outline" size={24} color="#007AFF" />
             <Text style={styles.sectionTitle}>Upload Records</Text>
           </View>
           <Text style={styles.sectionSubtitle}>
-            Select records to process with OCR
+            Select medical records to upload and process
           </Text>
           
           <RecordUploader onRecordPicked={handleRecordPicked} />
         </View>
         
-        {/* Record List */}
-        <RecordList 
-          records={records}
-          onRemoveRecord={handleRemoveRecord}
-          onUploadAll={handleUploadAll}
-        />
+        {/* Selected Records */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="document-text-outline" size={24} color="#007AFF" />
+            <Text style={styles.sectionTitle}>Selected Records</Text>
+          </View>
+          
+          <RecordList 
+            records={records}
+            onRemoveRecord={handleRemoveRecord}
+          />
+        </View>
+
+        {/* Upload Button */}
+        {records.length > 0 && (
+          <TouchableOpacity 
+            style={styles.uploadButton}
+            onPress={handleUploadAll}
+            disabled={uploading}
+          >
+            <Ionicons name="cloud-upload" size={24} color="#fff" />
+            <Text style={styles.uploadButtonText}>
+              {uploading ? 'Uploading...' : 'Upload All Records'}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {uploading && (
           <View style={styles.uploadingContainer}>
-            <ActivityIndicator size="large" color="#4A90E2" />
+            <ActivityIndicator size="large" color="#007AFF" />
             <Text style={styles.uploadingText}>{uploadStatus}</Text>
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   content: {
     flex: 1,
     padding: 20,
   },
+  section: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#333',
-    marginLeft: 8,
+    color: '#1a1a1a',
+    marginLeft: 10,
   },
   sectionSubtitle: {
     fontSize: 14,
@@ -148,20 +180,37 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     lineHeight: 20,
   },
-  uploadSection: {
-    marginBottom: 24,
+  uploadButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  uploadButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   uploadingContainer: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
-    marginTop: 20,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 20,
   },
   uploadingText: {
-    marginTop: 10,
+    marginTop: 12,
     fontSize: 16,
-    color: '#4A90E2',
+    color: '#007AFF',
     fontWeight: '500',
   },
 });
