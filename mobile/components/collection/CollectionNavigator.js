@@ -183,54 +183,38 @@ const CollectionNavigator = ({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleSection}>
-          <Ionicons name="library-outline" size={24} color="#4A90E2" />
-          <Text style={styles.title}>Collection System</Text>
-        </View>
-        {/* Auto-refresh indicator replaces manual refresh button */}
-        {refreshing && (
-          <View style={styles.refreshIndicator}>
-            <Ionicons 
-              name="sync" 
-              size={18} 
-              color="#4A90E2" 
-              style={styles.spinning}
-            />
+      {/* Clean Stats Section */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{collections.length}</Text>
+            <Text style={styles.statLabel}>Collections</Text>
           </View>
-        )}
-      </View>
-
-      <View style={styles.statsSection}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{collections.length}</Text>
-          <Text style={styles.statLabel}>Collections</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{records.length}</Text>
-          <Text style={styles.statLabel}>Records</Text>
-        </View>
-        <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>
-            {records.filter(r => !r.collection_id).length}
-          </Text>
-          <Text style={styles.statLabel}>Unorganized</Text>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{records.length}</Text>
+            <Text style={styles.statLabel}>Records</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>
+              {records.filter(r => !r.collection_id).length}
+            </Text>
+            <Text style={styles.statLabel}>Unorganized</Text>
+          </View>
         </View>
       </View>
 
-      <View style={styles.actionsSection}>
-        <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={createNewCollection}
-        >
-          <Ionicons name="add-circle-outline" size={20} color="#4A90E2" />
-          <Text style={styles.actionText}>New Collection</Text>
+      {/* Create Button */}
+      <View style={styles.actionSection}>
+        <TouchableOpacity style={styles.createButton} onPress={createNewCollection}>
+          <Ionicons name="add" size={20} color="#fff" />
+          <Text style={styles.createButtonText}>Create Collection</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.treeContainer}>
+      {/* Collections List */}
+      <View style={styles.collectionsSection}>
         <CollectionTree
           collections={collections}
           records={records}
@@ -242,6 +226,7 @@ const CollectionNavigator = ({
           refreshing={refreshing}
           onCollectionDelete={handleDeleteCollection}
           onRecordDelete={handleDeleteRecord}
+          onCreateCollection={createNewCollection}
         />
       </View>
 
@@ -318,89 +303,65 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+  statsContainer: {
+    backgroundColor: '#fff',
+    marginHorizontal: 16,
+    marginTop: 20,
+    marginBottom: 10,
+    paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#e5e5e5',
   },
-  titleSection: {
+  statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: 12,
-  },
-  refreshIndicator: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(74, 144, 226, 0.1)',
-  },
-  spinning: {
-    // Add animation here if needed
-  },
-  statsSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 16,
-    backgroundColor: '#f8f9fa',
-    marginHorizontal: 20,
-    marginVertical: 12,
-    borderRadius: 12,
   },
   statItem: {
     alignItems: 'center',
     flex: 1,
   },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#e5e5e5',
+  },
   statNumber: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#4A90E2',
+    color: '#000',
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
     color: '#666',
     fontWeight: '500',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  statDivider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#dee2e6',
+  actionSection: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
   },
-  actionsSection: {
+  createButton: {
+    backgroundColor: '#000',
     paddingHorizontal: 20,
-    marginBottom: 16,
-  },
-  actionButton: {
+    paddingVertical: 12,
+    borderRadius: 6,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#4A90E2',
   },
-  actionText: {
+  createButtonText: {
+    color: '#fff',
     fontSize: 14,
     fontWeight: '600',
-    color: '#4A90E2',
     marginLeft: 8,
   },
-  treeContainer: {
+  collectionsSection: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  // Modal styles
+  // Modal styles updated for black and white
   modalContainer: {
     flex: 1,
     backgroundColor: '#fff',
@@ -410,9 +371,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingTop: 60,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#e5e5e5',
+    backgroundColor: '#fff',
   },
   closeButton: {
     padding: 8,
@@ -420,7 +383,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#000',
   },
   placeholder: {
     width: 40,
@@ -431,22 +394,23 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   inputSection: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: '#000',
     marginBottom: 8,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: '#e5e5e5',
+    borderRadius: 6,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
     backgroundColor: '#fff',
+    color: '#000',
   },
   textArea: {
     height: 80,
@@ -458,39 +422,27 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     gap: 12,
     borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
+    borderTopColor: '#e5e5e5',
+    backgroundColor: '#fff',
   },
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 6,
     alignItems: 'center',
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: '#666',
   },
-  createButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#4A90E2',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  createButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#fff',
-  },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#f5f5f5',
   },
   disabledButtonText: {
-    color: '#999',
+    color: '#ccc',
   },
 });
 

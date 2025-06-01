@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, RefreshControl, Modal, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApiService } from '../../services/apiService';
 import { LoadingOverlay } from '../common';
 import FolderTree from './FolderTree';
+import CollectionItem from './CollectionItem';
 
 /**
  * Collection navigator component that provides collection-based navigation
@@ -16,7 +17,7 @@ const FolderNavigator = ({
   onRefresh, 
   refreshing,
   refreshTrigger = 0 
-}) => {const [collections, setCollections] = useState([]);
+}) => {  const [collections, setCollections] = useState([]);
   const [records, setRecords] = useState([]);
   const [selectedCollectionId, setSelectedCollectionId] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,23 +26,21 @@ const FolderNavigator = ({
   const [newCollectionDescription, setNewCollectionDescription] = useState('');
   const [creating, setCreating] = useState(false);
 
-  const apiService = useApiService();  useEffect(() => {
+  const apiService = useApiService();
+  
+  useEffect(() => {
     loadData();
   }, []);
-
-  // Refresh data when refreshTrigger changes
+  // Refresh data when refreshTrigger changes or when refreshing prop changes to true
   useEffect(() => {
-    if (refreshTrigger > 0) {
+    if (refreshTrigger > 0 || refreshing) {
       loadData();
     }
-  }, [refreshTrigger]);
-
-  // Also refresh data when refreshing prop changes to true
-  useEffect(() => {
-    if (refreshing) {
-      loadData();
-    }
-  }, [refreshing]);
+  }, [refreshTrigger, refreshing]);
+  
+  /**
+   * Loads all data for collections and records
+   */
   const loadData = async () => {
     setLoading(true);
     try {
@@ -56,10 +55,12 @@ const FolderNavigator = ({
       // Short timeout to ensure UI update is visible
       setTimeout(() => {
         setLoading(false);
-      }, 300);
-    }
+      }, 300);    }
   };
 
+  /**
+   * Loads collection data from the API
+   */
   const loadCollections = async () => {
     try {
       const response = await apiService.collections.getAll();
@@ -69,6 +70,10 @@ const FolderNavigator = ({
       throw error;
     }
   };
+  
+  /**
+   * Loads all records from the API
+   */
   const loadAllRecords = async () => {
     try {
       const response = await apiService.records.getAll();
@@ -79,18 +84,32 @@ const FolderNavigator = ({
     }
   };
 
+  /**
+   * Handles collection selection
+   * @param {string} collectionId - ID of the selected collection
+   */
   const handleCollectionSelect = (collectionId) => {
     setSelectedCollectionId(collectionId);
-    onCollectionSelect?.(collectionId);
-  };
+    onCollectionSelect?.(collectionId);  };
 
+  /**
+   * Handles record selection
+   * @param {Object} record - The selected record object
+   */
   const handleRecordSelect = (record) => {
     onRecordSelect?.(record);
   };
+  
+  /**
+   * Creates a new collection by showing the creation modal
+   */
   const createNewCollection = () => {
     setShowCreateModal(true);
   };
 
+  /**
+   * Handles the creation of a new collection
+   */
   const handleCreateCollection = async () => {
     if (!newCollectionName.trim()) {
       Alert.alert('Error', 'Please enter a collection name');
@@ -117,37 +136,21 @@ const FolderNavigator = ({
       console.error('Error creating collection:', error);
       Alert.alert('Error', 'Failed to create collection');
     } finally {
-      setCreating(false);
-    }
+      setCreating(false);    }
   };
 
+  /**
+   * Handles cancellation of collection creation
+   */
   const handleCancelCreate = () => {
     setNewCollectionName('');
     setNewCollectionDescription('');
-    setShowCreateModal(false);
-  };
-  const moveRecordToCollection = async (recordId, targetCollectionId) => {
-    try {
-      if (targetCollectionId) {
-        await apiService.collections.addRecord(targetCollectionId, recordId);
-      } else {
-        // Remove from current collection
-        const record = records.find(r => r.id === recordId);
-        if (record?.collection_id) {
-          await apiService.collections.removeRecord(record.collection_id, recordId);
-        }
-      }
-      
-      // Refresh data
-      await loadAllRecords();
-      
-      Alert.alert('Success', 'Record moved successfully');
-    } catch (error) {
-      console.error('Error moving record:', error);
-      Alert.alert('Error', 'Failed to move record');
-    }
-  };
+    setShowCreateModal(false);  };
 
+  /**
+   * Handles collection deletion
+   * @param {string} collectionId - ID of the collection to delete
+   */
   const handleDeleteCollection = async (collectionId) => {
     try {
       await apiService.collections.delete(collectionId);
@@ -156,9 +159,12 @@ const FolderNavigator = ({
     } catch (error) {
       console.error('Error deleting collection:', error);
       Alert.alert('Error', 'Failed to delete collection');
-    }
-  };
+    }  };
 
+  /**
+   * Handles record deletion
+   * @param {string} recordId - ID of the record to delete
+   */
   const handleDeleteRecord = async (recordId) => {
     try {
       await apiService.records.delete(recordId);
@@ -169,35 +175,52 @@ const FolderNavigator = ({
       Alert.alert('Error', 'Failed to delete record');
     }
   };
-
+  
   if (loading) {
-    return <LoadingOverlay message="Loading collection structure..." />;
+    return <LoadingOverlay message="Loading collections..." />;
   }
-  return (
+  /**
+   * Renders a collection item in the list
+   * @param {Object} param0 - The item containing collection data
+   * @returns {JSX.Element} The rendered collection item
+   */
+  const renderCollectionItem = ({ item }) => {
+    // Determine if this is a new collection (added in the last 24 hours)
+    const isNew = item.created_at && 
+      (new Date() - new Date(item.created_at)) < (24 * 60 * 60 * 1000);
+    
+    return (
+      <CollectionItem
+        collection={item}
+        onPress={() => handleCollectionSelect(item.id)}
+        isNew={isNew}
+      />
+    );  };
+    return (
     <View style={styles.container}>
-      <View style={styles.header}>        <View style={styles.titleSection}>
-          <Ionicons name="library-outline" size={24} color="#4A90E2" />
-          <Text style={styles.title}>Collection System</Text>
-        </View>
-        {/* Auto-refresh indicator replaces manual refresh button */}
-        {refreshing && (
-          <View style={styles.refreshIndicator}>
-            <Ionicons 
-              name="sync" 
-              size={18} 
-              color="#4A90E2" 
-              style={styles.spinning}
-            />
-          </View>
-        )}
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Collections</Text>
+        <Text style={styles.headerSubtitle}>Organize your documents into collections</Text>
       </View>
 
-      <View style={styles.statsSection}>
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{collections.length}</Text>
-          <Text style={styles.statLabel}>Collections</Text>
+      {refreshing && (
+        <View style={styles.refreshIndicator}>          <Ionicons 
+            name="sync" 
+            size={18} 
+            color="#4A90E2"
+          />
         </View>
-        <View style={styles.statDivider} />        <View style={styles.statItem}>
+      )}
+        <FlatList
+        data={collections}
+        keyExtractor={(item) => item.id ? item.id.toString() : Math.random().toString()}
+        renderItem={renderCollectionItem}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+      />
+      
+      <View style={styles.statsContainer}>
+        <View style={styles.statItem}>
           <Text style={styles.statNumber}>{records.length}</Text>
           <Text style={styles.statLabel}>Records</Text>
         </View>
@@ -208,9 +231,7 @@ const FolderNavigator = ({
           </Text>
           <Text style={styles.statLabel}>Unorganized</Text>
         </View>
-      </View>
-
-      <View style={styles.actionsSection}>
+      </View>      <View style={styles.actionsSection}>
         <TouchableOpacity 
           style={styles.actionButton}
           onPress={createNewCollection}
@@ -218,7 +239,10 @@ const FolderNavigator = ({
           <Ionicons name="add-circle-outline" size={20} color="#4A90E2" />
           <Text style={styles.actionText}>New Collection</Text>
         </TouchableOpacity>
-      </View>      <View style={styles.treeContainer}>        <FolderTree
+      </View>
+      
+      <View style={styles.treeContainer}>
+        <FolderTree
           collections={collections}
           records={records}
           selectedCollectionId={selectedCollectionId}
@@ -304,51 +328,34 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: 20,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  listContainer: {
+    paddingTop: 10,
+    paddingBottom: 20,
     paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
-  },
-  titleSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginLeft: 12,
-  },  refreshButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
   },
   refreshIndicator: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 999,
     padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+    borderRadius: 20,    backgroundColor: 'rgba(74, 144, 226, 0.1)',
   },
-  spinning: {
-    // Add animation here if needed
-  },
-  statsSection: {
+  statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 15,
     backgroundColor: '#f8f9fa',
+    borderRadius: 8,
     marginHorizontal: 20,
-    marginVertical: 12,
-    borderRadius: 12,
+    marginBottom: 16,
   },
   statItem: {
-    alignItems: 'center',
     flex: 1,
+    alignItems: 'center',
   },
   statNumber: {
     fontSize: 24,
@@ -386,10 +393,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4A90E2',
     marginLeft: 8,
-  },  treeContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
   },
+  treeContainer: {
+    flex: 1,
+    paddingHorizontal: 20,  },
   // Modal styles
   modalContainer: {
     flex: 1,

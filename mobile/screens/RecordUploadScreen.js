@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, Alert, ActivityIndicator, Text, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, ScrollView, Alert, ActivityIndicator, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/common';
 import { RecordUploader, RecordList } from '../components/document';
 import { useApiService } from '../services/apiService';
 
-const RecordUploadScreen = ({ route, navigation }) => {
+const RecordUploadScreen = ({ navigation }) => {
   const [records, setRecords] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
@@ -18,7 +18,9 @@ const RecordUploadScreen = ({ route, navigation }) => {
   
   const handleRemoveRecord = (recordToRemove) => {
     setRecords(records.filter(doc => doc.uri !== recordToRemove.uri));
-  };  const handleNavigateToCollectionSystem = () => {
+  };
+
+  const handleNavigateToCollections = () => {
     navigation.navigate('CollectionSystem');
   };
 
@@ -47,8 +49,7 @@ const RecordUploadScreen = ({ route, navigation }) => {
       Alert.alert(
         "Upload Successful",
         `${response.data.length} record(s) have been processed and uploaded.`,
-        [
-          { 
+        [          { 
             text: "View Collections", 
             onPress: () => {
               // Pass parameter to indicate records were added
@@ -78,12 +79,11 @@ const RecordUploadScreen = ({ route, navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Header 
-        title="Record Upload" 
+    <View style={styles.container}>      <Header 
+        title="Upload Records" 
         rightAction={{
           icon: 'folder-outline',
-          onPress: handleNavigateToCollectionSystem
+          onPress: handleNavigateToCollections
         }}
       />
       
