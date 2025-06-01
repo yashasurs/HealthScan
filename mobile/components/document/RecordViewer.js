@@ -81,9 +81,8 @@ const RecordViewer = ({
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle} numberOfLines={1}>
               {record.filename}
-            </Text>
-            <Text style={styles.headerSubtitle}>
-              {record.file_type?.split('/')[1] || 'Unknown'} • {formatFileSize(record.file_size || 0)}
+            </Text>            <Text style={styles.headerSubtitle}>
+              {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {formatFileSize(record.file_size || 0)}
             </Text>
           </View>
           <TouchableOpacity 

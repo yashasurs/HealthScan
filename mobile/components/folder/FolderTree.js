@@ -88,7 +88,7 @@ const FolderTree = ({
           <Text style={styles.recordName} numberOfLines={1}>
             {record.filename}
           </Text>          <Text style={styles.recordMeta}>
-            {record.file_type?.split('/')[1] || 'Unknown'} • {Math.round((record.file_size || 0) / 1024)}KB
+            {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {Math.round((record.file_size || 0) / 1024)}KB
           </Text>
         </View>
         <TouchableOpacity

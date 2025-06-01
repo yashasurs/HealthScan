@@ -9,13 +9,16 @@ import RecordItem from './RecordItem';
  * @param {Function} props.onRemoveRecord - Callback when record is removed
  * @param {Function} props.onUploadAll - Callback when upload all button is pressed
  */
-const RecordList = ({ records, onRemoveRecord, onUploadAll }) => {
-  const renderRecordItem = ({ item }) => (
-    <RecordItem 
-      record={item} 
-      onRemove={onRemoveRecord} 
-    />
-  );
+const RecordList = ({ records = [], onRemoveRecord, onUploadAll }) => {
+  const renderRecordItem = ({ item }) => {
+    const handleRemove = typeof onRemoveRecord === 'function' ? onRemoveRecord : undefined;
+    return (
+      <RecordItem 
+        record={item} 
+        onRemove={handleRemove}
+      />
+    );
+  };
   
   const renderFooter = () => (
     <TouchableOpacity 

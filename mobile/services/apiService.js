@@ -44,8 +44,17 @@ export const useApiService = () => {
   const getAuthenticatedApi = async () => {
     const currentToken = token || await getToken();
     return createApiService(currentToken);
-  };  return {
+  };
+
+  return {
     getAuthenticatedApi,
+    // Auth API
+    auth: {
+      getCurrentUser: async () => {
+        const api = await getAuthenticatedApi();
+        return api.get('/me');
+      }
+    },
     // Collections API
     collections: {
       getAll: async () => {
@@ -91,6 +100,13 @@ export const useApiService = () => {
       delete: async (recordId) => {
         const api = await getAuthenticatedApi();
         return api.delete(`/records/${recordId}`);
+      },
+      getUnorganized: async () => {
+        const api = await getAuthenticatedApi();
+        const response = await api.get('/records/');
+        // Filter records that don't belong to any collection
+        const unorganizedRecords = response.data.filter(record => !record.collection_id);
+        return { data: unorganizedRecords };
       }
     },// OCR API
     ocr: {

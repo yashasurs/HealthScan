@@ -2,18 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { Header } from '../components/common';
 import { FolderNavigator, RecordOrganizer } from '../components/folder';
-import { RecordViewer } from '../components/document';
+import { RecordViewer, RecordItem } from '../components/document';
 import { useApiService } from '../services/apiService';
 import { Ionicons } from '@expo/vector-icons';
-// Import components from collection to support CollectionSystemScreen functionality
-import { CollectionNavigator } from '../components/collection';
 
-/**
- * Folder System Screen - Main interface for organizing records in collections/folders
- * Provides a hierarchical folder view with drag-and-drop organization capabilities
- */
 const FolderSystemScreen = ({ navigation, route }) => {
   const [collections, setCollections] = useState([]);
+  const [unorganizedRecords, setUnorganizedRecords] = useState([]);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showOrganizer, setShowOrganizer] = useState(false);
   const [showRecordViewer, setShowRecordViewer] = useState(false);
@@ -27,82 +22,65 @@ const FolderSystemScreen = ({ navigation, route }) => {
 
   const apiService = useApiService();
 
-  // Load collections on initial render
+  // Load data on initial render and when refreshTrigger changes
   useEffect(() => {
-    loadCollections();
-  }, []);
+    loadData();
+  }, [refreshTrigger]);
   
   // Check if navigated from record upload with new records
   useEffect(() => {
     if (route.params?.recordsAdded) {
-      // Trigger a refresh when records are added
       setRefreshTrigger(prev => prev + 1);
-      // Reset the parameter to prevent multiple refreshes
       navigation.setParams({ recordsAdded: false });
     }
-  }, [route.params?.recordsAdded]);  const loadCollections = async () => {
+  }, [route.params?.recordsAdded]);
+
+  const loadData = async () => {
     try {
-      const response = await apiService.collections.getAll();
-      setCollections(response.data);
+      const [collectionsResponse, unorganizedResponse] = await Promise.all([
+        apiService.collections.getAll(),
+        apiService.records.getUnorganized()
+      ]);
+
+      setCollections(collectionsResponse.data);
+      setUnorganizedRecords(unorganizedResponse.data);
       
-      // Calculate stats from the data
-      const collectionsCount = response.data.length;
+      // Calculate stats
+      const collectionsCount = collectionsResponse.data.length;
       let recordsCount = 0;
-      let unorganizedCount = 0;
       
-      // Count records in collections and unorganized records
-      response.data.forEach(collection => {
+      collectionsResponse.data.forEach(collection => {
         if (collection.records) {
           recordsCount += collection.records.length;
         }
       });
-      
-      // You may need to adapt this depending on your API structure
-      try {
-        const unorganizedResponse = await apiService.records.getUnorganized();
-        unorganizedCount = unorganizedResponse.data.length;
-      } catch (err) {
-        console.error('Error fetching unorganized records:', err);
-      }
-      
+
       setStats({
         collections: collectionsCount,
         records: recordsCount,
-        unorganized: unorganizedCount
+        unorganized: unorganizedResponse.data.length
       });
       
     } catch (error) {
-      console.error('Error loading collections:', error);
-      // Handle unauthorized errors
-      if (error.response && error.response.status === 401) {
-        Alert.alert(
-          'Authentication Error', 
-          'Your session has expired. Please log in again.',
-          [{ text: 'OK' }]
-        );
+      console.error('Error loading data:', error);
+      if (error.response?.status === 401) {
+        Alert.alert('Authentication Error', 'Your session has expired. Please log in again.');
       } else {
-        Alert.alert(
-          'Error', 
-          'Failed to load collections. Please try again later.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Error', 'Failed to load data. Please try again later.');
       }
     }
   };
+
   const handleRefresh = async () => {
     setRefreshing(true);
-    try {
-      await loadCollections();
-    } catch (error) {
-      console.error('Error refreshing:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  };  const handleRecordSelect = (record) => {
-    // Navigate to RecordDetailScreen instead of showing modal (from CollectionSystemScreen)
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const handleRecordSelect = (record) => {
     navigation.navigate('RecordDetail', {
       recordId: record.id,
-      record: record // Pass the record data to avoid extra API call
+      record: record
     });
   };
 
@@ -111,61 +89,72 @@ const FolderSystemScreen = ({ navigation, route }) => {
     setShowOrganizer(true);
   };
 
-  const handleCollectionSelect = (collectionId) => {
-    // Could navigate to collection details or perform other actions
-    console.log('Selected collection:', collectionId);
-  };  const handleRecordMoved = () => {
-    // Increment refresh trigger to force automatic refresh
+  const handleRecordMoved = () => {
     setRefreshTrigger(prev => prev + 1);
-    // Also refresh collections
-    loadCollections();
   };
 
-  const handleRecordDeleted = (recordId) => {
-    // Trigger a refresh when a record is deleted
-    setRefreshTrigger(prev => prev + 1);
-    // Also refresh collections
-    loadCollections();
-  };  const handleNavigateToUpload = () => {
-    navigation.navigate('Records');
-  };
-    const handleCreateCollection = () => {
-    // Implement collection creation functionality
-    // This could open a modal with a form to create a new collection
-    Alert.alert(
-      "Create Collection", 
-      "Collection creation feature will be implemented here.",
-      [{ text: "OK" }]
+  const handleCreateCollection = () => {
+    Alert.prompt(
+      "Create Collection",
+      "Enter a name for your new collection",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Create",
+          onPress: async (name) => {
+            if (!name?.trim()) return;
+            try {
+              await apiService.collections.create({
+                name: name.trim(),
+                description: ""
+              });
+              setRefreshTrigger(prev => prev + 1);
+              Alert.alert("Success", "Collection created successfully");
+            } catch (error) {
+              console.error('Error creating collection:', error);
+              Alert.alert("Error", "Failed to create collection");
+            }
+          }
+        }
+      ],
+      "plain-text"
     );
   };
-  
-  const renderCollectionItem = (collection) => {
-    // Check if collection was created in the last 24 hours
-    const isNew = collection.created_at && 
-      (new Date() - new Date(collection.created_at)) < (24 * 60 * 60 * 1000);
-      
+
+  const renderCollection = (collection) => {
+    const recordCount = collection.records?.length || 0;
+    
     return (
-      <TouchableOpacity 
-        key={collection.id} 
-        style={styles.collectionItem}
-        onPress={() => handleCollectionSelect(collection.id)}
-      >
-        <View style={styles.iconContainer}>
-          <Ionicons name="folder-outline" size={24} style={styles.folderIcon} />
-        </View>
-        <View style={styles.collectionDetails}>
-          <Text style={styles.collectionName}>{collection.name}</Text>
-          <View style={styles.collectionMeta}>
-            <Text style={styles.documentCount}>
-              {collection.records?.length || 0} document{collection.records?.length !== 1 ? 's' : ''}
-            </Text>
-            {isNew && <Text style={styles.newLabel}>New collection</Text>}
+      <View key={collection.id} style={styles.collectionCard}>
+        <View style={styles.collectionHeader}>
+          <View style={styles.collectionTitleContainer}>
+            <Ionicons name="folder" size={24} color="#4A90E2" />
+            <Text style={styles.collectionTitle}>{collection.name}</Text>
           </View>
+          <Text style={styles.recordCount}>
+            {recordCount} {recordCount === 1 ? 'record' : 'records'}
+          </Text>
         </View>
-      </TouchableOpacity>
+        
+        {collection.records && collection.records.length > 0 ? (
+          <View style={styles.recordsList}>
+            {collection.records.map(record => (
+              <RecordItem
+                key={record.id}
+                record={record}
+                onPress={() => handleRecordSelect(record)}
+                onLongPress={() => handleRecordLongPress(record)}
+              />
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.emptyText}>No records in this collection</Text>
+        )}
+      </View>
     );
   };
-    return (
+
+  return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Collections</Text>
@@ -196,27 +185,53 @@ const FolderSystemScreen = ({ navigation, route }) => {
           </View>
         </View>
       </View>
-        <View style={styles.content}>
-        <ScrollView 
-          style={styles.collectionsList}
-          contentContainerStyle={styles.collectionsListContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              colors={['#333']}
-            />
-          }
-        >
-          {collections.map(collection => renderCollectionItem(collection))}
+
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#333']}
+          />
+        }
+      >
+        {/* Collections Section */}
+        <View style={styles.section}>
+          {collections.map(renderCollection)}
+          
           {collections.length === 0 && !refreshing && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>No collections yet</Text>
               <Text style={styles.emptyStateSubText}>Create a collection to get started</Text>
             </View>
           )}
-        </ScrollView>
-      </View>{showOrganizer && (
+        </View>
+
+        {/* Unorganized Records Section */}
+        {unorganizedRecords.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Unorganized Records</Text>
+              <Text style={styles.sectionSubtitle}>
+                Records not yet added to any collection
+              </Text>
+            </View>
+            <View style={styles.unorganizedList}>
+              {unorganizedRecords.map(record => (
+                <RecordItem
+                  key={record.id}
+                  record={record}
+                  onPress={() => handleRecordSelect(record)}
+                  onLongPress={() => handleRecordLongPress(record)}
+                />
+              ))}
+            </View>
+          </View>
+        )}
+      </ScrollView>
+
+      {showOrganizer && (
         <RecordOrganizer
           visible={showOrganizer}
           onClose={() => {
@@ -228,18 +243,6 @@ const FolderSystemScreen = ({ navigation, route }) => {
           onRecordMoved={handleRecordMoved}
         />
       )}
-
-      {showRecordViewer && (
-        <RecordViewer
-          visible={showRecordViewer}
-          onClose={() => {
-            setShowRecordViewer(false);
-            setSelectedRecord(null);
-          }}
-          record={selectedRecord}
-          onRecordDeleted={handleRecordDeleted}
-        />
-      )}
     </View>
   );
 };
@@ -247,13 +250,15 @@ const FolderSystemScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   header: {
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   title: {
     fontSize: 32,
@@ -270,7 +275,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#333',
+    backgroundColor: '#4A90E2',
     paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: 8,
@@ -288,7 +293,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 20,
     paddingHorizontal: 10,
-    marginBottom: 16,
   },
   statItem: {
     flex: 1,
@@ -311,18 +315,73 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },  collectionsList: {
-    flex: 1,
   },
-  collectionsListContent: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 24,
+  section: {
+    padding: 16,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#666',
+  },
+  collectionCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  collectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  collectionTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  collectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 12,
+  },
+  recordCount: {
+    fontSize: 14,
+    color: '#666',
+  },
+  recordsList: {
+    marginTop: 8,
+  },
+  unorganizedList: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 40,
+    backgroundColor: '#fff',
+    borderRadius: 12,
   },
   emptyStateText: {
     fontSize: 18,
@@ -334,47 +393,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-  collectionItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    marginRight: 12,
-  },
-  folderIcon: {
-    color: '#555',
-  },
-  collectionDetails: {
-    flex: 1,
-  },
-  collectionName: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 4,
-  },
-  collectionMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  documentCount: {
+  emptyText: {
     fontSize: 14,
     color: '#666',
+    textAlign: 'center',
+    paddingVertical: 20,
   },
-  newLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginLeft: 8,
-  }
 });
 
 export default FolderSystemScreen;

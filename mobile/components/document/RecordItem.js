@@ -8,8 +8,10 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
  * @param {Function} props.onRemove - Callback when remove button is pressed
  */
 const RecordItem = ({ record, onRemove }) => {
-  const fileExtension = record.name.split('.').pop().toUpperCase();
-  const fileSizeKB = (record.size / 1024).toFixed(2);
+  if (!record) return null;
+  
+  const fileExtension = record.filename ? record.filename.split('.').pop()?.toUpperCase() || 'FILE' : 'FILE';
+  const fileSizeKB = ((record.file_size || 0) / 1024).toFixed(2);
 
   return (
     <View style={styles.recordItem}>
@@ -18,20 +20,20 @@ const RecordItem = ({ record, onRemove }) => {
           {fileExtension}
         </Text>
       </View>
-      <View style={styles.recordInfo}>
-        <Text style={styles.recordName} numberOfLines={1}>
-          {record.name}
+      <View style={styles.recordInfo}>        <Text style={styles.recordName} numberOfLines={1}>
+          {record.filename || 'Unnamed Record'}
         </Text>
         <Text style={styles.recordSize}>
-          {fileSizeKB} KB
-        </Text>
-      </View>
-      <TouchableOpacity 
-        style={styles.recordRemove}
-        onPress={() => onRemove(record)}
-      >
-        <Text style={styles.recordRemoveText}>✕</Text>
-      </TouchableOpacity>
+          {record.file_type ? `${record.file_type.split('/')[1] || 'Unknown'} • ` : ''}{fileSizeKB} KB
+        </Text>      </View>      {typeof onRemove === 'function' && (
+        <TouchableOpacity 
+          style={styles.recordRemove}
+          onPress={() => onRemove(record)}
+          accessibilityLabel="Remove record"
+        >
+          <Text style={styles.recordRemoveText}>✕</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
