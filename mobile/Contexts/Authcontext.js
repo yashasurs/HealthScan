@@ -56,23 +56,36 @@ export const AuthProvider = ({ children }) => {
     loadStoredData();
   }, []);
 
-  const register = async (email, username, password) => {
+  const register = async (userData) => {
     try {
       setError(null);
-      const response = await axios.post(`${API_URL}/register`, {
-        email,
-        username,
-        password
-      });
+      
+      // Prepare data matching server schema
+      const registrationData = {
+        email: userData.email,
+        username: userData.username,
+        password: userData.password,
+        blood_group: userData.blood_group || null,
+        aadhar: userData.aadhar || null,
+        allergies: userData.allergies || null,
+        doctor_name: userData.doctor_name || null,
+        visit_date: userData.visit_date ? new Date(userData.visit_date).toISOString() : null
+      };
+
+      const response = await axios.post(`${API_URL}/register`, registrationData);
 
       const { access_token } = response.data;
-      const userData = { email, username };
+      const userInfo = { 
+        email: userData.email, 
+        username: userData.username,
+        blood_group: userData.blood_group
+      };
 
       // Set token and user data directly after registration
       setToken(access_token);
-      setUser(userData);
+      setUser(userInfo);
       await AsyncStorage.setItem("token", access_token);
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      await AsyncStorage.setItem("user", JSON.stringify(userInfo));
       
       return { success: true };
     } catch (error) {

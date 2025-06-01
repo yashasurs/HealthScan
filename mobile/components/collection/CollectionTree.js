@@ -27,7 +27,8 @@ const CollectionTree = ({
   onRefresh,
   refreshing = false,
   onCollectionDelete,
-  onRecordDelete
+  onRecordDelete,
+  onCreateCollection // Add this prop
 }) => {
   const [expandedCollections, setExpandedCollections] = useState(new Set());
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
@@ -107,11 +108,22 @@ const CollectionTree = ({
       </View>
     </TouchableOpacity>
   );
-
   const renderCollection = (collection) => {
     const isExpanded = expandedCollections.has(collection.id);
     const isSelected = selectedCollectionId === collection.id;
     const collectionRecords = getRecordsForCollection(collection.id);
+    const collectionName = collection.name || "New collection";
+    const displayDate = collection.created_at ? 
+      new Date(collection.created_at).toLocaleDateString('en-US', { 
+        month: 'numeric', 
+        day: 'numeric', 
+        year: 'numeric' 
+      }) : 
+      new Date().toLocaleDateString('en-US', { 
+        month: 'numeric', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
 
     return (
       <View key={collection.id} style={styles.collectionContainer}>
@@ -126,52 +138,74 @@ const CollectionTree = ({
           }}
         >
           <View style={styles.collectionContent}>
-            <View style={styles.collectionLeft}>
-              <TouchableOpacity
-                onPress={() => toggleCollection(collection.id)}
-                style={styles.expandButton}
-              >
-                <Ionicons
-                  name={isExpanded ? "chevron-down" : "chevron-forward"}
-                  size={20}
-                  color="#666"
-                />
-              </TouchableOpacity>
-              <Ionicons
-                name="folder"
-                size={20}
-                color={isSelected ? "#4A90E2" : "#666"}
-                style={styles.collectionIcon}
-              />
-              <View>
-                <Text style={[
-                  styles.collectionName,
-                  isSelected && styles.selectedText
-                ]}>
-                  {collection.name}
-                </Text>
-                <Text style={styles.collectionMeta}>
-                  {collectionRecords.length} record{collectionRecords.length !== 1 ? 's' : ''}
-                </Text>
+            {/* Header Section with Gradient Background */}
+            <View style={styles.collectionHeaderSection}>
+              <View style={styles.collectionTitleRow}>
+                <View style={styles.collectionLeft}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons
+                      name="folder"
+                      size={24}
+                      color="#4A90E2"
+                      style={styles.folderIcon}
+                    />
+                  </View>
+                  <Text style={[
+                    styles.collectionName,
+                    isSelected && styles.selectedText
+                  ]}>
+                    {collectionName}
+                  </Text>
+                </View>
+                <View style={styles.collectionActions}>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleDeletePress(collection, 'collection');
+                    }}
+                  >
+                    <Ionicons name="trash-outline" size={16} color="#dc3545" />
+                  </TouchableOpacity>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={16} color="#4A90E2" style={styles.checkmark} />
+                  )}
+                </View>
               </View>
             </View>
-            <View style={styles.collectionActions}>
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleDeletePress(collection, 'collection');
-                }}
-              >
-                <Ionicons name="trash-outline" size={16} color="#dc3545" />
-              </TouchableOpacity>
-              {isSelected && (
-                <Ionicons name="checkmark-circle" size={16} color="#4A90E2" style={styles.checkmark} />
+
+            {/* Body Section */}
+            <View style={styles.collectionBody}>
+              {collection.description && (
+                <Text style={styles.description} numberOfLines={3}>
+                  {collection.description}
+                </Text>
               )}
+              
+              <View style={styles.metaContainer}>
+                <View style={styles.documentCountContainer}>
+                  <Ionicons name="document-text-outline" size={14} color="#6c757d" />
+                  <Text style={styles.documentCount}>
+                    {collectionRecords.length} document{collectionRecords.length !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+                <Text style={styles.date}>{displayDate}</Text>
+              </View>
+              
+              <View style={styles.viewDocumentsRow}>
+                <Text style={styles.viewDocumentsText}>Click to view documents</Text>
+                <Ionicons 
+                  name="chevron-forward" 
+                  size={16} 
+                  color="#6c757d" 
+                  style={styles.chevronIcon}
+                />
+              </View>
             </View>
           </View>
         </TouchableOpacity>
 
+        {/* Expanded Records List */}
         {isExpanded && (
           <View style={styles.recordsList}>
             {collectionRecords.length > 0 ? (
@@ -191,31 +225,29 @@ const CollectionTree = ({
 
   return (
     <View style={styles.container}>
+      {/* Remove the duplicate header and stats sections since they should be in CollectionNavigator */}
+      
+      {/* Just render the collections list */}
       <FlatList
         data={collections}
         renderItem={({ item }) => renderCollection(item)}
         keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        style={styles.collectionsList}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#4A90E2"
+            colors={['#4A90E2']}
           />
         }
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
       />
 
-      {unorganizedRecords.length > 0 && (
+      {/* Show unorganized records if any */}
+      {getUnorganizedRecords().length > 0 && (
         <View style={styles.unorganizedSection}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="folder-open-outline" size={18} color="#999" />
-            <Text style={styles.sectionTitle}>Unorganized Records</Text>
-            <Text style={styles.sectionCount}>({unorganizedRecords.length})</Text>
-          </View>
-          <View style={styles.recordsList}>
-            {unorganizedRecords.map(renderRecord)}
-          </View>
+          <Text style={styles.unorganizedTitle}>Unorganized Records</Text>
+          {getUnorganizedRecords().map(renderRecord)}
         </View>
       )}
 
@@ -239,26 +271,32 @@ const CollectionTree = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
-  collectionsList: {
-    flex: 1,
+  listContainer: {
+    paddingVertical: 8,
   },
   collectionContainer: {
-    marginBottom: 8,
+    marginBottom: 12,
   },
   collectionHeader: {
-    padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#e5e5e5',
   },
   selectedCollection: {
-    backgroundColor: '#e3f2fd',
-    borderColor: '#4A90E2',
+    borderColor: '#000',
   },
   collectionContent: {
+    flexDirection: 'column',
+  },
+  collectionHeaderSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f5f5f5',
+  },
+  collectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -268,49 +306,98 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
+  iconContainer: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 6,
+    padding: 8,
+    marginRight: 12,
+  },
+  folderIcon: {
+    // Icon styling
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  collectionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
+  },
+  selectedText: {
+    color: '#000',
+  },
   collectionActions: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   deleteButton: {
     padding: 8,
-    marginLeft: 8,
   },
   checkmark: {
     marginLeft: 8,
   },
-  expandButton: {
-    marginRight: 8,
-    padding: 4,
+  collectionBody: {
+    padding: 16,
   },
-  collectionIcon: {
-    marginRight: 12,
+  description: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+    lineHeight: 20,
   },
-  collectionName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 2,
+  metaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  selectedText: {
-    color: '#4A90E2',
+  documentCountContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
-  collectionMeta: {
+  documentCount: {
     fontSize: 12,
     color: '#666',
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  date: {
+    fontSize: 12,
+    color: '#999',
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  viewDocumentsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  viewDocumentsText: {
+    fontSize: 12,
+    color: '#999',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  chevronIcon: {
+    opacity: 0.6,
   },
   recordsList: {
-    marginTop: 8,
-    marginLeft: 40,
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#f0f0f0',
+    backgroundColor: '#f9f9f9',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e5e5',
   },
   recordItem: {
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
+    backgroundColor: '#fff',
   },
   recordContent: {
     flexDirection: 'row',
@@ -325,12 +412,28 @@ const styles = StyleSheet.create({
   recordName: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: '#000',
     marginBottom: 2,
   },
   recordMeta: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#999',
+  },
+  unorganizedSection: {
+    padding: 16,
+    backgroundColor: '#fff',
+    margin: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
+  unorganizedTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   emptyRecords: {
     padding: 20,
@@ -339,30 +442,6 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: '#999',
-    fontStyle: 'italic',
-  },
-  unorganizedSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingHorizontal: 12,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginLeft: 8,
-  },
-  sectionCount: {
-    fontSize: 12,
-    color: '#999',
-    marginLeft: 4,
   },
 });
 

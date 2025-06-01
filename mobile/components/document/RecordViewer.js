@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e9ecef',
+    borderBottomColor: '#e5e5e5',
     backgroundColor: '#fff',
   },
   closeButton: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#000',
     textAlign: 'center',
   },
   headerSubtitle: {
@@ -218,23 +218,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   contentTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#000',
     marginLeft: 8,
   },
   contentCard: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
     padding: 20,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#e5e5e5',
   },
   contentText: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#333',
+    color: '#000',
   },
   emptyContent: {
     alignItems: 'center',
@@ -257,17 +257,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#000',
     marginBottom: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   metadataCard: {
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#e9ecef',
+    borderColor: '#e5e5e5',
   },
   metadataRow: {
     flexDirection: 'row',
@@ -278,14 +280,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   metadataLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     color: '#666',
     flex: 1,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   metadataValue: {
     fontSize: 14,
-    color: '#333',
+    color: '#000',
     flex: 2,
     textAlign: 'right',
   },
@@ -295,78 +299,71 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingContent: {
     backgroundColor: '#fff',
     padding: 24,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: 'center',
     marginHorizontal: 40,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
   },
   loadingText: {
-    fontSize: 16,
-    color: '#dc3545',
+    fontSize: 14,
+    color: '#000',
     marginTop: 12,
     fontWeight: '500',
   },
 });
 
-// Markdown styles for better content formatting
+// Updated markdown styles for clean black and white
 const markdownStyles = {
   body: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#333',
+    color: '#000',
     fontFamily: 'System',
   },
   heading1: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginTop: 20,
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
-    paddingBottom: 8,
-  },
-  heading2: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#000',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  heading2: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
     marginTop: 16,
     marginBottom: 8,
   },
   heading3: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#000',
     marginTop: 12,
     marginBottom: 6,
   },
   paragraph: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#333',
+    color: '#000',
     marginBottom: 12,
   },
   list_item: {
     fontSize: 16,
     lineHeight: 22,
-    color: '#333',
+    color: '#000',
     marginBottom: 4,
   },
-  bullet_list: {
-    marginBottom: 12,
-  },
-  ordered_list: {
-    marginBottom: 12,
-  },
   code_inline: {
-    backgroundColor: '#f0f0f0',
-    color: '#e11d48',
+    backgroundColor: '#f5f5f5',
+    color: '#000',
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 4,
@@ -374,16 +371,16 @@ const markdownStyles = {
     fontFamily: 'monospace',
   },
   code_block: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#f5f5f5',
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 6,
     marginVertical: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#4A90E2',
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
   },
   blockquote: {
     borderLeftWidth: 4,
-    borderLeftColor: '#ddd',
+    borderLeftColor: '#e5e5e5',
     paddingLeft: 12,
     marginVertical: 8,
     fontStyle: 'italic',
@@ -391,34 +388,11 @@ const markdownStyles = {
   },
   strong: {
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: '#000',
   },
   em: {
     fontStyle: 'italic',
   },
-  table: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 4,
-    marginVertical: 8,
-  },
-  th: {
-    backgroundColor: '#f5f5f5',
-    fontWeight: 'bold',
-    padding: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  td: {
-    padding: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  hr: {
-    backgroundColor: '#ddd',
-    height: 1,
-    marginVertical: 16,
-  }
 };
 
 export default RecordViewer;
