@@ -20,6 +20,9 @@ const SignupScreen = ({ navigation }) => {
     username: '',
     password: '',
     confirmPassword: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
     blood_group: '',
     aadhar: '',
     allergies: '',
@@ -39,7 +42,7 @@ const SignupScreen = ({ navigation }) => {
   };
 
   const validateForm = () => {
-    const { email, username, password, confirmPassword, blood_group } = formData;
+    const { email, username, password, confirmPassword, blood_group, first_name, last_name, phone_number } = formData;
     
     if (!email.trim()) {
       Alert.alert('Error', 'Please enter your email');
@@ -53,6 +56,26 @@ const SignupScreen = ({ navigation }) => {
     
     if (!username.trim()) {
       Alert.alert('Error', 'Please enter a username');
+      return false;
+    }
+
+    if (!first_name.trim()) {
+      Alert.alert('Error', 'Please enter your first name');
+      return false;
+    }
+
+    if (!last_name.trim()) {
+      Alert.alert('Error', 'Please enter your last name');
+      return false;
+    }
+
+    if (!phone_number.trim()) {
+      Alert.alert('Error', 'Please enter your phone number');
+      return false;
+    }
+
+    if (phone_number.length < 10) {
+      Alert.alert('Error', 'Please enter a valid phone number');
       return false;
     }
     
@@ -89,6 +112,9 @@ const SignupScreen = ({ navigation }) => {
         email: formData.email,
         username: formData.username,
         password: formData.password,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone_number: formData.phone_number,
         blood_group: formData.blood_group,
         aadhar: formData.aadhar || null,
         allergies: formData.allergies || null,
@@ -138,6 +164,41 @@ const SignupScreen = ({ navigation }) => {
           )}
 
           <View style={styles.form}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>First Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your first name"
+                value={formData.first_name}
+                onChangeText={(value) => handleInputChange('first_name', value)}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Last Name *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your last name"
+                value={formData.last_name}
+                onChangeText={(value) => handleInputChange('last_name', value)}
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Phone Number *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your phone number"
+                value={formData.phone_number}
+                onChangeText={(value) => handleInputChange('phone_number', value)}
+                keyboardType="phone-pad"
+                maxLength={15}
+                editable={!isLoading}
+              />
+            </View>
+
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Email *</Text>
               <TextInput

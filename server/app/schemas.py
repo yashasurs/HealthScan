@@ -19,6 +19,9 @@ class UserLogin(BaseModel):
 
 class UserCreate(UserLogin):
     email: EmailStr
+    first_name: str
+    last_name: str
+    phone_number: str
     blood_group: str
     aadhar: Optional[str] = None
     allergies: Optional[str] = None
@@ -88,6 +91,9 @@ class LinkInput(BaseModel):
 class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
     blood_group: Optional[str] = None
     aadhar: Optional[str] = None
     allergies: Optional[str] = None
@@ -98,6 +104,9 @@ class UserOut(BaseModel):
     id: int
     username: str
     email: EmailStr
+    first_name: str
+    last_name: str
+    phone_number: str
     blood_group: str
     aadhar: Optional[str] = None
     allergies: Optional[str] = None

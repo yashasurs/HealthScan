@@ -15,12 +15,14 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
 
-    hashed_password = utils.hash(user.password)
-
+    hashed_password = utils.hash(user.password)    
     new_user = models.User(
         email=user.email,
         username=user.username,
         password=hashed_password,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        phone_number=user.phone_number,
         blood_group=user.blood_group,
         aadhar=user.aadhar,
         allergies=user.allergies,
@@ -79,16 +81,28 @@ def update_user(
     user_obj = db.query(models.User).filter(models.User.id == current_user.id).first()
     if not user_obj:
         raise HTTPException(status_code=404, detail="User not found")
+    
+    # Handle username update
     if user_update.username:
-        # Check if username is taken by another user
         if db.query(models.User).filter(models.User.username == user_update.username, models.User.id != current_user.id).first():
             raise HTTPException(status_code=400, detail="Username already taken")
         user_obj.username = user_update.username
+    
+    # Handle email update
     if user_update.email:
-        # Check if email is taken by another user
         if db.query(models.User).filter(models.User.email == user_update.email, models.User.id != current_user.id).first():
             raise HTTPException(status_code=400, detail="Email already registered")
         user_obj.email = user_update.email
+    
+    # Handle required fields
+    if user_update.first_name is not None:
+        user_obj.first_name = user_update.first_name
+    if user_update.last_name is not None:
+        user_obj.last_name = user_update.last_name
+    if user_update.phone_number is not None:
+        user_obj.phone_number = user_update.phone_number
+    
+    # Handle optional fields
     if user_update.blood_group:
         user_obj.blood_group = user_update.blood_group
     if user_update.aadhar is not None:
@@ -99,6 +113,7 @@ def update_user(
         user_obj.doctor_name = user_update.doctor_name
     if user_update.visit_date is not None:
         user_obj.visit_date = user_update.visit_date
+    
     db.commit()
     db.refresh(user_obj)
     return user_obj
