@@ -1,0 +1,7 @@
+{
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportAttributeAccessIssue": "none",
+    "reportAssignmentType": "none"
+  },
+  "python.analysis.typeCheckingMode": "off"
+}
