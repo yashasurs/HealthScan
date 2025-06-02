@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
 import RecordItem from './RecordItem';
 
 /**
@@ -7,9 +7,8 @@ import RecordItem from './RecordItem';
  * @param {Object} props
  * @param {Array} props.records - Array of record objects
  * @param {Function} props.onRemoveRecord - Callback when record is removed
- * @param {Function} props.onUploadAll - Callback when upload all button is pressed
  */
-const RecordList = ({ records = [], onRemoveRecord, onUploadAll }) => {
+const RecordList = ({ records = [], onRemoveRecord }) => {
   const renderRecordItem = ({ item }) => {
     const handleRemove = typeof onRemoveRecord === 'function' ? onRemoveRecord : undefined;
     return (
@@ -19,15 +18,6 @@ const RecordList = ({ records = [], onRemoveRecord, onUploadAll }) => {
       />
     );
   };
-  
-  const renderFooter = () => (
-    <TouchableOpacity 
-      style={styles.submitButton}
-      onPress={onUploadAll}
-    >
-      <Text style={styles.submitButtonText}>Upload All Records</Text>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.container}>
@@ -44,7 +34,6 @@ const RecordList = ({ records = [], onRemoveRecord, onUploadAll }) => {
           data={records}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderRecordItem}
-          ListFooterComponent={renderFooter}
           scrollEnabled={false}
           nestedScrollEnabled={true}
         />
@@ -71,20 +60,7 @@ const styles = StyleSheet.create({
   },
   emptyStateText: {
     color: '#777',
-  },
-  submitButton: {
-    backgroundColor: '#000',
-    paddingVertical: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 30,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  }
 });
 
 export default RecordList;

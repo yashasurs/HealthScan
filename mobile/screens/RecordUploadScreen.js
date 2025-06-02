@@ -18,15 +18,34 @@ const RecordUploadScreen = ({ navigation }) => {
   const [records, setRecords] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
+  const [stats, setStats] = useState({
+    totalSize: 0,
+    count: 0
+  });
 
   const apiService = useApiService();
-  
-  const handleRecordPicked = (record) => {
-    setRecords([...records, record]);
+    const handleRecordPicked = (record) => {
+    const processedRecord = {
+      ...record,
+      filename: record.filename || record.name || 'unnamed_file',
+      file_size: record.size || 0,
+      type: record.mimeType || record.type || 'image/jpeg'
+    };
+    setRecords([...records, processedRecord]);
+    // Update stats
+    setStats(prev => ({
+      count: prev.count + 1,
+      totalSize: prev.totalSize + (record.size || 0)
+    }));
   };
-  
+
   const handleRemoveRecord = (recordToRemove) => {
     setRecords(records.filter(doc => doc.uri !== recordToRemove.uri));
+    // Update stats
+    setStats(prev => ({
+      count: prev.count - 1,
+      totalSize: prev.totalSize - (recordToRemove.file_size || 0)
+    }));
   };
 
   const handleNavigateToCollections = () => {
@@ -42,12 +61,12 @@ const RecordUploadScreen = ({ navigation }) => {
     setUploading(true);
     setUploadStatus('Uploading and processing records...');
 
-    try {
-      // Convert picked records to file objects for the API
+    try {      // Convert picked records to file objects for the API
       const files = records.map(doc => ({
         uri: doc.uri,
-        type: doc.type || 'image/jpeg',
-        name: doc.name || 'image.jpg'
+        type: doc.mimeType || doc.type || 'image/jpeg',
+        filename: doc.filename || doc.name || 'unnamed_file',
+        file_size: doc.size || 0
       }));
       
       const response = await apiService.ocr.processFiles(files);
@@ -80,16 +99,32 @@ const RecordUploadScreen = ({ navigation }) => {
       setUploading(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.container}>
-      <Header 
-        title="Upload Records" 
-        rightAction={{
-          icon: 'folder-outline',
-          onPress: handleNavigateToCollections
-        }}
-      />
+      <View style={styles.header}>
+        <Text style={styles.title}>Upload Records</Text>
+        <Text style={styles.subtitle}>Upload and process your medical records</Text>
+        
+        <TouchableOpacity 
+          style={styles.navigateButton} 
+          onPress={handleNavigateToCollections}
+        >
+          <Ionicons name="folder" size={24} color="#fff" />
+          <Text style={styles.buttonText}>View Collections</Text>
+        </TouchableOpacity>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{records.length}</Text>
+            <Text style={styles.statLabel}>Selected</Text>
+          </View>
+          <View style={styles.statSeparator} />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{(stats.totalSize / (1024 * 1024)).toFixed(1)}</Text>
+            <Text style={styles.statLabel}>Total MB</Text>
+          </View>
+        </View>
+      </View>
       
       <ScrollView style={styles.content}>
         {/* Upload Section */}
@@ -148,6 +183,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
+  header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+  },
+  navigateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#181818',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+    marginBottom: 24,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
   content: {
     flex: 1,
     padding: 20,
@@ -162,6 +232,32 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f7f7f9',
+    borderRadius: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  statSeparator: {
+    width: 1,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 10,
   },
   sectionHeader: {
     flexDirection: 'row',
