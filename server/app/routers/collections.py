@@ -289,3 +289,65 @@ async def get_shared_collection_record_pdf(
     return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers={
         "Content-Disposition": f"attachment; filename={record.filename or f'record_{record_id}'}.pdf"
     })
+
+@router.post("/share/{share_token}/save", response_model=CollectionResponse)
+async def save_shared_collection(
+    share_token: str,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """Save a shared collection to the current user's account (creates a copy with all records)"""
+    
+    # Find the share
+    share = db.query(Share).filter(
+        Share.share_token == share_token,
+        Share.is_active == True,
+        Share.collection_id.isnot(None)
+    ).first()
+    
+    if not share:
+        raise HTTPException(status_code=404, detail="Invalid or expired share link")
+    
+    # Get the original collection
+    original_collection = db.query(Collection).filter(Collection.id == share.collection_id).first()
+    
+    if not original_collection:
+        raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Check if user already has a copy of this collection
+    existing_copy = db.query(Collection).filter(
+        Collection.user_id == current_user.id,
+        Collection.name == f"Copy of {original_collection.name}"
+    ).first()
+    
+    if existing_copy:
+        raise HTTPException(status_code=400, detail="You already have a copy of this collection")
+    
+    # Create a new collection for the current user (copy)
+    new_collection = Collection(
+        name=f"Copy of {original_collection.name}",
+        description=f"Copy of shared collection: {original_collection.description or ''}",
+        user_id=current_user.id
+    )
+    
+    db.add(new_collection)
+    db.commit()
+    db.refresh(new_collection)
+    
+    # Copy all records from the original collection
+    original_records = db.query(Record).filter(Record.collection_id == share.collection_id).all()
+    
+    for original_record in original_records:
+        new_record = Record(
+            filename=original_record.filename,
+            content=original_record.content,
+            file_size=original_record.file_size,
+            file_type=original_record.file_type,
+            user_id=current_user.id,
+            collection_id=new_collection.id
+        )
+        db.add(new_record)
+    
+    db.commit()
+    
+    return new_collection

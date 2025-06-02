@@ -199,3 +199,53 @@ async def get_shared_record_pdf(
     return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers={
         "Content-Disposition": f"attachment; filename={record.filename or f'shared_record_{share_token[:8]}'}.pdf"
     })
+
+@router.post("/share/{share_token}/save", response_model=schemas.RecordResponse)
+async def save_shared_record(
+    share_token: str,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Save a shared record to the current user's account (creates a copy)"""
+    
+    # Find the share
+    share = db.query(models.Share).filter(
+        models.Share.share_token == share_token,
+        models.Share.is_active == True,
+        models.Share.record_id.isnot(None)
+    ).first()
+    
+    if not share:
+        raise HTTPException(status_code=404, detail="Invalid or expired share link")
+    
+    # Get the original record
+    original_record = db.query(models.Record).filter(models.Record.id == share.record_id).first()
+    
+    if not original_record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    # Check if user already has a copy of this record
+    existing_copy = db.query(models.Record).filter(
+        models.Record.user_id == current_user.id,
+        models.Record.filename == f"Copy of {original_record.filename}",
+        models.Record.content == original_record.content
+    ).first()
+    
+    if existing_copy:
+        raise HTTPException(status_code=400, detail="You already have a copy of this record")
+    
+    # Create a new record for the current user (copy)
+    new_record = models.Record(
+        filename=f"Copy of {original_record.filename}",
+        content=original_record.content,
+        file_size=original_record.file_size,
+        file_type=original_record.file_type,
+        user_id=current_user.id,
+        collection_id=None  # Save as unorganized record
+    )
+    
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    
+    return new_record
