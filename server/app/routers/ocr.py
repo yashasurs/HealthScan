@@ -5,7 +5,7 @@ from ..schemas import RecordResponse
 from ..models import Record
 from ..database import get_db
 from ..oauth2 import get_current_user
-from ..utils import GeminiAgent, merge_texts, process_single_image_tesseract
+from ..utils import MarkupAgent, merge_texts, process_single_image_tesseract
 import asyncio
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import multiprocessing
@@ -137,7 +137,7 @@ async def get_text(
             })
         
         # Second pass: format all extracted texts in batch using Gemini
-        agent = GeminiAgent()
+        agent = MarkupAgent()
         try:
             # Merge texts into a single string with default separator
             merged_text = merge_texts(extracted_texts)

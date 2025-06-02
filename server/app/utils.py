@@ -121,7 +121,6 @@ def markdown_to_pdf_bytes(markdown_text: str) -> bytes:
 
 
 
-
 def merge_texts(texts: List[str], separator: str = "\n\n---\n\n") -> str:
     """
     Merges a list of texts into a single string using a separator.
@@ -136,7 +135,7 @@ def merge_texts(texts: List[str], separator: str = "\n\n---\n\n") -> str:
     return separator.join(texts)
 
 
-class GeminiAgent():
+class MarkupAgent():
     def __init__(self):
         self.model = GeminiModel(
             "gemini-2.0-flash",
@@ -151,7 +150,6 @@ class GeminiAgent():
     async def generate_markup(
             self,
             merged_text: str = "",
-            separator: str = "\n\n---\n\n"
     ) -> List[MarkupResponse]:
         """
         Uses the LLM to format the input text as markup language, without changing its content.
@@ -173,18 +171,120 @@ class GeminiAgent():
                 "\n[{'markup': 'formatted text 1'}, {'markup': 'formatted text 2'}, {'markup': 'formatted text 3'}]"
             ),
         )
+
+        try:        
+            response = await agent.run(merged_text)
+            return response.output
         
-        # Passing the input as a positional argument as the first parameter
-        response = await agent.run(merged_text)
+        except Exception as e:
+            return f"Error: {e}"
+
+class SummaryGenerationAgent():
+    def __init__(self):
+        self.model = GeminiModel(
+            "gemini-2.0-flash",
+            provider=GoogleGLAProvider(
+                api_key=str(os.getenv("GEMINI_API_KEY")),
+            ),
+        )
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+
+    async def generate_summary(self, raw_input: str) -> str:
+        """
+        Generates a concise summary of medical document text.
         
-        return response.output
+        This function is designed for PHC (Primary Health Care) applications and optimized 
+        for medical terminology and context. It extracts key medical information while 
+        preserving important clinical details.
+        
+        Args:
+            raw_input (str): The raw text from a medical document
+            
+        Returns:
+            str: A concise, structured summary of the medical document
+        """
+        
+        agent = Agent(
+            self.model,
+            result_type=str,
+            system_prompt=(
+                "You are a medical summarization expert. Analyze the provided medical document and create a clear, "
+                "concise summary that preserves all critical medical information. Your response MUST be formatted "
+                "in valid Markdown following this EXACT structure:\n\n"
+                
+                "```markdown\n"
+                "# Medical Summary\n\n"
+                
+                "## Patient Information\n"
+                "[Age, gender, name if provided, MRN/ID if present]\n\n"
+                
+                "## Vital Signs\n"
+                "[BP, pulse, temperature, respiratory rate, SpO2, height, weight, BMI if present]\n\n"
+                
+                "## Chief Complaint\n"
+                "[Primary reason for visit/admission]\n\n"
+                
+                "## History of Present Illness\n"
+                "[Brief, focused narrative of the current medical issue]\n\n"
+                
+                "## Past Medical History\n"
+                "[Bulleted list of relevant medical conditions]\n\n"
+                
+                "## Medications\n"
+                "[Bulleted list with dosages, frequency, and route when available]\n\n"
+                
+                "## Allergies\n"
+                "[Bulleted list with reactions if specified]\n\n"
+                
+                "## Physical Examination\n"
+                "[Key findings organized by body system]\n\n"
+                
+                "## Assessment/Diagnosis\n"
+                "[Bulleted list of diagnoses with ICD codes if present]\n\n"
+                
+                "## Plan\n"
+                "[Bulleted treatment plan, follow-up instructions, referrals]\n\n"
+                
+                "## Lab Results\n"
+                "[Key laboratory findings in a concise format]\n\n"
+                
+                "## Imaging/Procedures\n"
+                "[Summary of relevant imaging or procedure results]\n\n"
+                "```\n\n"
+                
+                "IMPORTANT INSTRUCTIONS:\n"
+                "1. Only include sections that have information in the original document\n"
+                "2. Use exactly the section headings provided above (level 2 headings)\n"
+                "3. If information for a section is not available, omit that entire section\n"
+                "4. Do not add any explanatory text, notes, or disclaimers outside this format\n"
+                "5. Do not add any text like 'Not provided' or 'None' - simply omit those sections\n"
+                "6. Preserve exact medication names, dosages, lab values, and measurements\n"
+                "7. Use proper Markdown formatting: headers with #, bullet points with *, emphasis with ** when appropriate\n"
+                "8. Tables should use proper Markdown table syntax for lab results if appropriate\n"
+                "9. Your response must ONLY contain this Markdown content and nothing else\n"
+                "10. Be approximately 15-25% of the original text length\n\n"
+                
+                "Your summary must be accurate, clinically relevant, and suitable for healthcare professionals. "
+                "DO NOT add any information not present in the original text. DO NOT include any personal opinions or recommendations "
+                "beyond what is explicitly stated in the source document."
+            )
+        )
+
+        try:
+            response = await agent.run(raw_input)
+            return response.output
+
+        except Exception as e:
+            return f"Error: {e}"
 
 
     
 if __name__ == "__main__":
 
     async def main():
-        agent = GeminiAgent()
+        agent = MarkupAgent()
         # Define sample texts
         sample_texts = [
             """
