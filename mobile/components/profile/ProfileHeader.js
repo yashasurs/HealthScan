@@ -1,20 +1,22 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
 
 /**
- * Profile header component showing user avatar, name and role with hardcoded data
- * @param {function} onChangeAvatar - Function to call when change avatar button is pressed
+ * Profile header component showing user avatar, name and role with real user data
+ * @param {Object} user - The user data
+ * @param {boolean} isEditing - Flag indicating if the profile is in editing mode
+ * @param {function} onUpdate - Function to call when user data is updated
  */
-const ProfileHeader = ({ onChangeAvatar }) => {
-  // Hardcoded user data
-  const hardcodedUserData = {
-    fullName: "John Doe",
-    role: "Patient"
-  };
+const ProfileHeader = ({ user, isEditing, onUpdate }) => {
+  // Generate initials from the first and last name
+  const initials = user.first_name && user.last_name 
+    ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
+    : (user.username ? user.username[0].toUpperCase() : 'U');
   
-  // Generate initials from the name
-  const displayName = hardcodedUserData.fullName;
-  const initials = displayName.split(' ').map(n => n[0]).join('');  
+  const fullName = user.first_name && user.last_name 
+    ? `${user.first_name} ${user.last_name}`
+    : user.username;
+  
   return (
     <View style={styles.profileSection}>
       <View style={styles.avatarContainer}>
@@ -23,16 +25,21 @@ const ProfileHeader = ({ onChangeAvatar }) => {
             {initials}
           </Text>
         </View>
-        <TouchableOpacity 
-          style={styles.editAvatarButton}
-          onPress={onChangeAvatar}
-        >
-          <Text style={styles.editAvatarButtonText}>Change</Text>
-        </TouchableOpacity>
+        {isEditing && (
+          <TouchableOpacity 
+            style={styles.editAvatarButton}
+            onPress={() => Alert.alert('Coming Soon', 'Avatar upload feature will be available in a future update.')}
+          >
+            <Text style={styles.editAvatarButtonText}>Change</Text>
+          </TouchableOpacity>
+        )}
       </View>
       
-      <Text style={styles.userName}>{displayName}</Text>
-      <Text style={styles.userRole}>{hardcodedUserData.role}</Text>
+      <Text style={styles.userName}>{fullName}</Text>
+      <Text style={styles.userRole}>Patient</Text>
+      {user.phone_number && (
+        <Text style={styles.phoneNumber}>{user.phone_number}</Text>
+      )}
     </View>
   );
 };
@@ -79,6 +86,11 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: 16,
+    color: '#666',
+    marginBottom: 4,
+  },
+  phoneNumber: {
+    fontSize: 14,
     color: '#666',
   },
 });

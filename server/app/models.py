@@ -11,6 +11,9 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=True)
+    first_name = Column(String(50), nullable=False)
+    last_name = Column(String(50), nullable=False)
+    phone_number = Column(String(15), nullable=False)
     aadhar = Column(String(12), nullable=True)  # Optional 12-digit Aadhar number
     allergies = Column(Text, nullable=True)
     doctor_name = Column(String(100), nullable=True)

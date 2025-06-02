@@ -55,7 +55,6 @@ export const AuthProvider = ({ children }) => {
 
     loadStoredData();
   }, []);
-
   const register = async (userData) => {
     try {
       setError(null);
@@ -65,6 +64,9 @@ export const AuthProvider = ({ children }) => {
         email: userData.email,
         username: userData.username,
         password: userData.password,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        phone_number: userData.phone_number,
         blood_group: userData.blood_group || null,
         aadhar: userData.aadhar || null,
         allergies: userData.allergies || null,

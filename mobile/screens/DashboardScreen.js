@@ -75,6 +75,16 @@ const DashboardScreen = () => {
             <View style={styles.infoSection}>
               <Text style={styles.sectionTitle}>Basic Info</Text>
               <View style={styles.patientInfoRow}>
+                <Text style={styles.patientInfoLabel}>Name:</Text>
+                <Text style={styles.patientInfoValue}>
+                  {`${patientData.first_name} ${patientData.last_name}`}
+                </Text>
+              </View>
+              <View style={styles.patientInfoRow}>
+                <Text style={styles.patientInfoLabel}>Phone:</Text>
+                <Text style={styles.patientInfoValue}>{patientData.phone_number}</Text>
+              </View>
+              <View style={styles.patientInfoRow}>
                 <Text style={styles.patientInfoLabel}>Username:</Text>
                 <Text style={styles.patientInfoValue}>{patientData.username}</Text>
               </View>
