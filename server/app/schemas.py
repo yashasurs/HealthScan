@@ -116,3 +116,45 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
+class MessageResponse(BaseModel):
+    message: str
+
+class SummaryRecordResponse(BaseModel):
+    original_record_id: str
+    original_filename: str
+    summary_record_id: Optional[str] = None
+    summary_filename: Optional[str] = None
+    error: Optional[str] = None
+
+class CollectionSummaryResponse(BaseModel):
+    collection: CollectionResponse
+    summaries: List[SummaryRecordResponse]
+
+class SharedCollectionResponse(BaseModel):
+    collection: dict
+    records: List[dict]
+
+class SharedRecordResponse(BaseModel):
+    id: str
+    filename: str
+    content: str
+    file_size: Optional[int] = None
+    file_type: Optional[str] = None
+    created_at: datetime
+
+class RecordSummaryResponse(RecordResponse):
+    original_record_id: Optional[str] = None
+    original_filename: Optional[str] = None
+
+class SharedRecordSummaryResponse(BaseModel):
+    id: str
+    filename: str
+    content: str
+    original_filename: str
+
+class CollectionSummaryContent(BaseModel):
+    collection_id: str
+    collection_name: str
+    summary_content: str
+    record_count: int
+

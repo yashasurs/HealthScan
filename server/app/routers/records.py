@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import schemas, models, database, oauth2, utils
 from fastapi.responses import StreamingResponse
 import io
-from ..utils import markdown_to_pdf_bytes
+from ..utils import markdown_to_pdf_bytes, SummaryGenerationAgent
 
 
 router = APIRouter(
@@ -42,7 +42,7 @@ def get_record(
     
     return record
 
-@router.patch("/{record_id}")
+@router.patch("/{record_id}", response_model=schemas.MessageResponse)
 def update_record(
     record_id: str,
     record_update: schemas.RecordUpdate,
@@ -71,7 +71,7 @@ def update_record(
     
     return {"message": "Record updated successfully"}
 
-@router.patch("/{record_id}/content")
+@router.patch("/{record_id}/content", response_model=schemas.MessageResponse)
 def update_record_content(
     record_id: str,
     content: str,
@@ -95,7 +95,7 @@ def update_record_content(
     
     return {"message": "Record content updated successfully"}
 
-@router.delete("/{record_id}")
+@router.delete("/{record_id}", response_model=schemas.MessageResponse)
 def delete_record(
     record_id: str,
     db: Session = Depends(database.get_db),
@@ -139,7 +139,7 @@ def get_record_pdf(
         "Content-Disposition": f"attachment; filename=record_{record_id}.pdf"
     })
 
-@router.get("/share/{share_token}")
+@router.get("/share/{share_token}", response_model=schemas.SharedRecordResponse)
 async def access_shared_record(
     share_token: str,
     db: Session = Depends(database.get_db)
@@ -249,3 +249,59 @@ async def save_shared_record(
     db.refresh(new_record)
     
     return new_record
+
+@router.get("/{record_id}/summary", response_model=schemas.RecordSummaryResponse)
+async def get_record_summary(
+    record_id: str,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Generate a medical summary for a specific record"""
+    record = db.query(models.Record).filter(
+        models.Record.id == record_id,
+        models.Record.user_id == current_user.id
+    ).first()
+    
+    if not record:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Record not found"
+        )
+    
+    # Check if content is too short
+    if not record.content or len(record.content.strip()) < 50:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Record content is too short to summarize"
+        )
+    
+    # Generate summary using the SummaryGenerationAgent
+    summary_agent = SummaryGenerationAgent()
+    try:
+        summary = await summary_agent.generate_summary(record.content)
+        
+        # Create a new record with the summary
+        summary_record = models.Record(
+            filename=f"Summary of {record.filename}",
+            content=summary,
+            file_size=len(summary.encode('utf-8')),
+            file_type="text/markdown",
+            user_id=current_user.id,
+            collection_id=record.collection_id
+        )
+        
+        db.add(summary_record)
+        db.commit()
+        db.refresh(summary_record)
+        
+        # Return response with original record details
+        return {
+            **summary_record.__dict__,
+            "original_record_id": record.id,
+            "original_filename": record.filename
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate summary: {str(e)}"
+        )
