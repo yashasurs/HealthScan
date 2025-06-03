@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, View, Text, ActivityIndicator, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, View, Text, ActivityIndicator, RefreshControl, TextInput, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../Contexts/Authcontext';
@@ -10,13 +10,15 @@ const DashboardScreen = () => {
   const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({});
   const { user } = useAuth();
   const apiService = useApiService();
-
   const loadData = async () => {
     try {
       const response = await apiService.auth.getCurrentUser();
       setPatientData(response.data);
+      setEditData(response.data);
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
@@ -33,10 +35,54 @@ const DashboardScreen = () => {
     await loadData();
     setRefreshing(false);
   };
-
   const handleAddRecord = () => {
     navigation.navigate('Upload');
   };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditData(patientData);
+  };
+  const handleSaveEdit = async () => {
+    try {
+      setLoading(true);
+      await apiService.auth.updateUser(editData);
+      setPatientData(editData);
+      setIsEditing(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setEditData(prev => ({
+      ...prev,
+      [field]: value    }));
+  };
+
+  const renderField = (label, field, value, editable = true) => (
+    <View style={styles.patientInfoRow}>
+      <Text style={styles.patientInfoLabel}>{label}:</Text>
+      {isEditing && editable ? (
+        <TextInput
+          style={styles.editInput}
+          value={editData[field] || ''}
+          onChangeText={(text) => handleInputChange(field, text)}
+          placeholder={`Enter ${label.toLowerCase()}`}
+        />
+      ) : (
+        <Text style={styles.patientInfoValue}>{value}</Text>
+      )}
+    </View>
+  );
 
   const renderContent = () => {
     if (loading) {
@@ -59,64 +105,39 @@ const DashboardScreen = () => {
     return (
       <View style={styles.section}>
         <View style={styles.patientCard}>
-          <View style={styles.cardHeader}>
-            <View style={styles.cardTitleContainer}>
-              <View style={styles.iconContainer}>
-                <Ionicons name="person-circle-outline" size={24} color="#4A90E2" />
+          <View style={styles.cardHeader}>            <View style={styles.cardTitleContainer}>              <View style={styles.iconContainer}>
+                <Ionicons name="person-circle-outline" size={24} color="#666" />
               </View>
               <Text style={styles.cardTitle}>Patient Information</Text>
-            </View>
-            <TouchableOpacity style={styles.editButton}>
+            </View>            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
               <Ionicons name="pencil-outline" size={20} color="#666" />
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.patientInfoContainer}>
-            <View style={styles.infoSection}>
+            <View style={styles.patientInfoContainer}>            <View style={styles.infoSection}>
               <Text style={styles.sectionTitle}>Basic Info</Text>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Name:</Text>
-                <Text style={styles.patientInfoValue}>
-                  {`${patientData.first_name} ${patientData.last_name}`}
-                </Text>
-              </View>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Phone:</Text>
-                <Text style={styles.patientInfoValue}>{patientData.phone_number}</Text>
-              </View>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Username:</Text>
-                <Text style={styles.patientInfoValue}>{patientData.username}</Text>
-              </View>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Blood Group:</Text>
-                <Text style={[styles.patientInfoValue, styles.highlightValue]}>
-                  {patientData.blood_group || 'Not specified'}
-                </Text>
-              </View>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Aadhar:</Text>
-                <Text style={styles.patientInfoValue}>{patientData.aadhar || 'Not provided'}</Text>
-              </View>
+              {renderField('Full Name', 'full_name', `${patientData.first_name || ''} ${patientData.last_name || ''}`.trim())}
+              {renderField('Username', 'username', patientData.username)}
             </View>
 
             <View style={styles.infoSection}>
               <Text style={styles.sectionTitle}>Medical Info</Text>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Doctor:</Text>
-                <Text style={styles.patientInfoValue}>{patientData.doctor_name || 'Not assigned'}</Text>
-              </View>
-              <View style={styles.patientInfoRow}>
-                <Text style={styles.patientInfoLabel}>Last Visit:</Text>
-                <Text style={styles.patientInfoValue}>{patientData.visit_date || 'No visits recorded'}</Text>
-              </View>
-              <View style={[styles.patientInfoRow, styles.lastRow]}>
-                <Text style={styles.patientInfoLabel}>Allergies:</Text>
-                <Text style={styles.patientInfoValue}>
-                  {patientData.allergies ? patientData.allergies.join(", ") : 'None reported'}
-                </Text>
-              </View>
+              {renderField('Blood Group', 'blood_group', patientData.blood_group || 'Not specified')}
+              {renderField('Aadhar Card', 'aadhar_card', patientData.aadhar_card || 'Not provided')}
+              {renderField('Allergies', 'allergies', patientData.allergies || 'None reported')}
+              {renderField('Doctor Name', 'doctor_name', patientData.doctor_name || 'Not assigned')}
+              {renderField('Last Visit', 'visit_date', patientData.visit_date || 'No visits recorded', false)}
             </View>
+
+            {isEditing && (
+              <View style={styles.editButtonsContainer}>
+                <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancelEdit}>
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSaveEdit}>
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </View>
@@ -138,7 +159,10 @@ const DashboardScreen = () => {
         </TouchableOpacity>
       </View>      <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isEditing && styles.scrollContentEditing
+        ]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -153,7 +177,8 @@ const DashboardScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({  container: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
@@ -164,14 +189,9 @@ const styles = StyleSheet.create({  container: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   title: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 5,
@@ -198,68 +218,74 @@ const styles = StyleSheet.create({  container: {
     marginLeft: 8,
   },  content: {
     flex: 1,
-  },
-  section: {
-    flex: 1,
-    padding: 16,
-  },  patientCard: {
-    flex: 1,
+    padding: 20,
+  },  section: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  patientCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
     overflow: 'hidden',
   },  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: '#f7f7f9',
     borderBottomWidth: 1,
-    borderBottomColor: '#edf2f7',
-  },
-  cardTitleContainer: {
+    borderBottomColor: '#e0e0e0',
+  },cardTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  iconContainer: {
-    backgroundColor: '#e8f2ff',
-    padding: 8,
-    borderRadius: 12,
+  },  iconContainer: {
+    backgroundColor: '#f0f0f0',
+    padding: 6,
+    borderRadius: 10,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#2d3748',
-    marginLeft: 10,
+    color: '#333',
+    marginLeft: 8,
   },
   editButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: '#f1f1f1',
+    padding: 6,
+    borderRadius: 6,
+    backgroundColor: '#f0f0f0',
   },  patientInfoContainer: {
     flex: 1,
-    padding: 16,
+    padding: 12,
   },
   infoSection: {
-    marginBottom: 24,
+    marginBottom: 18,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#4A90E2',
-    marginBottom: 16,
-    paddingBottom: 8,
+    color: '#1a1a1a',
+    marginBottom: 12,
+    paddingBottom: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#edf2f7',
+    borderBottomColor: '#e0e0e0',
   },  patientInfoRow: {
     flexDirection: 'row',
-    marginBottom: 12,
-    paddingBottom: 12,
+    marginBottom: 10,
+    paddingBottom: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
@@ -272,19 +298,61 @@ const styles = StyleSheet.create({  container: {
     width: 100,
     fontSize: 14,
     fontWeight: '600',
-    color: '#718096',
+    color: '#666',
   },
   patientInfoValue: {
     flex: 1,
     fontSize: 14,
-    color: '#2d3748',
+    color: '#333',
     fontWeight: '500',
   },
   highlightValue: {
-    color: '#4A90E2',
+    color: '#333',
     fontWeight: '700',
+  },  editInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: '#fff',
+  },  editButtonsContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
   },
-  loadingContainer: {
+  button: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  saveButton: {
+    backgroundColor: '#181818',
+  },
+  cancelButtonText: {
+    color: '#666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -297,18 +365,23 @@ const styles = StyleSheet.create({  container: {
     backgroundColor: '#fff',
     borderRadius: 12,
     margin: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   emptyStateText: {
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
     marginBottom: 8,
-  },  emptyStateSubText: {
+  },
+  emptyStateSubText: {
     fontSize: 14,
     color: '#666',
-  },
-  scrollContent: {
+  },scrollContent: {
     flexGrow: 1,
+  },
+  scrollContentEditing: {
+    paddingBottom: 150, // Extra padding when in edit mode
   },
 });
 
