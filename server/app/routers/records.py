@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from .. import schemas, models, database, oauth2, utils
 from fastapi.responses import StreamingResponse
 import io
-from ..utils import markdown_to_pdf_bytes, SummaryGenerationAgent
+from ..utils import markdown_to_pdf_bytes
 
 
 router = APIRouter(
