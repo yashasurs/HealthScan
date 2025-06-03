@@ -14,6 +14,7 @@ import RecordUploadScreen from './screens/RecordUploadScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import FolderSystemScreen from './screens/FolderSystemScreen';
 import RecordDetailScreen from './screens/RecordDetailScreen';
+import RecordViewerScreen from './screens/RecordViewerScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -44,11 +45,13 @@ function MainTabNavigator() {
             iconName = focused ? 'document-text' : 'document-text-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
-          }          return (
+          }
+          return (
             <View style={[
               styles.iconContainer, 
               focused && styles.iconContainerFocused
-            ]}>              <Ionicons 
+            ]}>
+              <Ionicons 
                 name={iconName} 
                 size={focused ? 22 : 20} 
                 color={color} 
@@ -57,9 +60,11 @@ function MainTabNavigator() {
               {focused && <View style={styles.focusIndicator} />}
             </View>
           );
-        },        tabBarActiveTintColor: '#FFFFFF',
+        },
+        tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: '#9CA3AF',
-        tabBarBackground: () => <CustomTabBarBackground />,        tabBarStyle: {
+        tabBarBackground: () => <CustomTabBarBackground />,
+        tabBarStyle: {
           position: 'absolute',
           bottom: Platform.OS === 'ios' ? 30 : 20,
           left: 20,
@@ -81,7 +86,8 @@ function MainTabNavigator() {
           borderWidth: 1,
           borderColor: 'rgba(255, 255, 255, 0.1)',
           backgroundColor: 'transparent',
-        },        tabBarLabelStyle: {
+        },
+        tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
           marginTop: 4,
@@ -136,17 +142,31 @@ function AppNavigator() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#4A90E2" />
       </View>
     );
   }
+
   return (
     <NavigationContainer>
       <StatusBar style="dark" />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
+        {!isAuthenticated ? (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+          </>
+        ) : (
           <>
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+            <Stack.Screen 
+              name="RecordViewer" 
+              component={RecordViewerScreen}
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom'
+              }}
+            />
             <Stack.Screen 
               name="CollectionSystem" 
               component={FolderSystemScreen} 
@@ -157,11 +177,6 @@ function AppNavigator() {
               component={RecordDetailScreen} 
               options={{ headerShown: false, presentation: 'card' }} 
             />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
           </>
         )}
       </Stack.Navigator>
@@ -183,7 +198,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-  },  tabBarBackground: {
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  tabBarBackground: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -192,48 +212,24 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   iconContainer: {
-    justifyContent: 'center',
     alignItems: 'center',
-    width: 36,
-    height: 30,
-    borderRadius: 16,
-    marginBottom: 1,
-    position: 'relative',
-  },  iconContainerFocused: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#FFFFFF',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-    transform: [{ scale: 1.02 }],
+    justifyContent: 'center',
+    paddingTop: 4,
+  },
+  iconContainerFocused: {
+    transform: [{ scale: 1.1 }],
   },
   iconFocused: {
-    shadowColor: '#FFFFFF',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 2,
-  },focusIndicator: {
+    textShadowColor: 'rgba(255, 255, 255, 0.2)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  focusIndicator: {
     position: 'absolute',
-    bottom: -6,
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
+    bottom: -12,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: '#FFFFFF',
-    shadowColor: '#FFFFFF',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    elevation: 3,
   },
 });

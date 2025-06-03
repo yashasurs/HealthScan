@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, RefreshControl, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ConfirmationModal } from '../common';
+import { ConfirmationModal, Checkbox } from '../common';
 import { useApiService } from '../../services/apiService';
 
 /**
@@ -16,6 +16,8 @@ import { useApiService } from '../../services/apiService';
  * @param {boolean} props.refreshing - Whether the list is currently refreshing
  * @param {Function} props.onCollectionDelete - Callback when collection is deleted
  * @param {Function} props.onRecordDelete - Callback when record is deleted
+ * @param {Function} props.onCreateCollection - Callback when creating a new collection
+ * @param {Function} props.onRecordAddedToCollection - Callback when records are added to collection
  */
 const CollectionTree = ({
   collections = [],
@@ -28,11 +30,18 @@ const CollectionTree = ({
   refreshing = false,
   onCollectionDelete,
   onRecordDelete,
-  onCreateCollection // Add this prop
+  onCreateCollection,
+  onRecordAddedToCollection
 }) => {
   const [expandedCollections, setExpandedCollections] = useState(new Set());
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
+  const [showRecordPickerModal, setShowRecordPickerModal] = useState(false);
+  const [selectedCollectionForAdding, setSelectedCollectionForAdding] = useState(null);
+  const [selectedRecordsForAdding, setSelectedRecordsForAdding] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const apiService = useApiService();
 
   const toggleCollection = (collectionId) => {
     const newExpanded = new Set(expandedCollections);
@@ -72,6 +81,54 @@ const CollectionTree = ({
   const handleDeleteCancel = () => {
     setConfirmDeleteVisible(false);
     setDeleteItem(null);
+  };
+
+  const handleAddRecordsToCollection = async () => {
+    setLoading(true);
+    try {
+      // Add each selected record to the collection
+      for (const recordId of selectedRecordsForAdding) {
+        await apiService.collections.addRecord(selectedCollectionForAdding.id, recordId);
+      }
+      
+      setShowRecordPickerModal(false);
+      Alert.alert(
+        'Success', 
+        `${selectedRecordsForAdding.length} record(s) added to ${selectedCollectionForAdding.name}`
+      );
+      
+      // Reset selections and refresh
+      setSelectedRecordsForAdding([]);
+      setSelectedCollectionForAdding(null);
+      onRefresh?.();
+    } catch (error) {
+      console.error('Error adding records to collection:', error);
+      Alert.alert('Error', 'Failed to add records to collection');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenRecordPicker = (collection) => {
+    const unorganizedRecords = getUnorganizedRecords();
+    if (unorganizedRecords.length === 0) {
+      Alert.alert('No Records', 'No unorganized records available to add');
+      return;
+    }
+    setSelectedCollectionForAdding(collection);
+    setSelectedRecordsForAdding([]);
+    setShowRecordPickerModal(true);
+  };
+
+  const handleRecordSelectionToggle = (recordId) => {
+    setSelectedRecordsForAdding(prev => {
+      const isSelected = prev.includes(recordId);
+      if (isSelected) {
+        return prev.filter(id => id !== recordId);
+      } else {
+        return [...prev, recordId];
+      }
+    });
   };
 
   const renderRecord = (record) => (
@@ -203,16 +260,35 @@ const CollectionTree = ({
               </View>
             </View>
           </View>
-        </TouchableOpacity>
-
-        {/* Expanded Records List */}
+        </TouchableOpacity>        {/* Expanded Records List */}
         {isExpanded && (
           <View style={styles.recordsList}>
             {collectionRecords.length > 0 ? (
-              collectionRecords.map(renderRecord)
+              <>
+                {collectionRecords.map(renderRecord)}
+                {/* Add Records button for collections with existing records */}
+                {getUnorganizedRecords().length > 0 && (
+                  <View style={styles.addMoreRecordsContainer}>
+                    <TouchableOpacity
+                      style={styles.addMoreRecordsButton}
+                      onPress={() => handleOpenRecordPicker(collection)}
+                    >
+                      <Ionicons name="add-outline" size={16} color="#4A90E2" />
+                      <Text style={styles.addMoreRecordsText}>Add More Records</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </>
             ) : (
               <View style={styles.emptyRecords}>
                 <Text style={styles.emptyText}>No records in this collection</Text>
+                <TouchableOpacity
+                  style={styles.addRecordButton}
+                  onPress={() => handleOpenRecordPicker(collection)}
+                >
+                  <Ionicons name="add-outline" size={16} color="#4A90E2" />
+                  <Text style={styles.addRecordText}>Add Records</Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
@@ -263,7 +339,85 @@ const CollectionTree = ({
         onClose={handleDeleteCancel}
         confirmText="Delete"
         confirmColor="#dc3545"
-      />
+      />      {/* Record Picker Modal */}
+      <Modal
+        visible={showRecordPickerModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowRecordPickerModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={() => setShowRecordPickerModal(false)}
+              style={styles.modalCloseButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Add Records to Collection</Text>
+            <TouchableOpacity
+              onPress={handleAddRecordsToCollection}
+              style={[
+                styles.modalSaveButton,
+                (selectedRecordsForAdding.length === 0 || loading) && styles.modalSaveButtonDisabled
+              ]}
+              disabled={selectedRecordsForAdding.length === 0 || loading}
+            >
+              <Text style={[
+                styles.modalSaveText,
+                (selectedRecordsForAdding.length === 0 || loading) && styles.modalSaveTextDisabled
+              ]}>
+                {loading ? 'Adding...' : 'Add Records'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.modalContent}>
+            <Text style={styles.modalSubtitle}>
+              Select records to add to "{selectedCollectionForAdding?.name}"
+            </Text>
+            
+            {/* Record selection list */}
+            <FlatList
+              data={getUnorganizedRecords()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  onPress={() => handleRecordSelectionToggle(item.id)}
+                  style={[
+                    styles.recordSelectItem,
+                    selectedRecordsForAdding.includes(item.id) && styles.recordSelectItemSelected
+                  ]}
+                >
+                  <Checkbox
+                    value={selectedRecordsForAdding.includes(item.id)}
+                    onValueChange={() => handleRecordSelectionToggle(item.id)}
+                    color="#4A90E2"
+                  />
+                  <View style={styles.recordSelectInfo}>
+                    <Text style={styles.recordSelectText} numberOfLines={1}>
+                      {item.original_filename || item.filename || 'Untitled'}
+                    </Text>
+                    <Text style={styles.recordSelectMeta}>
+                      {item.file_type ? item.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {Math.round((item.file_size || 0) / 1024)}KB
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.recordSelectList}
+              showsVerticalScrollIndicator={false}
+            />
+
+            {getUnorganizedRecords().length === 0 && (
+              <View style={styles.emptyRecordsMessage}>
+                <Ionicons name="documents-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyRecordsText}>No unorganized records available</Text>
+                <Text style={styles.emptyRecordsSubText}>All records are already organized in collections</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -442,6 +596,147 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     color: '#999',
+  },
+  addRecordButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f8ff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+  },
+  addRecordText: {
+    fontSize: 14,
+    color: '#4A90E2',
+    marginLeft: 4,
+    fontWeight: '500',
+  },
+  addMoreRecordsContainer: {
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    backgroundColor: '#f9f9f9',
+    alignItems: 'center',
+  },
+  addMoreRecordsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#4A90E2',
+    minWidth: 150,
+  },
+  addMoreRecordsText: {
+    fontSize: 14,
+    color: '#4A90E2',
+    marginLeft: 6,
+    fontWeight: '500',
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalSaveButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: '#4A90E2',
+    borderRadius: 6,
+  },
+  modalSaveButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  modalSaveText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalSaveTextDisabled: {
+    color: '#999',
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 20,
+  },
+  recordSelectList: {
+    paddingVertical: 8,
+  },
+  recordSelectItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  recordSelectItemSelected: {
+    backgroundColor: '#e6f7ff',
+    borderColor: '#4A90E2',
+  },
+  recordSelectInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  recordSelectText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+    marginBottom: 4,
+  },
+  recordSelectMeta: {
+    fontSize: 12,
+    color: '#999',
+  },
+  emptyRecordsMessage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
+  },
+  emptyRecordsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyRecordsSubText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
   },
 });
 
