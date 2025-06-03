@@ -15,13 +15,17 @@ load_dotenv()
 SECRET_KEY = os.environ.get('SECRET_KEY')
 ALGORITHM = os.environ.get('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', 30))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get('REFRESH_TOKEN_EXPIRE_DAYS', 7))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-
+    
+    # Add token type for validation
+    to_encode.update({"token_type": "access"})
+    
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
 
@@ -30,18 +34,48 @@ def create_access_token(data: dict):
     return encoded_jwt
 
 
-def verify_access_token(token: str, credentials_exception):
+def create_refresh_token(data: dict):
+    to_encode = data.copy()
+    
+    # Add token type for validation
+    to_encode.update({"token_type": "refresh"})
+    
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire})
+
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    return encoded_jwt
+
+
+def verify_token(token: str, credentials_exception, expected_token_type=None):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Extract user ID
         id = payload.get("user_id")
         if id is None:
             raise credentials_exception
-        token_data = schemas.TokenData(id=int(id))
+        
+        # Extract and validate token type if required
+        token_type = payload.get("token_type")
+        if expected_token_type and token_type != expected_token_type:
+            raise credentials_exception
+            
+        token_data = schemas.TokenData(id=int(id), token_type=token_type)
     except jwt.ExpiredSignatureError:
         raise credentials_exception
     except jwt.InvalidTokenError:
         raise credentials_exception
     return token_data
+
+
+def verify_access_token(token: str, credentials_exception):
+    return verify_token(token, credentials_exception, expected_token_type="access")
+
+
+def verify_refresh_token(token: str, credentials_exception):
+    return verify_token(token, credentials_exception, expected_token_type="refresh")
 
 
 def get_current_user(

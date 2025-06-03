@@ -32,8 +32,16 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # Generate tokens
     access_token = oauth2.create_access_token(data={"user_id": new_user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = oauth2.create_refresh_token(data={"user_id": new_user.id})
+    
+    return {
+        "access_token": access_token, 
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
 
 @router.post("/login", response_model=schemas.Token)
 def login(
@@ -48,8 +56,16 @@ def login(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
+    # Generate tokens
     access_token = oauth2.create_access_token(data={"user_id": user.id})
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = oauth2.create_refresh_token(data={"user_id": user.id})
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
 
 @router.delete("/user")
 def delete_user(
@@ -117,6 +133,33 @@ def update_user(
     db.commit()
     db.refresh(user_obj)
     return user_obj
+
+@router.post("/refresh", response_model=schemas.Token)
+def refresh_token(refresh_token: str, db: Session = Depends(database.get_db)):
+    """Endpoint to get a new access token using a refresh token"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid refresh token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    # Verify the refresh token
+    token_data = oauth2.verify_refresh_token(refresh_token, credentials_exception)
+    
+    # Get the user from the database
+    user = db.query(models.User).filter(models.User.id == token_data.id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate new tokens
+    new_access_token = oauth2.create_access_token(data={"user_id": user.id})
+    new_refresh_token = oauth2.create_refresh_token(data={"user_id": user.id})
+    
+    return {
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer"
+    }
 
 @router.get("/me", response_model=schemas.UserOut)
 def read_users_me(current_user: models.User = Depends(oauth2.get_current_user)):
