@@ -47,12 +47,15 @@ export const useApiService = () => {
   };
 
   return {
-    getAuthenticatedApi,
-    // Auth API
+    getAuthenticatedApi,    // Auth API
     auth: {
       getCurrentUser: async () => {
         const api = await getAuthenticatedApi();
         return api.get('/me');
+      },
+      updateUser: async (userData) => {
+        const api = await getAuthenticatedApi();
+        return api.put('/user', userData);
       }
     },
     // Collections API
@@ -108,14 +111,21 @@ export const useApiService = () => {
         const unorganizedRecords = response.data.filter(record => !record.collection_id);
         return { data: unorganizedRecords };
       }
-    },// OCR API
+    },    // OCR API
     ocr: {
       processFiles: async (files) => {
         const api = await getAuthenticatedApi();
         const formData = new FormData();
         
-        files.forEach(file => {
-          formData.append('files', file);
+        files.forEach((file, index) => {
+          // Ensure the file object has the correct properties for React Native FormData
+          const fileObject = {
+            uri: file.uri,
+            type: file.type || file.mimeType || 'image/jpeg',
+            name: file.filename || file.name || `file_${index}.jpg`
+          };
+          
+          formData.append('files', fileObject);
         });
 
         let url = '/ocr/get-text';

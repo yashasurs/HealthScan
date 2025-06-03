@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, Alert, View, ActivityIndicator } from 'react-native';
+import { StyleSheet, ScrollView, Alert, View, ActivityIndicator, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Header } from '../components/common';
 import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
@@ -84,56 +84,86 @@ const ProfileScreen = () => {
       setIsLoading(false);
     }
   };
-
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#000" />
       </View>
     );
-  }
+  }  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.subtitle}>Manage your account and settings</Text>
+      </View>
 
-  return (
-    <ScrollView style={styles.container}>
-      <Header title="Profile" />
-      {userData && (
-        <>
-          <ProfileHeader 
-            user={userData}
-            isEditing={isEditing}
-            onUpdate={handleUpdateProfile}
-          />
-          
-          <ProfileInfo 
-            user={userData}
-            isEditing={isEditing}
-            onUpdate={handleUpdateProfile}
-          />
-          
-          <ProfileActions 
-            isLoggingOut={isLoggingOut}
-            isEditing={isEditing}
-            onEditProfile={() => setIsEditing(true)}
-            onCancelEdit={() => setIsEditing(false)}
-            onChangePassword={handlePasswordChange}
-            onLogout={handleLogout}
-          />
-        </>
-      )}
-    </ScrollView>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {userData && (
+          <>
+            <ProfileHeader 
+              user={userData}
+              isEditing={isEditing}
+              onUpdate={handleUpdateProfile}
+            />
+            
+            <ProfileInfo 
+              user={userData}
+              isEditing={isEditing}
+              onUpdate={handleUpdateProfile}
+            />
+            
+            <ProfileActions 
+              isLoggingOut={isLoggingOut}
+              isEditing={isEditing}
+              onEditProfile={() => setIsEditing(true)}
+              onCancelEdit={() => setIsEditing(false)}
+              onChangePassword={handlePasswordChange}
+              onLogout={handleLogout}
+            />
+          </>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f8f9fa',
+  },  header: {
+    paddingTop: 40,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
     backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 3,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 0,
+  },  content: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 120, // Extra padding to account for navigation bar
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
 });
 
