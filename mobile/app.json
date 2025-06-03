@@ -19,7 +19,8 @@
         "foregroundImage": "./assets/health-scan.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.anonymous.projectsunga"
     },
     "web": {
       "favicon": "./assets/health-scan.png"

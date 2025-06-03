@@ -11,15 +11,16 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { useApiService } from '../services/apiService';
+import { RenameRecordModal } from '../components/modals';
 
 /**
  * RecordDetailScreen - Full screen view for displaying record details
  */
 const RecordDetailScreen = ({ navigation, route }) => {
-  const { recordId, record: initialRecord } = route.params;
-  const [record, setRecord] = useState(initialRecord);
+  const { recordId, record: initialRecord } = route.params;  const [record, setRecord] = useState(initialRecord);
   const [loading, setLoading] = useState(!initialRecord);
   const [deleting, setDeleting] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
   
   const apiService = useApiService();
 
@@ -70,7 +71,15 @@ const RecordDetailScreen = ({ navigation, route }) => {
       Alert.alert('Error', 'Failed to delete record');
     } finally {
       setDeleting(false);
-    }
+    }  };
+
+  const handleRename = () => {
+    setShowRenameModal(true);
+  };
+
+  const handleRecordRenamed = (recordId, newFilename) => {
+    // Update the local record state
+    setRecord(prev => ({ ...prev, filename: newFilename }));
   };
 
   const formatFileSize = (bytes) => {
@@ -115,19 +124,30 @@ const RecordDetailScreen = ({ navigation, route }) => {
           </Text>
           <Text style={styles.headerSubtitle}>
             {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {formatFileSize(record.file_size || 0)}
-          </Text>
+          </Text>        </View>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            onPress={handleRename} 
+            style={styles.actionButton}
+          >
+            <Ionicons 
+              name="pencil-outline" 
+              size={20} 
+              color="#4A90E2" 
+            />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleDelete} 
+            style={styles.actionButton}
+            disabled={deleting}
+          >
+            <Ionicons 
+              name="trash-outline" 
+              size={20} 
+              color={deleting ? "#ccc" : "#000"} 
+            />
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity 
-          onPress={handleDelete} 
-          style={styles.deleteButton}
-          disabled={deleting}
-        >
-          <Ionicons 
-            name="trash-outline" 
-            size={24} 
-            color={deleting ? "#ccc" : "#000"} 
-          />
-        </TouchableOpacity>
       </View>
 
       {/* Content */}
@@ -201,9 +221,16 @@ const RecordDetailScreen = ({ navigation, route }) => {
           <View style={styles.loadingContent}>
             <ActivityIndicator size="large" color="#000" />
             <Text style={styles.loadingText}>Deleting record...</Text>
-          </View>
-        </View>
+          </View>        </View>
       )}
+
+      {/* Rename Record Modal */}
+      <RenameRecordModal
+        visible={showRenameModal}
+        onClose={() => setShowRenameModal(false)}
+        record={record}
+        onRecordRenamed={handleRecordRenamed}
+      />
     </View>
   );
 };
@@ -237,12 +264,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
     textAlign: 'center',
-  },
-  headerSubtitle: {
+  },  headerSubtitle: {
     fontSize: 12,
     color: '#666',
     marginTop: 2,
     textAlign: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   deleteButton: {
     padding: 8,

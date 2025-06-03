@@ -57,16 +57,27 @@ export const useApiService = () => {
         const api = await getAuthenticatedApi();
         return api.put('/user', userData);
       }
-    },
-    // Collections API
+    },    // Collections API
     collections: {
       getAll: async () => {
         const api = await getAuthenticatedApi();
         return api.get('/collections/');
       },
+      get: async (collectionId) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/collections/${collectionId}`);
+      },
       create: async (collectionData) => {
         const api = await getAuthenticatedApi();
         return api.post('/collections/', collectionData);
+      },
+      update: async (collectionId, collectionData) => {
+        const api = await getAuthenticatedApi();
+        return api.put(`/collections/${collectionId}`, collectionData);
+      },
+      updatePartial: async (collectionId, collectionData) => {
+        const api = await getAuthenticatedApi();
+        return api.patch(`/collections/${collectionId}`, collectionData);
       },
       delete: async (collectionId) => {
         const api = await getAuthenticatedApi();
@@ -83,8 +94,16 @@ export const useApiService = () => {
       removeRecord: async (collectionId, recordId) => {
         const api = await getAuthenticatedApi();
         return api.delete(`/collections/${collectionId}/records/${recordId}`);
+      },
+      getSummary: async (collectionId) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/collections/${collectionId}/summary`);
+      },
+      getShared: async (shareToken) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/collections/share/${shareToken}`);
       }
-    },    // Records API
+    },// Records API
     records: {
       getAll: async () => {
         const api = await getAuthenticatedApi();
@@ -94,15 +113,43 @@ export const useApiService = () => {
         const api = await getAuthenticatedApi();
         return api.get(`/records/${recordId}`);
       },
-      update: async (recordId, content) => {
+      update: async (recordId, recordData) => {
         const api = await getAuthenticatedApi();
-        return api.patch(`/records/${recordId}`, null, {
+        return api.patch(`/records/${recordId}`, recordData);
+      },
+      updateContent: async (recordId, content) => {
+        const api = await getAuthenticatedApi();
+        return api.patch(`/records/${recordId}/content`, null, {
           params: { content }
         });
       },
       delete: async (recordId) => {
         const api = await getAuthenticatedApi();
         return api.delete(`/records/${recordId}`);
+      },
+      getPdf: async (recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/records/${recordId}/pdf`, {
+          responseType: 'blob'
+        });
+      },
+      getSummary: async (recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/records/${recordId}/summary`);
+      },
+      getShared: async (shareToken) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/records/share/${shareToken}`);
+      },
+      getSharedPdf: async (shareToken) => {
+        const api = await getAuthenticatedApi();
+        return api.get(`/records/share/${shareToken}/pdf`, {
+          responseType: 'blob'
+        });
+      },
+      saveShared: async (shareToken) => {
+        const api = await getAuthenticatedApi();
+        return api.post(`/records/share/${shareToken}/save`);
       },
       getUnorganized: async () => {
         const api = await getAuthenticatedApi();
