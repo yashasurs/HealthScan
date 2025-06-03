@@ -18,6 +18,12 @@ const EmailIcon = () => (
   </svg>
 );
 
+const PhoneIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+  </svg>
+);
+
 const HeartIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
     <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
@@ -55,11 +61,13 @@ const Profile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-
   // Form state
   const [formData, setFormData] = useState({
     username: '',
     email: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
     blood_group: '',
     aadhar: '',
     allergies: '',
@@ -68,13 +76,15 @@ const Profile = () => {
   });
 
   const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-
   // Load user data into form
   useEffect(() => {
     if (user) {
       setFormData({
         username: user.username || '',
         email: user.email || '',
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        phone_number: user.phone_number || '',
         blood_group: user.blood_group || '',
         aadhar: user.aadhar || '',
         allergies: user.allergies || '',
@@ -96,7 +106,6 @@ const Profile = () => {
     setError('');
     setSuccessMessage('');
   };
-
   const handleCancel = () => {
     setIsEditing(false);
     setError('');
@@ -106,6 +115,9 @@ const Profile = () => {
       setFormData({
         username: user.username || '',
         email: user.email || '',
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        phone_number: user.phone_number || '',
         blood_group: user.blood_group || '',
         aadhar: user.aadhar || '',
         allergies: user.allergies || '',
@@ -122,11 +134,13 @@ const Profile = () => {
 
     try {
       const api = createApiService();
-      
-      // Prepare data for API call
+        // Prepare data for API call
       const updateData = {
         username: formData.username || null,
         email: formData.email || null,
+        first_name: formData.first_name || null,
+        last_name: formData.last_name || null,
+        phone_number: formData.phone_number || null,
         blood_group: formData.blood_group || null,
         aadhar: formData.aadhar || null,
         allergies: formData.allergies || null,
@@ -177,15 +191,24 @@ const Profile = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+              <div className="flex items-center space-x-4">                <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-white">
-                    {user.username ? user.username.charAt(0).toUpperCase() : 'U'}
+                    {user.first_name 
+                      ? user.first_name.charAt(0).toUpperCase() 
+                      : user.username 
+                        ? user.username.charAt(0).toUpperCase() 
+                        : 'U'}
                   </span>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{user.username || 'User'}</h1>
+                </div><div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {user.first_name || user.last_name 
+                      ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
+                      : user.username || 'User'}
+                  </h1>
                   <p className="text-gray-600">{user.email}</p>
+                  {user.phone_number && (
+                    <p className="text-sm text-gray-500">{user.phone_number}</p>
+                  )}
                 </div>
               </div>
               
@@ -247,8 +270,7 @@ const Profile = () => {
             <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
           </div>
           
-          <div className="px-6 py-4 space-y-6">
-            {/* Basic Information */}
+          <div className="px-6 py-4 space-y-6">            {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -296,6 +318,81 @@ const Profile = () => {
                   <div className="flex items-center space-x-3 py-2">
                     <EmailIcon />
                     <span className="text-gray-900">{user.email || 'Not provided'}</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  First Name
+                </label>
+                {isEditing ? (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <UserIcon />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.first_name}
+                      onChange={(e) => handleInputChange('first_name', e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      placeholder="Enter first name"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3 py-2">
+                    <UserIcon />
+                    <span className="text-gray-900">{user.first_name || 'Not provided'}</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Last Name
+                </label>
+                {isEditing ? (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <UserIcon />
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.last_name}
+                      onChange={(e) => handleInputChange('last_name', e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      placeholder="Enter last name"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3 py-2">
+                    <UserIcon />
+                    <span className="text-gray-900">{user.last_name || 'Not provided'}</span>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                {isEditing ? (
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <PhoneIcon />
+                    </div>
+                    <input
+                      type="tel"
+                      value={formData.phone_number}
+                      onChange={(e) => handleInputChange('phone_number', e.target.value)}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-3 py-2">
+                    <PhoneIcon />
+                    <span className="text-gray-900">{user.phone_number || 'Not provided'}</span>
                   </div>
                 )}
               </div>
