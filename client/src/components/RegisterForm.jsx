@@ -46,9 +46,18 @@ const CalendarIcon = () => (
   </svg>
 );
 
+const PhoneIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+  </svg>
+);
+
 const RegisterForm = () => {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [bloodGroup, setBloodGroup] = useState('');
@@ -62,8 +71,7 @@ const RegisterForm = () => {
     const navigate = useNavigate();
     
     const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-    
-    const handleSubmit = async (e) => {
+      const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         
@@ -76,6 +84,21 @@ const RegisterForm = () => {
             setError("Please select your blood group");
             return;
         }
+
+        if (!firstName.trim()) {
+            setError("First name is required");
+            return;
+        }
+
+        if (!lastName.trim()) {
+            setError("Last name is required");
+            return;
+        }
+
+        if (!phoneNumber.trim()) {
+            setError("Phone number is required");
+            return;
+        }
         
         setIsLoading(true);
         
@@ -83,6 +106,9 @@ const RegisterForm = () => {
             const userData = {
                 username: username,
                 email: email,
+                first_name: firstName,
+                last_name: lastName,
+                phone_number: phoneNumber,
                 password: password,
                 blood_group: bloodGroup,
                 aadhar: aadhar || null,
@@ -129,9 +155,7 @@ const RegisterForm = () => {
                                 placeholder="Choose a username"
                             />
                         </div>
-                    </div>
-
-                    <div>
+                    </div>                    <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                             Email
                         </label>
@@ -149,6 +173,72 @@ const RegisterForm = () => {
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="block w-full appearance-none rounded border border-gray-300 pl-10 pr-3 py-2 placeholder-gray-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black text-sm"
                                 placeholder="Enter your email"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                            First Name *
+                        </label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <UserIcon />
+                            </div>
+                            <input
+                                id="firstName"
+                                name="firstName"
+                                type="text"
+                                autoComplete="given-name"
+                                required
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                className="block w-full appearance-none rounded border border-gray-300 pl-10 pr-3 py-2 placeholder-gray-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black text-sm"
+                                placeholder="Enter your first name"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                            Last Name *
+                        </label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <UserIcon />
+                            </div>
+                            <input
+                                id="lastName"
+                                name="lastName"
+                                type="text"
+                                autoComplete="family-name"
+                                required
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                className="block w-full appearance-none rounded border border-gray-300 pl-10 pr-3 py-2 placeholder-gray-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black text-sm"
+                                placeholder="Enter your last name"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                            Phone Number *
+                        </label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <PhoneIcon />
+                            </div>
+                            <input
+                                id="phoneNumber"
+                                name="phoneNumber"
+                                type="tel"
+                                autoComplete="tel"
+                                required
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                className="block w-full appearance-none rounded border border-gray-300 pl-10 pr-3 py-2 placeholder-gray-400 focus:border-black focus:outline-none focus:ring-1 focus:ring-black text-sm"
+                                placeholder="Enter your phone number"
                             />
                         </div>
                     </div>
