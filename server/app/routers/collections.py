@@ -3,9 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
 from ..models import Collection, Record, Share
-from ..schemas import CollectionCreate, CollectionResponse, RecordResponse, CollectionUpdate, MessageResponse, SharedCollectionResponse, CollectionSummaryContent
+from ..schemas import CollectionCreate, CollectionResponse, RecordResponse, CollectionUpdate, MessageResponse, SharedCollectionResponse
 from ..oauth2 import get_current_user
-from ..utils import SummaryGenerationAgent
 
 router = APIRouter(
     prefix='/collections',
@@ -253,65 +252,3 @@ async def access_shared_collection(
             } for record in records
         ]
     }
-
-@router.get("/{collection_id}/summary", response_model=CollectionSummaryContent)
-async def get_collection_summary(
-    collection_id: str,
-    db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
-):
-    """Generate a single comprehensive summary of all records in a collection"""
-    # Verify collection belongs to user
-    collection = db.query(Collection).filter(
-        Collection.id == collection_id,
-        Collection.user_id == current_user.id
-    ).first()
-    
-    if not collection:
-        raise HTTPException(status_code=404, detail="Collection not found")
-    
-    # Get all records in this collection
-    records = db.query(Record).filter(Record.collection_id == collection_id).all()
-    
-    if not records:
-        raise HTTPException(status_code=400, detail="Collection has no records to summarize")
-    
-    # Collect all content into a single document
-    combined_content = []
-    valid_records = []
-    
-    for record in records:
-        if record.content and len(record.content.strip()) >= 50:
-            combined_content.append(f"## Document: {record.filename}\n\n{record.content}\n\n")
-            valid_records.append(record)
-    
-    if not combined_content:
-        raise HTTPException(status_code=400, detail="No valid content found to summarize")
-    
-    # Prepare combined content with headers
-    all_content = f"# Combined Medical Records from Collection: {collection.name}\n\n"
-    all_content += f"Collection Description: {collection.description or 'No description'}\n\n"
-    all_content += f"Total Documents: {len(valid_records)}\n\n"
-    all_content += "---\n\n"
-    all_content += "\n\n---\n\n".join(combined_content)
-    
-    # Generate a single summary for all content
-    summary_agent = SummaryGenerationAgent()
-    
-    try:
-        # Generate one comprehensive summary of all records
-        collection_summary = await summary_agent.generate_summary(all_content)
-        
-        # Simply return the summary without saving it
-        return {
-            "collection_id": collection_id,
-            "collection_name": collection.name,
-            "summary_content": collection_summary,
-            "record_count": len(valid_records)
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to generate collection summary: {str(e)}"
-        )
