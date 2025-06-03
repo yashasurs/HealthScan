@@ -3,6 +3,7 @@ __pycache__
 alembic.ini
 alembic
 sql_app.db
+**.db
 .env
 *.sqlite
 *.sqlite3

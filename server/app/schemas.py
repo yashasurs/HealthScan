@@ -6,11 +6,13 @@ from pydantic import Field, BaseModel, EmailStr
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str
 
 
 class TokenData(BaseModel):
     id: int | None = None
+    token_type: str | None = None
 
 
 class UserLogin(BaseModel):
