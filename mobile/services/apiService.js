@@ -10,23 +10,30 @@ const API_BASE_URL = 'http://10.0.2.2:8000';
  * @returns {axios.AxiosInstance}
  */
 const createApiService = (token) => {
+  if (!token) {
+    console.warn('No token provided to createApiService');
+    throw new Error('Authentication token is required');
+  }
+
   const instance = axios.create({
     baseURL: API_BASE_URL,
     headers: {
-      'Authorization': token ? `Bearer ${token}` : '',
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
-  });  // Add response interceptor for debugging and error handling
-  instance.interceptors.response.use(
-    response => {
-      return response;
-    },
-    error => {
-      // If 401 Unauthorized, token may be invalid
-      if (error.response && error.response.status === 401) {
-        console.warn('API call returned 401 Unauthorized - token may be invalid');
-        // The logout will be handled at the component level
+  });  instance.interceptors.response.use(
+    response => response,
+    async error => {
+      const originalRequest = error.config;
+      
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        // Use React Native's event emitter for auth errors
+        const { DeviceEventEmitter } = require('react-native');
+        DeviceEventEmitter.emit('authError', error);
+        throw new Error('Authentication required');
       }
+      
       return Promise.reject(error);
     }
   );

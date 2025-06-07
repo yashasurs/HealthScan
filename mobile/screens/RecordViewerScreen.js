@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RecordViewer } from '../components/document';
@@ -82,12 +83,20 @@ const RecordViewerScreen = ({ route, navigation }) => {
         >
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
         </TouchableOpacity>          <View style={styles.headerCenter} />
-        <View style={styles.headerActions}>
-          <TouchableOpacity 
-            onPress={() => {
+        <View style={styles.headerActions}>          <TouchableOpacity            onPress={() => {
+              const details = [
+                `Filename: ${record.filename || 'Untitled'}`,
+                `File Type: ${record.file_type || 'Unknown'}`,
+                `File Size: ${formatFileSize(record.file_size || 0)}`,
+                record.collection_id ? `Collection: ${record.collection_id}` : null,
+                `Created: ${record.created_at ? new Date(record.created_at).toLocaleDateString() : 'Unknown'}`,
+                `Last Modified: ${record.updated_at ? new Date(record.updated_at).toLocaleDateString() : 'Unknown'}`
+              ].filter(Boolean).join('\n\n');
+
               Alert.alert(
                 'Record Details',
-                `Name: ${record.filename}\nType: ${record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'}\nSize: ${formatFileSize(record.size || 0)}`
+                details,
+                [{ text: 'Close', style: 'default' }]
               );
             }}
             style={styles.actionButton}
@@ -143,48 +152,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingTop: 50,
+    paddingTop: Platform.OS === 'ios' ? 50 : 40,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
     backgroundColor: '#fff',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
   },
   backButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: '#f8f9fa',
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
   },
   headerCenter: {
     flex: 1,
     marginHorizontal: 12,
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 2,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 20,
-    paddingHorizontal: 4,
+    backgroundColor: 'rgba(248, 249, 250, 0.9)',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
   },
   actionButton: {
-    padding: 8,
+    padding: 10,
     marginHorizontal: 4,
-    borderRadius: 16,
+    borderRadius: 10,
   },
   content: {
     flex: 1,

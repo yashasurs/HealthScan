@@ -113,13 +113,13 @@ const RecordViewer = ({
         </View>
       )}
 
-      {/* Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.contentHeader}>
-          <View style={styles.contentHeaderLeft}>
-            <Ionicons name="document-text" size={20} color="#4A90E2" />
-            <Text style={styles.contentTitle}>OCR Content (Markdown Formatted)</Text>
-          </View>
+      {/* Content */}      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.fileHeader}>
+          <Ionicons name="document-text" size={24} color="#4A90E2" />
+          <Text style={styles.fileName} numberOfLines={1}>{record.filename}</Text>
+          <Text style={styles.fileType}>
+            {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'}
+          </Text>
         </View>
 
         <View style={styles.contentCard}>
@@ -138,36 +138,6 @@ const RecordViewer = ({
           )}
         </View>
 
-        {/* Metadata Section */}
-        <View style={styles.metadataSection}>
-          <Text style={styles.sectionTitle}>Record Information</Text>
-          <View style={styles.metadataCard}>
-            <View style={styles.metadataRow}>
-              <Text style={styles.metadataLabel}>Filename:</Text>
-              <Text style={styles.metadataValue}>{record.filename}</Text>
-            </View>
-            <View style={styles.metadataRow}>
-              <Text style={styles.metadataLabel}>File Type:</Text>
-              <Text style={styles.metadataValue}>
-                {record.file_type || 'Unknown'}
-              </Text>
-            </View>
-            <View style={styles.metadataRow}>
-              <Text style={styles.metadataLabel}>File Size:</Text>
-              <Text style={styles.metadataValue}>
-                {formatFileSize(record.file_size || 0)}
-              </Text>
-            </View>
-            {record.collection_id && (
-              <View style={styles.metadataRow}>
-                <Text style={styles.metadataLabel}>Collection:</Text>
-                <Text style={styles.metadataValue}>
-                  {record.collection_id}
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
       </ScrollView>
 
       {deleting && (
@@ -242,96 +212,120 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 8,
-  },
-  content: {
+  },  content: {
     flex: 1,
     paddingHorizontal: 20,
   },
-  contentHeader: {
+  fileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: 20,
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: '#fff',
   },
-  contentHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  contentTitle: {
-    fontSize: 16,
+  fileName: {
+    fontSize: 20,
     fontWeight: '600',
-    color: '#000',
-    marginLeft: 8,
+    color: '#1a202c',
+    marginLeft: 12,
+    flex: 1,
   },
-  contentCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 20,
+  fileType: {
+    fontSize: 14,
+    color: '#6c757d',
+    fontWeight: '500',
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    overflow: 'hidden',
+    textTransform: 'uppercase',
+  },contentCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
   contentText: {
     fontSize: 16,
-    lineHeight: 24,
-    color: '#000',
+    lineHeight: 26,
+    color: '#2c3e50',
+    letterSpacing: 0.3,
   },
   emptyContent: {
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 48,
+    backgroundColor: 'rgba(248, 249, 250, 0.5)',
+    borderRadius: 12,
   },
   emptyText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#2c3e50',
     marginTop: 16,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: 15,
+    color: '#6c757d',
     textAlign: 'center',
     marginTop: 8,
-    lineHeight: 20,
-  },
-  metadataSection: {
-    marginBottom: 24,
+    lineHeight: 22,
+    maxWidth: '80%',
+  },  metadataSection: {
+    marginBottom: 32,
+    paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 12,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#2c3e50',
+    marginBottom: 16,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   metadataCard: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 2,
   },
   metadataRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingVertical: 8,
+    alignItems: 'center',
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(0, 0, 0, 0.04)',
   },
   metadataLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#666',
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6c757d',
     flex: 1,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
   metadataValue: {
-    fontSize: 14,
-    color: '#000',
+    fontSize: 15,
+    color: '#2c3e50',
     flex: 2,
     textAlign: 'right',
+    fontWeight: '500',
   },
   loadingOverlay: {
     position: 'absolute',
@@ -364,30 +358,34 @@ const styles = StyleSheet.create({
 const markdownStyles = {
   body: {
     fontSize: 16,
-    lineHeight: 24,
-    color: '#000',
+    lineHeight: 26,
+    color: '#2c3e50',
     fontFamily: 'System',
+    letterSpacing: 0.3,
   },
   heading1: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
-    marginTop: 20,
-    marginBottom: 10,
+    color: '#1a202c',
+    marginTop: 28,
+    marginBottom: 12,
+    letterSpacing: 0.4,
   },
   heading2: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
-    marginTop: 16,
-    marginBottom: 8,
+    color: '#2d3748',
+    marginTop: 24,
+    marginBottom: 10,
+    letterSpacing: 0.3,
   },
   heading3: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#000',
-    marginTop: 12,
-    marginBottom: 6,
+    color: '#4a5568',
+    marginTop: 20,
+    marginBottom: 8,
+    letterSpacing: 0.2,
   },
   paragraph: {
     fontSize: 16,

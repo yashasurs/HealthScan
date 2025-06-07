@@ -14,23 +14,20 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const isAuthenticated = !!token;
-  const getToken = async () => {
+  const isAuthenticated = !!token;  const getToken = async () => {
     try {
-      // If we already have a token in memory, use it
       if (token) return token;
       
-      // Otherwise fetch it from storage
       const storedToken = await AsyncStorage.getItem("token");
-      
-      // If found in storage, update the state
-      if (storedToken && !token) {
+      if (storedToken) {
         setToken(storedToken);
+        return storedToken;
       }
       
-      return storedToken;
+      throw new Error('No authentication token found');
     } catch (error) {
-      console.error("Failed to retrieve token from AsyncStorage", error);
+      console.error("Authentication error:", error.message);
+      await logout();
       return null;
     }
   };
@@ -96,41 +93,52 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: message };
     }
   };
-
   const login = async (username, password) => {
     try {
       setError(null);
-      // Use URLSearchParams to send form-encoded data
+      
       const formData = new URLSearchParams();
       formData.append('username', username);
       formData.append('password', password);
+      
       const response = await axios.post(`${API_URL}/login`, formData, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
       const { access_token } = response.data;
-      const userData = { username };
+      if (!access_token) {
+        throw new Error('Server response missing access token');
+      }
+
+      // Get user profile data after successful login
+      const userResponse = await axios.get(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+
       setToken(access_token);
-      setUser(userData);
-      await AsyncStorage.setItem("token", access_token);
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
+      setUser(userResponse.data);
+      
+      await Promise.all([
+        AsyncStorage.setItem("token", access_token),
+        AsyncStorage.setItem("user", JSON.stringify(userResponse.data))
+      ]);
       
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.detail || 'Login failed';
+      const message = error.response?.data?.detail || error.message || 'Login failed';
       setError(message);
       return { success: false, error: message };
     }
   };
-
   const logout = async () => {
     try {
       setToken(null);
       setUser(null);
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("user");
+      setError(null);
+      await Promise.all([
+        AsyncStorage.removeItem("token"),
+        AsyncStorage.removeItem("user")
+      ]);
     } catch (error) {
       console.error("Logout error:", error);
     }
