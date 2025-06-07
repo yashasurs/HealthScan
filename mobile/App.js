@@ -136,7 +136,7 @@ function MainTabNavigator() {
   );
 }
 
-function AppNavigator() {
+function AppContent() {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
@@ -148,47 +148,47 @@ function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar style="dark" />
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!isAuthenticated ? (
-          <>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
-          </>
-        ) : (
-          <>
-            <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-            <Stack.Screen 
-              name="RecordViewer" 
-              component={RecordViewerScreen}
-              options={{
-                presentation: 'fullScreenModal',
-                animation: 'slide_from_bottom'
-              }}
-            />
-            <Stack.Screen 
-              name="CollectionSystem" 
-              component={FolderSystemScreen} 
-              options={{ headerShown: false, presentation: 'modal' }} 
-            />
-            <Stack.Screen 
-              name="RecordDetail" 
-              component={RecordDetailScreen} 
-              options={{ headerShown: false, presentation: 'card' }} 
-            />
-          </>
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {!isAuthenticated ? (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+        </>
+      ) : (
+        <>
+          <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          <Stack.Screen 
+            name="RecordViewer" 
+            component={RecordViewerScreen}
+            options={{
+              presentation: 'fullScreenModal',
+              animation: 'slide_from_bottom'
+            }}
+          />
+          <Stack.Screen 
+            name="CollectionSystem" 
+            component={FolderSystemScreen} 
+            options={{ headerShown: false, presentation: 'modal' }} 
+          />
+          <Stack.Screen 
+            name="RecordDetail" 
+            component={RecordDetailScreen} 
+            options={{ headerShown: false, presentation: 'card' }} 
+          />
+        </>
+      )}
+    </Stack.Navigator>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppNavigator />
-    </AuthProvider>
+    <NavigationContainer>
+      <AuthProvider>
+        <AppContent />
+        <StatusBar style="dark" />
+      </AuthProvider>
+    </NavigationContainer>
   );
 }
 
