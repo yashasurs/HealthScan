@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, Alert, View, ActivityIndicator, Text, Platform } from 'react-native';
+import { StyleSheet, ScrollView, Alert, View, ActivityIndicator, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Header } from '../components/common';
 import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
@@ -134,91 +134,36 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    paddingTop: Platform.OS === 'ios' ? 50 : 40,
+    backgroundColor: '#f8f9fa',
+  },  header: {
+    paddingTop: 40,
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingBottom: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#1a1a1a',
-    marginBottom: 8,
+    color: '#333',
+    marginBottom: 3,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
-  },
-  content: {
+    marginBottom: 0,
+  },  content: {
     flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 120, // Extra padding to account for navigation bar
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  errorContainer: {
-    backgroundColor: '#fff2f2',
-    padding: 16,
-    margin: 16,
-    borderRadius: 8,
-  },
-  errorText: {
-    color: '#dc2626',
-    fontSize: 14,
-  },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 16,
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButton: {
-    backgroundColor: '#1a1a1a',
-  },
-  secondaryButton: {
     backgroundColor: '#f8f9fa',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  primaryButtonText: {
-    color: '#fff',
-  },
-  secondaryButtonText: {
-    color: '#666',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
   },
 });
 

@@ -11,10 +11,11 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const isAuthenticated = !!token;  const getToken = async () => {
+  const isAuthenticated = !!token;const getToken = async () => {
     try {
       if (token) return token;
       
@@ -31,16 +32,17 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   };
-
   // Load token and user from AsyncStorage on app start
   useEffect(() => {
     const loadStoredData = async () => {
       try {
         const storedToken = await AsyncStorage.getItem("token");
+        const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
         const storedUser = await AsyncStorage.getItem("user");
 
         if (storedToken && storedUser) {
           setToken(storedToken);
+          setRefreshToken(storedRefreshToken);
           setUser(JSON.parse(storedUser));
         }
       } catch (error) {
@@ -51,8 +53,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     loadStoredData();
-  }, []);
-  const register = async (userData) => {
+  }, []);  const register = async (userData) => {
     try {
       setError(null);
       
@@ -73,18 +74,23 @@ export const AuthProvider = ({ children }) => {
 
       const response = await axios.post(`${API_URL}/register`, registrationData);
 
-      const { access_token } = response.data;
-      const userInfo = { 
-        email: userData.email, 
-        username: userData.username,
-        blood_group: userData.blood_group
-      };
+      const { access_token, refresh_token } = response.data;
+      
+      // Get user profile data after successful registration
+      const userResponse = await axios.get(`${API_URL}/me`, {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
 
-      // Set token and user data directly after registration
+      // Set tokens and user data
       setToken(access_token);
-      setUser(userInfo);
-      await AsyncStorage.setItem("token", access_token);
-      await AsyncStorage.setItem("user", JSON.stringify(userInfo));
+      setRefreshToken(refresh_token);
+      setUser(userResponse.data);
+      
+      await Promise.all([
+        AsyncStorage.setItem("token", access_token),
+        AsyncStorage.setItem("refresh_token", refresh_token),
+        AsyncStorage.setItem("user", JSON.stringify(userResponse.data))
+      ]);
       
       return { success: true };
     } catch (error) {
@@ -92,8 +98,7 @@ export const AuthProvider = ({ children }) => {
       setError(message);
       return { success: false, error: message };
     }
-  };
-  const login = async (username, password) => {
+  };  const login = async (username, password) => {
     try {
       setError(null);
       
@@ -105,7 +110,7 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
-      const { access_token } = response.data;
+      const { access_token, refresh_token } = response.data;
       if (!access_token) {
         throw new Error('Server response missing access token');
       }
@@ -116,10 +121,12 @@ export const AuthProvider = ({ children }) => {
       });
 
       setToken(access_token);
+      setRefreshToken(refresh_token);
       setUser(userResponse.data);
       
       await Promise.all([
         AsyncStorage.setItem("token", access_token),
+        AsyncStorage.setItem("refresh_token", refresh_token),
         AsyncStorage.setItem("user", JSON.stringify(userResponse.data))
       ]);
       
@@ -129,14 +136,15 @@ export const AuthProvider = ({ children }) => {
       setError(message);
       return { success: false, error: message };
     }
-  };
-  const logout = async () => {
+  };  const logout = async () => {
     try {
       setToken(null);
+      setRefreshToken(null);
       setUser(null);
       setError(null);
       await Promise.all([
         AsyncStorage.removeItem("token"),
+        AsyncStorage.removeItem("refresh_token"),
         AsyncStorage.removeItem("user")
       ]);
     } catch (error) {
@@ -144,17 +152,74 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshAccessToken = async () => {
+    try {
+      if (!refreshToken) {
+        throw new Error('No refresh token available');
+      }
+
+      const response = await axios.post(`${API_URL}/refresh`, {
+        refresh_token: refreshToken
+      });
+
+      const { access_token, refresh_token: new_refresh_token } = response.data;
+      
+      setToken(access_token);
+      setRefreshToken(new_refresh_token);
+      
+      await Promise.all([
+        AsyncStorage.setItem("token", access_token),
+        AsyncStorage.setItem("refresh_token", new_refresh_token)
+      ]);
+      
+      return access_token;
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      // If refresh fails, logout user
+      await logout();
+      throw error;
+    }
+  };
+
+  const getValidToken = async () => {
+    try {
+      if (!token) {
+        throw new Error('No access token available');
+      }
+
+      // Check if token is still valid by making a simple request
+      try {
+        await axios.get(`${API_URL}/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        return token;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          // Token expired, try to refresh
+          return await refreshAccessToken();
+        }
+        throw error;
+      }
+    } catch (error) {
+      console.error("Failed to get valid token:", error);
+      await logout();
+      throw error;
+    }
+  };
   return (
     <AuthContext.Provider value={{ 
       user, 
-      token, 
+      token,
+      refreshToken,
       isAuthenticated, 
       loading,
       error,
-      getToken, 
+      getToken,
+      getValidToken, 
       login, 
       logout,
-      register
+      register,
+      refreshAccessToken
     }}>
       {children}
     </AuthContext.Provider>
