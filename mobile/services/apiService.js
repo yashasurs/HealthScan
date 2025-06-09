@@ -5,33 +5,63 @@ import { useAuth } from '../Contexts/Authcontext';
 const API_BASE_URL = 'http://10.0.2.2:8000';
 
 /**
- * Creates an axios instance with authentication headers
- * @param {string} token - Authentication token
+ * Creates an axios instance with authentication headers and refresh token functionality
+ * @param {Function} getValidToken - Function to get a valid access token
+ * @param {Function} refreshAccessToken - Function to refresh the access token
  * @returns {axios.AxiosInstance}
  */
-const createApiService = (token) => {
-  if (!token) {
-    console.warn('No token provided to createApiService');
-    throw new Error('Authentication token is required');
-  }
-
+const createApiService = (getValidToken, refreshAccessToken) => {
   const instance = axios.create({
     baseURL: API_BASE_URL,
     headers: {
-      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
     }
-  });  instance.interceptors.response.use(
+  });
+
+  // Request interceptor to add current token to each request
+  instance.interceptors.request.use(
+    async (config) => {
+      try {
+        const token = await getValidToken();
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error('Failed to get valid token for request:', error);
+        throw error;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  // Response interceptor to handle token refresh on 401 errors
+  instance.interceptors.response.use(
     response => response,
     async error => {
       const originalRequest = error.config;
       
       if (error.response?.status === 401 && !originalRequest._retry) {
         originalRequest._retry = true;
-        // Use React Native's event emitter for auth errors
-        const { DeviceEventEmitter } = require('react-native');
-        DeviceEventEmitter.emit('authError', error);
-        throw new Error('Authentication required');
+        
+        try {
+          // Try to refresh the token
+          const newToken = await refreshAccessToken();
+          
+          // Update the authorization header with the new token
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          
+          // Retry the original request with the new token
+          return instance(originalRequest);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          // Emit auth error event for the app to handle (e.g., redirect to login)
+          const { DeviceEventEmitter } = require('react-native');
+          DeviceEventEmitter.emit('authError', refreshError);
+          return Promise.reject(refreshError);
+        }
       }
       
       return Promise.reject(error);
@@ -46,11 +76,10 @@ const createApiService = (token) => {
  * @returns {Object} API service instance with methods
  */
 export const useApiService = () => {
-  const { token, getToken } = useAuth();
+  const { getValidToken, refreshAccessToken } = useAuth();
 
   const getAuthenticatedApi = async () => {
-    const currentToken = token || await getToken();
-    return createApiService(currentToken);
+    return createApiService(getValidToken, refreshAccessToken);
   };
 
   return {

@@ -2,6 +2,35 @@
 import axios from 'axios';
 
 /**
+ * Refresh the access token using the refresh token
+ * @returns {Promise<string>} New access token
+ */
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
+  }
+
+  try {
+    const response = await axios.post('http://localhost:8000/refresh', null, {
+      params: { refresh_token: refreshToken }
+    });
+
+    const { access_token, refresh_token: new_refresh_token } = response.data;
+    localStorage.setItem('token', access_token);
+    localStorage.setItem('refresh_token', new_refresh_token);
+    
+    return access_token;
+  } catch (error) {
+    // If refresh fails, clear tokens and redirect to login
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh_token');
+    window.location.href = '/login';
+    throw error;
+  }
+};
+
+/**
  * Creates an axios instance with proper authentication headers
  * @returns {axios.AxiosInstance}
  */
@@ -19,13 +48,34 @@ export const createApiService = () => {
     }
   });
   
-  // Add response interceptor for debugging
+  // Add response interceptor for token refresh
   instance.interceptors.response.use(
     response => {
       console.log(`API call to ${response.config.url} successful:`, response.status);
       return response;
     },
-    error => {
+    async error => {
+      const originalRequest = error.config;
+      
+      // If we get a 401 and haven't already tried to refresh
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        
+        try {
+          const newToken = await refreshAccessToken();
+          
+          // Update the authorization header
+          originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+          instance.defaults.headers['Authorization'] = `Bearer ${newToken}`;
+          
+          // Retry the original request
+          return instance(originalRequest);
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          return Promise.reject(refreshError);
+        }
+      }
+      
       console.error(`API call to ${error.config?.url} failed:`, error.response?.status, error.response?.data);
       return Promise.reject(error);
     }
