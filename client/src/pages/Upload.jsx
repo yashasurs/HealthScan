@@ -166,38 +166,36 @@ const Documents = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Hero Section */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">      {/* Hero Section */}
       <div className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-6 max-w-7xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Document Upload</h1>
-              <p className="text-gray-600">Upload and process your documents with OCR technology</p>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-7xl">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Document Upload</h1>
+              <p className="text-sm sm:text-base text-gray-600">Upload and process your documents with OCR technology</p>
             </div>
-            <div className="hidden md:flex items-center space-x-4">
-              <div className="bg-blue-50 rounded-lg px-4 py-2">
-                <span className="text-sm font-medium text-blue-700">Collections: {collections.length}</span>
+            <div className="flex items-center justify-between sm:justify-end gap-4">
+              <div className="bg-blue-50 rounded-lg px-3 py-2 sm:px-4">
+                <span className="text-xs sm:text-sm font-medium text-blue-700">Collections: {collections.length}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Main Content Area */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-7xl">        {/* Main Content Area */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-          <div className="p-6 md:p-8">
+          <div className="p-4 sm:p-6 lg:p-8">
             <div className="space-y-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-blue-100 rounded-full p-2">
-                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6">
+                <div className="bg-blue-100 rounded-full p-2 self-start sm:self-center">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                 </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">Upload Documents</h2>
-                  <p className="text-gray-600">Process your images with OCR technology</p>
+                <div className="flex-1">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Upload Documents</h2>
+                  <p className="text-sm sm:text-base text-gray-600">Process your images with OCR technology</p>
                 </div>
               </div>
               <UploadTab 

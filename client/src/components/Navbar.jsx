@@ -49,7 +49,7 @@ const Navbar = () => {
   };
 
   // Check if user is on profile page
-  const isOnProfilePage = location.pathname === '/profile';const navigationLinks = isAuthenticated 
+  const isOnProfilePage = location.pathname === '/profile';  const navigationLinks = isAuthenticated 
     ? [
         { name: 'Home', path: '/home' },
         { name: 'Records', path: '/records' },
@@ -57,9 +57,7 @@ const Navbar = () => {
         { name: 'Upload', path: '/upload' }
       ]
     : [
-        { name: 'Home', path: '/' },
-        { name: 'Features', path: '/#features' },
-        { name: 'About', path: '/#about' },
+        { name: 'Home', path: '/' }
       ];return (
     <nav 
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100"

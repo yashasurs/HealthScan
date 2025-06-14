@@ -198,47 +198,11 @@ const SharedRecord = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Content */}
+      </div>      {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow rounded-lg">
-          {/* Record Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{record.filename}</h2>
-                <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
-                  <span>Created: {formatDateTime(record.created_at)}</span>
-                  {record.file_type && (
-                    <span>Type: {record.file_type}</span>
-                  )}
-                  {record.file_size && (
-                    <span>Size: {Math.round(record.file_size / 1024)} KB</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Shared Securely
-                </span>
-              </div>
-            </div>
-          </div>          {/* Record Content */}
-          <div className="px-6 py-6">
-            <div className="prose max-w-none">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Medical Record Content</h3>
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="markdown-content">
-                  <ReactMarkdown>{record.content}</ReactMarkdown>
-                </div>
-              </div>
-            </div>
-          </div>          {/* Save to Account Section */}
-          <div className="px-6 py-4 border-t border-gray-200">
+        {/* Save to Account Section - Moved to Top */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4">
             <div className="flex flex-col items-start space-y-2">
               {!isAuthenticated ? (
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 w-full">
@@ -322,6 +286,43 @@ const SharedRecord = () => {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="bg-white shadow rounded-lg">
+          {/* Record Header */}
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">{record.filename}</h2>
+                <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
+                  <span>Created: {formatDateTime(record.created_at)}</span>
+                  {record.file_type && (
+                    <span>Type: {record.file_type}</span>
+                  )}
+                  {record.file_size && (
+                    <span>Size: {Math.round(record.file_size / 1024)} KB</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Shared Securely
+                </span>
+              </div>
+            </div>
+          </div>          {/* Record Content */}
+          <div className="px-6 py-6">
+            <div className="prose max-w-none">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Medical Record Content</h3>
+              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                <div className="markdown-content">
+                  <ReactMarkdown>{record.content}</ReactMarkdown>
+                </div>
+              </div>
+            </div>          </div>
 
           {/* Footer */}
           <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">

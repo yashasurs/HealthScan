@@ -130,12 +130,7 @@ export const useApiService = () => {
       removeRecord: async (collectionId, recordId) => {
         const api = await getAuthenticatedApi();
         return api.delete(`/collections/${collectionId}/records/${recordId}`);
-      },
-      getSummary: async (collectionId) => {
-        const api = await getAuthenticatedApi();
-        return api.get(`/collections/${collectionId}/summary`);
-      },
-      getShared: async (shareToken) => {
+      },      getShared: async (shareToken) => {
         const api = await getAuthenticatedApi();
         return api.get(`/collections/share/${shareToken}`);
       }
@@ -162,16 +157,11 @@ export const useApiService = () => {
       delete: async (recordId) => {
         const api = await getAuthenticatedApi();
         return api.delete(`/records/${recordId}`);
-      },
-      getPdf: async (recordId) => {
+      },      getPdf: async (recordId) => {
         const api = await getAuthenticatedApi();
         return api.get(`/records/${recordId}/pdf`, {
           responseType: 'blob'
         });
-      },
-      getSummary: async (recordId) => {
-        const api = await getAuthenticatedApi();
-        return api.get(`/records/${recordId}/summary`);
       },
       getShared: async (shareToken) => {
         const api = await getAuthenticatedApi();

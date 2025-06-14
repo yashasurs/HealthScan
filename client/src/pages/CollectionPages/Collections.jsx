@@ -375,8 +375,8 @@ const Collections = () => {
         </div>
       )}      {/* Create Collection Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 mx-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 mx-4 shadow-2xl">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-lg sm:text-xl font-semibold">Create New Collection</h2>
               <button
@@ -437,8 +437,8 @@ const Collections = () => {
         </div>
       )}      {/* Edit Collection Modal */}
       {showEditModal && selectedCollection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 mx-4">
+        <div className="fixed inset-0 bg-white bg-opacity-30 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 mx-4 shadow-2xl">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-lg sm:text-xl font-semibold">Edit Collection</h2>
               <button

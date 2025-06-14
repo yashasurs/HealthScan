@@ -11,15 +11,10 @@ const RecordDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuth();  const [record, setRecord] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);  const [error, setError] = useState(null);  const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState('');
   const [editedFilename, setEditedFilename] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  
-  // Summary generation state
-  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-  const [summaryError, setSummaryError] = useState(null);
 
   // Extract collection info from URL parameters
   const searchParams = new URLSearchParams(location.search);
@@ -190,35 +185,6 @@ const RecordDetail = () => {
     setTimeout(() => setSuccessMessage(''), 3000);
   };
 
-  const handleGenerateSummary = async () => {
-    if (!record) return;
-    
-    setIsGeneratingSummary(true);
-    setSummaryError(null);
-    
-    try {
-      const api = createApiService();
-      const response = await api.get(`/records/${record.id}/summary`);
-      
-      showSuccessMessage(`Summary generated successfully! New record: "${response.data.filename}"`);
-      
-      // Optionally navigate to the new summary record
-      // navigate(`/records/${response.data.id}`);
-    } catch (error) {
-      console.error('Error generating summary:', error);
-      
-      if (error.response?.status === 400) {
-        setSummaryError('Record content is too short to summarize. Please ensure the record has substantial medical content.');
-      } else if (error.response?.status === 404) {
-        setSummaryError('Record not found.');
-      } else {
-        setSummaryError('Failed to generate summary. Please try again.');
-      }
-    } finally {
-      setIsGeneratingSummary(false);
-    }
-  };
-
   if (isLoading && !record) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -315,15 +281,7 @@ const RecordDetail = () => {
         {/* Error message */}
       {error && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 mb-4 text-sm sm:text-base">
-          <p>{error}</p>
-        </div>
-      )}
-      
-      {/* Summary Error message */}
-      {summaryError && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 sm:p-4 mb-4 text-sm sm:text-base">
-          <p>{summaryError}</p>
-        </div>
+          <p>{error}</p>        </div>
       )}
 
       {record && (
@@ -375,32 +333,7 @@ const RecordDetail = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                 </svg>                <span className="hidden sm:inline">Download QR</span>
-                <span className="sm:hidden">QR</span>
-              </button>
-
-              <button
-                onClick={handleGenerateSummary}
-                disabled={isGeneratingSummary}
-                className="inline-flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Generate Medical Summary"
-              >
-                {isGeneratingSummary ? (
-                  <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                )}
-                <span className="hidden sm:inline">
-                  {isGeneratingSummary ? 'Generating...' : 'Generate Summary'}
-                </span>
-                <span className="sm:hidden">
-                  {isGeneratingSummary ? '...' : 'Summary'}
-                </span>
-              </button>
+                <span className="sm:hidden">QR</span>              </button>
                 <button
                 onClick={handleEditToggle}
                 className="inline-flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base"
