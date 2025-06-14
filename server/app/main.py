@@ -1,11 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import sys
 from . import models
 from .database import engine
 from .routers import ocr, auth, collections, records, qr
 
-models.Base.metadata.create_all(bind=engine)
+# Initialize database tables
+try:
+    models.Base.metadata.create_all(bind=engine)
+    print("Database tables created/verified successfully")
+except Exception as e:
+    print(f"ERROR creating database tables: {e}")
+    if os.environ.get("ENV") == "production" or os.environ.get("PORT"):
+        print("Fatal error in production environment. Exiting.")
+        sys.exit(1)
 
 
 app = FastAPI()
