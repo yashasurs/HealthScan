@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL")
+SQLALCHEMY_DATABASE_URL = os.environ.get("SUPABASE_DATABASE_URL")
 
 print(f"Connecting to database at {SQLALCHEMY_DATABASE_URL}")
 
