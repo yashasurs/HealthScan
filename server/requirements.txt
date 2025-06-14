@@ -15,3 +15,4 @@ qrcode==8.2
 SQLAlchemy==2.0.41
 uvicorn==0.34.3
 weasyprint==65.1
+psycopg2-binary
