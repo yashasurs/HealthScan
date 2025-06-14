@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+import sys
 
 # Always load .env from the project/server root
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
@@ -8,9 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = os.environ.get("SUPABASE_DATABASE_URL")
-
-print(f"Connecting to database at {SQLALCHEMY_DATABASE_URL}")
+SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
