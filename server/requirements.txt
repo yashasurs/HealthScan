@@ -1,6 +1,6 @@
 fastapi==0.115.12
 Markdown==3.8
-numpy==2.3.0
+numpy
 opencv_python==4.11.0.86
 opencv_python_headless==4.11.0.86
 passlib==1.7.4
