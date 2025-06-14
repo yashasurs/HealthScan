@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from . import models
 from .database import engine
 from .routers import ocr, auth, collections, records, qr

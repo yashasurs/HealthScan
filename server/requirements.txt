@@ -1,13 +1,11 @@
 fastapi==0.115.12
 Markdown==3.8
 numpy==2.3.0
-opencv_python==4.11.0.86
 opencv_python_headless==4.11.0.86
 passlib==1.7.4
 Pillow==11.2.1
 pydantic==2.11.7
 pydantic_ai==0.2.18
-PyJWT==2.10.1
 PyJWT==2.10.1
 pytesseract==0.3.13
 python-dotenv==1.1.0
@@ -16,3 +14,4 @@ SQLAlchemy==2.0.41
 uvicorn==0.34.3
 weasyprint==65.1
 psycopg2-binary
+gunicorn==21.2.0
