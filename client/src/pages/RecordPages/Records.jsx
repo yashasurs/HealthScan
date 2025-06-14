@@ -245,9 +245,8 @@ const Records = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         </button>
-                        
-                        <button 
-                          className="flex-1 sm:flex-none p-3 sm:p-2.5 text-purple-600 hover:text-purple-700 hover:bg-purple-100 bg-purple-50 rounded-lg transition-all duration-200 min-w-0 shadow-sm hover:shadow-md"
+                          <button 
+                          className="flex-1 sm:flex-none p-3 sm:p-2.5 text-black hover:text-black hover:bg-gray-100 bg-gray-50 rounded-lg transition-all duration-200 min-w-0 shadow-sm hover:shadow-md"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleGenerateQR(record.id, record.filename);

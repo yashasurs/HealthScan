@@ -139,11 +139,10 @@ const CollectionHeader = ({
         {/* QR Code Download Button */}
         <div className="flex-shrink-0">          <button
             onClick={onDownloadQR}
-            disabled={qrLoading}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 font-medium transition-all duration-200 text-xs sm:text-sm border rounded-lg ${
+            disabled={qrLoading}            className={`inline-flex items-center gap-2 px-4 py-2.5 font-medium transition-all duration-200 text-xs sm:text-sm border rounded-lg ${
               qrLoading
                 ? 'text-gray-400 border-gray-300 cursor-not-allowed bg-gray-50'
-                : 'text-purple-600 hover:text-purple-800 border-purple-300 hover:border-purple-400 hover:bg-purple-50'
+                : 'text-black hover:text-black border-gray-300 hover:border-gray-400 hover:bg-gray-100'
             }`}
             title={qrLoading ? "Generating QR Code..." : "Download QR Code for Collection"}
           >

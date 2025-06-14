@@ -327,7 +327,7 @@ const RecordDetail = () => {
                 <span className="sm:hidden">PDF</span>
               </button>              <button
                 onClick={handleDownloadQR}
-                className="inline-flex items-center justify-center gap-2 text-purple-600 hover:text-purple-800 font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base"
+                className="inline-flex items-center justify-center gap-2 text-black hover:text-black font-medium transition-colors py-2 sm:py-0 text-sm sm:text-base"
                 title="Download QR Code"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
