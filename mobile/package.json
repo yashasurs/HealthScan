@@ -17,7 +17,6 @@
     "@react-navigation/stack": "^7.3.2",
     "axios": "^1.9.0",
     "expo": "~53.0.9",
-    "expo-barcode-scanner": "^13.0.1",
     "expo-blur": "~14.1.4",
     "expo-camera": "^16.1.8",
     "expo-clipboard": "^7.1.4",

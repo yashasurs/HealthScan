@@ -17,6 +17,7 @@ import FolderSystemScreen from './screens/FolderSystemScreen';
 import RecordDetailScreen from './screens/RecordDetailScreen';
 import RecordViewerScreen from './screens/RecordViewerScreen';
 import QRScannerScreen from './screens/QRScannerScreen';
+import SharedContentViewerScreen from './screens/SharedContentViewerScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -40,7 +41,8 @@ function MainTabNavigator() {
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Upload') {
-            iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';          } else if (route.name === 'Collections') {
+            iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
+          } else if (route.name === 'Collections') {
             iconName = focused ? 'folder-open' : 'folder-outline';
           } else if (route.name === 'QRScanner') {
             iconName = focused ? 'qr-code' : 'qr-code-outline';
@@ -94,8 +96,7 @@ function MainTabNavigator() {
           marginTop: 4,
           letterSpacing: 0.2,
           textTransform: 'capitalize',
-        },
-        tabBarItemStyle: {
+        },        tabBarItemStyle: {
           paddingTop: 6,
           paddingBottom: 4,
           borderRadius: 18,
@@ -105,20 +106,21 @@ function MainTabNavigator() {
         headerShown: false,
       })}
     >
-      <Tab.Screen 
+      <Tab.Screen
         name="Dashboard" 
         component={DashboardScreen} 
         options={{ 
           tabBarLabel: 'Home',
         }} 
       />
-      <Tab.Screen 
+      <Tab.Screen
         name="Upload" 
         component={RecordUploadScreen} 
         options={{ 
           tabBarLabel: 'Upload',
-        }} 
-      />      <Tab.Screen 
+        }}
+      />
+      <Tab.Screen 
         name="Collections" 
         component={FolderSystemScreen} 
         options={{ 
@@ -145,15 +147,15 @@ function MainTabNavigator() {
 
 function AppContent() {
   const { isAuthenticated, loading, isFirstLaunch } = useAuth();
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4A90E2" />
       </View>
     );
-  }  return (
-    <Stack.Navigator 
+  }
+
+  return (    <Stack.Navigator 
       screenOptions={{ headerShown: false }}
       initialRouteName={isFirstLaunch ? "Landing" : (!isAuthenticated ? "Login" : "MainTabs")}
     >
@@ -178,15 +180,21 @@ function AppContent() {
             name="CollectionSystem" 
             component={FolderSystemScreen} 
             options={{ headerShown: false, presentation: 'modal' }} 
-          />          <Stack.Screen 
+          />
+          <Stack.Screen 
             name="RecordDetail" 
             component={RecordDetailScreen} 
             options={{ headerShown: false, presentation: 'card' }} 
           />
-          <Stack.Screen 
+          <Stack.Screen
             name="QRScanner" 
             component={QRScannerScreen} 
             options={{ headerShown: false, presentation: 'modal' }} 
+          />
+          <Stack.Screen 
+            name="SharedContentViewer" 
+            component={SharedContentViewerScreen} 
+            options={{ headerShown: false, presentation: 'card' }} 
           />
         </>
       )}

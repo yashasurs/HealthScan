@@ -11,8 +11,7 @@ import {
   Vibration,
   Platform
 } from 'react-native';
-import { Camera } from 'expo-camera';
-import { BarCodeScanner } from 'expo-barcode-scanner';
+import { CameraView, Camera } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -36,7 +35,6 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
       setScanned(false);
     }
   }, [visible]);
-
   const handleBarCodeScanned = ({ type, data }) => {
     if (scanned) return;
     
@@ -48,7 +46,7 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
     }
 
     // Check if it's a QR code and contains our expected URL pattern
-    if (type === BarCodeScanner.Constants.BarCodeType.qr) {
+    if (type === 'qr') {
       // Check if it's one of our app's QR codes
       if (data.includes('/records/share?token=') || data.includes('/collections/share?token=')) {
         onQRScanned(data);
@@ -97,16 +95,15 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
       </TouchableOpacity>
     </View>
   );
-
   const renderScanner = () => (
     <View style={styles.scannerContainer}>
-      <Camera
+      <CameraView
         style={styles.camera}
-        type={Camera.Constants.Type.back}
-        flashMode={flashOn ? Camera.Constants.FlashMode.torch : Camera.Constants.FlashMode.off}
-        onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        barCodeScannerSettings={{
-          barCodeTypes: [BarCodeScanner.Constants.BarCodeType.qr],
+        facing="back"
+        flash={flashOn ? 'on' : 'off'}
+        onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'],
         }}
       >
         {/* Overlay */}
@@ -137,9 +134,8 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
             <Text style={styles.instructionText}>
               Position the QR code within the frame
             </Text>
-          </View>
-        </View>
-      </Camera>
+          </View>        </View>
+      </CameraView>
     </View>
   );
 

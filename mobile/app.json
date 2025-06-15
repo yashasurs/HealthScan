@@ -12,7 +12,11 @@
       "backgroundColor": "#000000"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes for medical records.",
+        "NSMicrophoneUsageDescription": "This app may use the microphone when recording videos."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -20,11 +24,25 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.projectsunga"
+      "package": "com.anonymous.projectsunga",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/health-scan.png"
     },
-    "primaryColor": "#000000"
+    "primaryColor": "#000000",
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan QR codes.",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone when recording videos.",
+          "recordAudioAndroid": true
+        }
+      ]
+    ]
   }
 }

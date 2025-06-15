@@ -10,7 +10,7 @@ import {
   SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { QRScanner } from '../components/scanner';
+import QRScanner from '../components/scanner/QRScanner';
 import { useApiService } from '../services/apiService';
 
 const QRScannerScreen = ({ navigation }) => {
@@ -36,49 +36,14 @@ const QRScannerScreen = ({ navigation }) => {
       }
       
       if (!token || !type) {
-        Alert.alert('Error', 'Invalid QR code format');
-        return;
+        Alert.alert('Error', 'Invalid QR code format');        return;
       }
 
-      // Fetch the shared content
-      let response;
-      if (type === 'record') {
-        response = await apiService.records.getShared(token);
-      } else {
-        response = await apiService.collections.getShared(token);
-      }
-
-      const sharedData = response.data;
-
-      // Show preview and save option
-      Alert.alert(
-        `Shared ${type === 'record' ? 'Record' : 'Collection'}`,
-        `${type === 'record' ? 'Record' : 'Collection'}: ${sharedData.filename || sharedData.name}\n\nWould you like to save this to your account?`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Save',
-            onPress: async () => {
-              try {
-                if (type === 'record') {
-                  await apiService.records.saveShared(token);
-                  Alert.alert('Success', 'Record saved to your account!', [
-                    { text: 'OK', onPress: () => navigation.navigate('Collections') }
-                  ]);
-                } else {
-                  await apiService.collections.saveShared(token);
-                  Alert.alert('Success', 'Collection saved to your account!', [
-                    { text: 'OK', onPress: () => navigation.navigate('Collections') }
-                  ]);
-                }
-              } catch (error) {
-                console.error('Error saving shared content:', error);
-                Alert.alert('Error', 'Failed to save. It may already exist in your account.');
-              }
-            }
-          }
-        ]
-      );
+      // Navigate to SharedContentViewerScreen to display the content
+      navigation.navigate('SharedContentViewer', {
+        shareToken: token,
+        shareType: type
+      });
 
     } catch (error) {
       console.error('Error processing QR code:', error);
