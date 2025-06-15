@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -17,7 +17,14 @@ const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, error } = useAuth();
+  const { login, error, markLaunchComplete } = useAuth();
+
+  // Mark launch complete when component mounts (user navigated from landing)
+  useEffect(() => {
+    if (markLaunchComplete) {
+      markLaunchComplete();
+    }
+  }, [markLaunchComplete]);
 
   const handleLogin = async () => {
     if (!username.trim()) {
