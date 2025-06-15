@@ -7,6 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider, useAuth } from './Contexts/Authcontext';
+import LandingScreen from './screens/LandingScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import DashboardScreen from './screens/DashboardScreen';
@@ -137,7 +138,7 @@ function MainTabNavigator() {
 }
 
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isFirstLaunch } = useAuth();
 
   if (loading) {
     return (
@@ -145,11 +146,18 @@ function AppContent() {
         <ActivityIndicator size="large" color="#4A90E2" />
       </View>
     );
-  }
-
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!isAuthenticated ? (
+  }  return (
+    <Stack.Navigator 
+      screenOptions={{ headerShown: false }}
+      initialRouteName={isFirstLaunch ? "Landing" : "Login"}
+    >
+      {isFirstLaunch ? (
+        <>
+          <Stack.Screen name="Landing" component={LandingScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+        </>
+      ) : !isAuthenticated ? (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />

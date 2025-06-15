@@ -209,6 +209,22 @@ export const useApiService = () => {
           }
         });
       }
+    },
+
+    // QR Code API
+    qr: {
+      getRecordQR: async (recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.post(`/qr/record/${recordId}`, {}, {
+          responseType: 'blob'
+        });
+      },
+      getCollectionQR: async (collectionId) => {
+        const api = await getAuthenticatedApi();
+        return api.post(`/qr/collection/${collectionId}`, {}, {
+          responseType: 'blob'
+        });
+      }
     }
   };
 };
