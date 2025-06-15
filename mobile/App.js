@@ -16,6 +16,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import FolderSystemScreen from './screens/FolderSystemScreen';
 import RecordDetailScreen from './screens/RecordDetailScreen';
 import RecordViewerScreen from './screens/RecordViewerScreen';
+import QRScannerScreen from './screens/QRScannerScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -39,11 +40,10 @@ function MainTabNavigator() {
           if (route.name === 'Dashboard') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Upload') {
-            iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
-          } else if (route.name === 'Collections') {
+            iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';          } else if (route.name === 'Collections') {
             iconName = focused ? 'folder-open' : 'folder-outline';
-          } else if (route.name === 'Records') {
-            iconName = focused ? 'document-text' : 'document-text-outline';
+          } else if (route.name === 'QRScanner') {
+            iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -118,8 +118,7 @@ function MainTabNavigator() {
         options={{ 
           tabBarLabel: 'Upload',
         }} 
-      />
-      <Tab.Screen 
+      />      <Tab.Screen 
         name="Collections" 
         component={FolderSystemScreen} 
         options={{ 
@@ -127,6 +126,13 @@ function MainTabNavigator() {
         }} 
       />
       <Tab.Screen 
+        name="QRScanner" 
+        component={QRScannerScreen} 
+        options={{ 
+          tabBarLabel: 'Scan',
+        }} 
+      />
+      <Tab.Screen
         name="Profile" 
         component={ProfileScreen} 
         options={{ 
@@ -149,16 +155,11 @@ function AppContent() {
   }  return (
     <Stack.Navigator 
       screenOptions={{ headerShown: false }}
-      initialRouteName={isFirstLaunch ? "Landing" : "Login"}
+      initialRouteName={isFirstLaunch ? "Landing" : (!isAuthenticated ? "Login" : "MainTabs")}
     >
-      {isFirstLaunch ? (
+      {!isAuthenticated ? (
         <>
-          <Stack.Screen name="Landing" component={LandingScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Signup" component={SignupScreen} />
-        </>
-      ) : !isAuthenticated ? (
-        <>
+          {isFirstLaunch && <Stack.Screen name="Landing" component={LandingScreen} />}
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
         </>
@@ -177,11 +178,15 @@ function AppContent() {
             name="CollectionSystem" 
             component={FolderSystemScreen} 
             options={{ headerShown: false, presentation: 'modal' }} 
-          />
-          <Stack.Screen 
+          />          <Stack.Screen 
             name="RecordDetail" 
             component={RecordDetailScreen} 
             options={{ headerShown: false, presentation: 'card' }} 
+          />
+          <Stack.Screen 
+            name="QRScanner" 
+            component={QRScannerScreen} 
+            options={{ headerShown: false, presentation: 'modal' }} 
           />
         </>
       )}

@@ -133,6 +133,10 @@ export const useApiService = () => {
       },      getShared: async (shareToken) => {
         const api = await getAuthenticatedApi();
         return api.get(`/collections/share/${shareToken}`);
+      },
+      saveShared: async (shareToken) => {
+        const api = await getAuthenticatedApi();
+        return api.post(`/collections/share/${shareToken}/save`);
       }
     },// Records API
     records: {
