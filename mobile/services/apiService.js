@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { useAuth } from '../Contexts/Authcontext';
 
-const API_BASE_URL = 'http://10.0.2.2:8000';
+const API_BASE_URL = 'https://healthscan-e868bea9b278.herokuapp.com';
 
 /**
  * Creates an axios instance with authentication headers and refresh token functionality
