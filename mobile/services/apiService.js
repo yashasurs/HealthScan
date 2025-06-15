@@ -131,8 +131,12 @@ export const useApiService = () => {
         const api = await getAuthenticatedApi();
         return api.delete(`/collections/${collectionId}/records/${recordId}`);
       },      getShared: async (shareToken) => {
-        const api = await getAuthenticatedApi();
-        return api.get(`/collections/share/${shareToken}`);
+        // Public endpoint - no auth required
+        const publicApi = axios.create({
+          baseURL: API_BASE_URL,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return publicApi.get(`/collections/share/${shareToken}`);
       },
       saveShared: async (shareToken) => {
         const api = await getAuthenticatedApi();
@@ -166,10 +170,13 @@ export const useApiService = () => {
         return api.get(`/records/${recordId}/pdf`, {
           responseType: 'blob'
         });
-      },
-      getShared: async (shareToken) => {
-        const api = await getAuthenticatedApi();
-        return api.get(`/records/share/${shareToken}`);
+      },      getShared: async (shareToken) => {
+        // Public endpoint - no auth required
+        const publicApi = axios.create({
+          baseURL: API_BASE_URL,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return publicApi.get(`/records/share/${shareToken}`);
       },
       getSharedPdf: async (shareToken) => {
         const api = await getAuthenticatedApi();
