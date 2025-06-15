@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFirstLaunch, setIsFirstLaunch] = useState(true);
 
   const isAuthenticated = !!token;const getToken = async () => {
     try {
@@ -31,29 +32,46 @@ export const AuthProvider = ({ children }) => {
       await logout();
       return null;
     }
-  };
-  // Load token and user from AsyncStorage on app start
+  };  // Load token and user from AsyncStorage on app start
   useEffect(() => {
     const loadStoredData = async () => {
       try {
+        const hasLaunchedBefore = await AsyncStorage.getItem("hasLaunchedBefore");
         const storedToken = await AsyncStorage.getItem("token");
         const storedRefreshToken = await AsyncStorage.getItem("refresh_token");
         const storedUser = await AsyncStorage.getItem("user");
 
-        if (storedToken && storedUser) {
-          setToken(storedToken);
-          setRefreshToken(storedRefreshToken);
-          setUser(JSON.parse(storedUser));
+        // Check if this is the first launch
+        if (!hasLaunchedBefore) {
+          setIsFirstLaunch(true);
+        } else {
+          setIsFirstLaunch(false);
+          
+          if (storedToken && storedUser) {
+            setToken(storedToken);
+            setRefreshToken(storedRefreshToken);
+            setUser(JSON.parse(storedUser));
+          }
         }
       } catch (error) {
         console.error("Failed to load auth data from AsyncStorage", error);
+        setIsFirstLaunch(false);
       } finally {
         setLoading(false);
       }
     };
 
     loadStoredData();
-  }, []);  const register = async (userData) => {
+  }, []);  const markLaunchComplete = async () => {
+    try {
+      await AsyncStorage.setItem("hasLaunchedBefore", "true");
+      setIsFirstLaunch(false);
+    } catch (error) {
+      console.error("Failed to mark launch complete:", error);
+    }
+  };
+
+  const register = async (userData) => {
     try {
       setError(null);
       
@@ -205,8 +223,7 @@ export const AuthProvider = ({ children }) => {
       await logout();
       throw error;
     }
-  };
-  return (
+  };  return (
     <AuthContext.Provider value={{ 
       user, 
       token,
@@ -214,6 +231,8 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated, 
       loading,
       error,
+      isFirstLaunch,
+      markLaunchComplete,
       getToken,
       getValidToken, 
       login, 
