@@ -30,9 +30,8 @@ const SharedCollection = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // Fetch from the shared collection endpoint (no auth required)
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/collections/share/${token}`, {
+        // Fetch from the shared collection endpoint (no auth required)
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://healthscan-e868bea9b278.herokuapp.com'}/collections/share/${token}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -65,9 +64,8 @@ const SharedCollection = () => {
     try {
       const searchParams = new URLSearchParams(location.search);
       const token = searchParams.get('token');
-      
-      // Use the collection share endpoint to download PDF for specific record
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/collections/share/${token}/record/${record.id}/pdf`, {
+        // Use the collection share endpoint to download PDF for specific record
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://healthscan-e868bea9b278.herokuapp.com'}/collections/share/${token}/record/${record.id}/pdf`, {
         method: 'GET',
       });
 

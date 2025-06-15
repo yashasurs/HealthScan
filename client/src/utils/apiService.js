@@ -10,9 +10,8 @@ const refreshAccessToken = async () => {
   if (!refreshToken) {
     throw new Error('No refresh token available');
   }
-
   try {
-    const response = await axios.post('http://localhost:8000/refresh', null, {
+    const response = await axios.post('https://healthscan-e868bea9b278.herokuapp.com/refresh', null, {
       params: { refresh_token: refreshToken }
     });
 
@@ -40,9 +39,8 @@ export const createApiService = () => {
   if (!token) {
     console.warn('No authentication token found. API calls may fail.');
   }
-  
-  const instance = axios.create({
-    baseURL: 'http://localhost:8000',
+    const instance = axios.create({
+    baseURL: 'https://healthscan-e868bea9b278.herokuapp.com',
     headers: {
       'Authorization': token ? `Bearer ${token}` : ''
     }

@@ -9,11 +9,10 @@ export const useAuth = () => {
 
 export default function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_URL = "http://localhost:8000"; 
+  const API_URL = "https://healthscan-e868bea9b278.herokuapp.com"; 
   useEffect(() => {
     const checkAuthStatus = async () => {
       const token = localStorage.getItem("token");
