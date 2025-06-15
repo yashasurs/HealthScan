@@ -17,6 +17,11 @@ import cv2
 
 load_dotenv()
 
+# Configure pytesseract with explicit path for deployment environments
+if os.environ.get('DYNO'):  # Check if running on Heroku
+    pytesseract.pytesseract.tesseract_cmd = '/app/.apt/usr/bin/tesseract'
+    os.environ['TESSDATA_PREFIX'] = '/app/.apt/usr/share/tesseract-ocr/5/tessdata'
+
 if __name__ == "__main__":
     from schemas import MarkupResponse
 else:
