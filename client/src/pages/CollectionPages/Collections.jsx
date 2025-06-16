@@ -22,23 +22,10 @@ const Collections = () => {
   }, []);  const fetchCollections = async () => {
     try {
       setLoading(true);
-      console.log('Fetching collections...');
       const response = await collectionsAPI.getAll();
-      console.log('Collections response:', response);
-      console.log('Collections data:', response.data);
-      console.log('Collections data type:', typeof response.data);
-      console.log('Collections array length:', Array.isArray(response.data) ? response.data.length : 'Not an array');
-      
-      if (Array.isArray(response.data) && response.data.length > 0) {
-        console.log('First collection:', response.data[0]);
-        console.log('First collection ID:', response.data[0].id, 'Type:', typeof response.data[0].id);
-      }
-      
       setCollections(response.data);
     } catch (err) {
       setError('Failed to fetch collections');
-      console.error('Error fetching collections:', err);
-      console.error('Error response:', err.response);
     } finally {
       setLoading(false);
     }
@@ -56,10 +43,8 @@ const Collections = () => {
       setShowCreateModal(false);
       setFormData({ name: '', description: '' });
       setError('');
-      fetchCollections();
-    } catch (err) {
+      fetchCollections();    } catch (err) {
       setError('Failed to create collection');
-      console.error('Error creating collection:', err);
     }
   };
 
@@ -76,10 +61,8 @@ const Collections = () => {
       setSelectedCollection(null);
       setFormData({ name: '', description: '' });
       setError('');
-      fetchCollections();
-    } catch (err) {
+      fetchCollections();    } catch (err) {
       setError('Failed to update collection');
-      console.error('Error updating collection:', err);
     }
   };
 
@@ -90,10 +73,8 @@ const Collections = () => {
 
     try {
       await collectionsAPI.delete(collectionId);
-      fetchCollections();
-    } catch (err) {
+      fetchCollections();    } catch (err) {
       setError('Failed to delete collection');
-      console.error('Error deleting collection:', err);
     }
   };
 
@@ -118,13 +99,10 @@ const Collections = () => {
     if (qrLoading) return; // Prevent multiple concurrent requests
     
     setQrLoading(true);
-    setQrLoadingCollectionId(collectionId);
-    setError('');
+    setQrLoadingCollectionId(collectionId);    setError('');
     setSuccessMessage('');
     
     try {
-      console.log('Generating QR code for collection:', collectionId, collectionName);
-      
       // Create API service instance with proper authentication
       const api = createApiService();
       
@@ -168,14 +146,10 @@ const Collections = () => {
       
       // Show success message
       setSuccessMessage(`QR code for "${collectionName}" downloaded successfully!`);
-      
-      // Clear success message after 3 seconds
+        // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
       
-      console.log('QR code download completed successfully:', filename);
-      
     } catch (error) {
-      console.error('Error downloading QR code:', error);
       
       // Handle different types of errors
       let errorMessage = 'Failed to generate QR code. Please try again.';

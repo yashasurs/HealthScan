@@ -22,15 +22,12 @@ const Documents = () => {
   }, [isAuthenticated]);
   
   // Fetch collections from API
-  const fetchCollections = async () => {
-    try {
+  const fetchCollections = async () => {    try {
       setIsLoading(true);
       const api = createApiService();
       const response = await api.get('/collections/');
-      console.log('Collections response:', response.data);
       setCollections(response.data);
     } catch (error) {
-      console.error('Error fetching collections:', error);
       setUploadStatus('Error fetching collections. Please try again.');
     } finally {
       setIsLoading(false);
@@ -115,23 +112,15 @@ const Documents = () => {
     
     try {
       const formData = new FormData();
-      
-      // Append all files to formData
+        // Append all files to formData
       files.forEach(file => {
         formData.append('files', file);
-        console.log(`Appending file: ${file.name}, size: ${file.size}, type: ${file.type}`);
       });
-      
-      // If a collection is selected, add its ID to the request
+        // If a collection is selected, add its ID to the request
       // Records will still be created even without a collection
       if (selectedCollection) {
         // The collection_id should be sent as a query parameter, not in the form data
-        console.log(`Using collection ID: ${selectedCollection}`);
-      } else {
-        console.log('No collection selected. Records will be created independently.');
       }
-      
-      console.log('Sending OCR request...');
       
       // Create API service with auth token
       const api = createApiService();
@@ -141,14 +130,12 @@ const Documents = () => {
       // Add collection_id as a query parameter if selected
       if (selectedCollection) {
         url += `?collection_id=${selectedCollection}`;
-      }
-        const response = await api.post(url, formData, {
+      }        const response = await api.post(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      console.log('OCR response received:', response.data);
       const recordsCreated = response.data.length;
       const collectionMessage = selectedCollection 
         ? `and added to collection` 
@@ -158,7 +145,6 @@ const Documents = () => {
       setFiles([]);
       
     } catch (error) {
-      console.error('Error uploading or processing files:', error);
       setUploadStatus(`Error: ${error.response?.data?.detail || 'Failed to process files'}`);
     } finally {
       setIsUploading(false);
