@@ -27,8 +27,7 @@ function App() {
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
             <Route path='/records/share' element={<SharedRecord />} />
-            <Route path='/collections/share' element={<SharedCollection />} />
-            <Route path='/home' element={
+            <Route path='/collections/share' element={<SharedCollection />} />            <Route path='/' element={
               <ProtectedRoute>
                 <Home />
               </ProtectedRoute>
@@ -63,7 +62,6 @@ function App() {
                 <Profile />
               </ProtectedRoute>
             } />
-            <Route path='/' element={<Home />} />
           </Routes>
         </div>
       </div>

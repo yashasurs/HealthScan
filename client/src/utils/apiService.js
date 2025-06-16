@@ -35,21 +35,15 @@ const refreshAccessToken = async () => {
  */
 export const createApiService = () => {
   const token = localStorage.getItem('token');
-  console.log('Creating API service with token:', token ? 'Token present' : 'No token');
-  if (!token) {
-    console.warn('No authentication token found. API calls may fail.');
-  }
     const instance = axios.create({
     baseURL: 'https://healthscan-e868bea9b278.herokuapp.com',
     headers: {
       'Authorization': token ? `Bearer ${token}` : ''
     }
   });
-  
-  // Add response interceptor for token refresh
+    // Add response interceptor for token refresh
   instance.interceptors.response.use(
     response => {
-      console.log(`API call to ${response.config.url} successful:`, response.status);
       return response;
     },
     async error => {
@@ -65,16 +59,13 @@ export const createApiService = () => {
           // Update the authorization header
           originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
           instance.defaults.headers['Authorization'] = `Bearer ${newToken}`;
-          
-          // Retry the original request
+            // Retry the original request
           return instance(originalRequest);
         } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
           return Promise.reject(refreshError);
         }
       }
       
-      console.error(`API call to ${error.config?.url} failed:`, error.response?.status, error.response?.data);
       return Promise.reject(error);
     }
   );

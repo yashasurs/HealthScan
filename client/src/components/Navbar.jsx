@@ -51,7 +51,7 @@ const Navbar = () => {
   // Check if user is on profile page
   const isOnProfilePage = location.pathname === '/profile';  const navigationLinks = isAuthenticated 
     ? [
-        { name: 'Home', path: '/home' },
+        { name: 'Home', path: '/' },
         { name: 'Records', path: '/records' },
         { name: 'Collections', path: '/collections' },
         { name: 'Upload', path: '/upload' }
@@ -63,7 +63,7 @@ const Navbar = () => {
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100"
     >      <div className="max-w-7xl mx-auto px-2 sm:px-3 lg:px-4">
         <div className="flex justify-between h-16">
-          {/* Logo and Brand - visible on all screens */}          <div className="flex items-center">            <Link to={isAuthenticated ? "/home" : "/"} className="flex items-center group pl-0 lg:pl-0">
+          {/* Logo and Brand - visible on all screens */}          <div className="flex items-center">            <Link to="/" className="flex items-center group pl-0 lg:pl-0">
               <img 
                 src="/Logo.png" 
                 alt="HealthScan Logo" 

@@ -24,9 +24,7 @@ export default function AuthProvider({ children }) {
           setIsAuthenticated(true);
           
           // Fetch current user data
-          await getCurrentUser();
-        } catch (err) {
-          console.error("Error verifying authentication", err);
+          await getCurrentUser();        } catch (err) {
           localStorage.removeItem("token");
           setIsAuthenticated(false);
           setUser(null);
@@ -91,15 +89,12 @@ export default function AuthProvider({ children }) {
     setIsAuthenticated(false);
     setUser(null);
   };  
-  
-  const getCurrentUser = async () => {
+    const getCurrentUser = async () => {
     try {
       const response = await axios.get(`${API_URL}/me`);
-      console.log("Current user data:", response.data);
       setUser(response.data);
       return response.data;
     } catch (err) {
-      console.error("Error fetching user data", err);
       return null;
     }
   };

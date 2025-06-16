@@ -116,9 +116,8 @@ const RegisterForm = () => {
                 doctor_name: doctorName || null,
                 visit_date: visitDate ? new Date(visitDate).toISOString() : null
             };
-            
-            await register(userData);
-            navigate('/home');
+              await register(userData);
+            navigate('/');
             
         } catch (err) {
             setError(err.response?.data?.detail || 'An error occurred during registration. Please try again.');
