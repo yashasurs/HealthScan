@@ -22,4 +22,16 @@ export default defineConfig({
       plugins: [],
     }),
   ],
+  build: {
+    chunkSizeWarningLimit: 1000, // Increase chunk size warning limit to 1000 kB
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor libraries into their own chunks
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+        }
+      }
+    }
+  },
 })
