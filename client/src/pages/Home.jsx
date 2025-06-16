@@ -14,15 +14,16 @@ const ScanIcon = () => (
   </svg>
 );
 
-const CloudIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-  </svg>
-);
-
 const MobileIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+    {/* Phone outline */}
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 2h8a2 2 0 012 2v16a2 2 0 01-2 2H8a2 2 0 01-2-2V4a2 2 0 012-2z" />
+    {/* Screen */}
+    <rect x="8" y="5" width="8" height="11" rx="1" strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} fill="currentColor" fillOpacity="0.1" />
+    {/* Home button */}
+    <circle cx="12" cy="18.5" r="1" fill="currentColor" />
+    {/* Screen content lines representing health records */}
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M10 7h4M10 9h3M10 11h4" stroke="currentColor" opacity="0.6" />
   </svg>
 );
 
@@ -203,40 +204,50 @@ const Home = () => {
 
             <div className="mt-12 lg:mt-0">
               <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-10"></div>
-                <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
-                  <blockquote>
-                    <div className="text-2xl font-medium text-gray-900 mb-6 leading-relaxed">
-                      "This system has transformed how we manage patient records at our PHC. What used to take hours now takes seconds."
+                <div className="absolute -inset-4 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-10"></div>                <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-100">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 mb-4">
+                      Empowering Healthcare Digitization
                     </div>
-                    <footer>
+                    <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+                      Our platform is designed to bridge the digital divide in healthcare record management, 
+                      specifically addressing the unique challenges faced by Primary Health Centers across India.
+                    </p>
+                    <div className="flex items-center justify-center space-x-4 text-blue-600">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 rounded-full bg-blue-600 h-16 w-16 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                          DR
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-lg font-semibold text-gray-900">Dr. Rajesh Sharma</div>
-                          <div className="text-blue-600 font-medium">PHC Medical Officer, Uttar Pradesh</div>
-                        </div>
+                        <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="font-medium">Secure</span>
                       </div>
-                    </footer>
-                  </blockquote>
-
-                  <div className="mt-10 pt-8 border-t border-blue-200">
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        <span className="font-medium">Fast</span>
+                      </div>
+                      <div className="flex items-center">
+                        <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span className="font-medium">Reliable</span>
+                      </div>
+                    </div>
+                  </div>                  <div className="mt-10 pt-8 border-t border-blue-200">
                     <div className="text-center">
-                      <h4 className="text-xl font-semibold text-gray-900 mb-6">Our Impact in Numbers</h4>
+                      <h4 className="text-xl font-semibold text-gray-900 mb-6">Platform Features</h4>
                       <div className="grid grid-cols-3 gap-6">
                         <div className="text-center">
-                          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">500+</p>
-                          <p className="text-sm text-gray-600 font-medium mt-1">PHCs Served</p>
+                          <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">📱</div>
+                          <p className="text-sm text-gray-600 font-medium mt-2">Mobile Friendly</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">2M+</p>
-                          <p className="text-sm text-gray-600 font-medium mt-1">Patient Records</p>
+                          <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">🔒</div>
+                          <p className="text-sm text-gray-600 font-medium mt-2">Secure Storage</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">14</p>
-                          <p className="text-sm text-gray-600 font-medium mt-1">States</p>
+                          <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">⚡</div>
+                          <p className="text-sm text-gray-600 font-medium mt-2">Quick Access</p>
                         </div>
                       </div>
                     </div>
