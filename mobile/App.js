@@ -15,7 +15,6 @@ import RecordUploadScreen from './screens/RecordUploadScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import FolderSystemScreen from './screens/FolderSystemScreen';
 import RecordDetailScreen from './screens/RecordDetailScreen';
-import RecordViewerScreen from './screens/RecordViewerScreen';
 import QRScannerScreen from './screens/QRScannerScreen';
 import SharedContentViewerScreen from './screens/SharedContentViewerScreen';
 
@@ -165,20 +164,11 @@ function AppContent() {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
         </>
-      ) : (
-        <>
+      ) : (        <>
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
           <Stack.Screen 
-            name="RecordViewer" 
-            component={RecordViewerScreen}
-            options={{
-              presentation: 'fullScreenModal',
-              animation: 'slide_from_bottom'
-            }}
-          />
-          <Stack.Screen 
             name="CollectionSystem" 
-            component={FolderSystemScreen} 
+            component={FolderSystemScreen}
             options={{ headerShown: false, presentation: 'modal' }} 
           />
           <Stack.Screen 
