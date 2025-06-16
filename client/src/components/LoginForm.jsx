@@ -27,10 +27,9 @@ const LoginForm = () => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
-        
-        try {
+          try {
             await login(username, password);
-            navigate('/home');
+            navigate('/');
             
         } catch (err) {
             setError(err.response?.data?.detail || 'Invalid username or password. Please try again.');
