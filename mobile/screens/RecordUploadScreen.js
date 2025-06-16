@@ -126,7 +126,10 @@ const RecordUploadScreen = ({ navigation }) => {
         </View>
       </View>
       
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Upload Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -217,10 +220,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
-  },
-  content: {
+  },  content: {
     flex: 1,
     padding: 20,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   section: {
     backgroundColor: '#fff',
@@ -277,7 +282,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   uploadButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -306,7 +311,7 @@ const styles = StyleSheet.create({
   uploadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#007AFF',
+    color: '#fff',
     fontWeight: '500',
   },
 });

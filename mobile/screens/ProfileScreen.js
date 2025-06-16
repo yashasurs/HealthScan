@@ -58,7 +58,6 @@ const ProfileScreen = () => {
       ]
     );
   };
-
   const handleUpdateProfile = async (updatedData) => {
     try {
       setIsLoading(true);
@@ -68,18 +67,6 @@ const ProfileScreen = () => {
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error) {
       Alert.alert('Error', error.response?.data?.detail || 'Failed to update profile');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePasswordChange = async (oldPassword, newPassword) => {
-    try {
-      setIsLoading(true);
-      await apiService.auth.changePassword(oldPassword, newPassword);
-      Alert.alert('Success', 'Password changed successfully');
-    } catch (error) {
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to change password');
     } finally {
       setIsLoading(false);
     }
@@ -115,13 +102,11 @@ const ProfileScreen = () => {
               isEditing={isEditing}
               onUpdate={handleUpdateProfile}
             />
-            
-            <ProfileActions 
+              <ProfileActions 
               isLoggingOut={isLoggingOut}
               isEditing={isEditing}
               onEditProfile={() => setIsEditing(true)}
               onCancelEdit={() => setIsEditing(false)}
-              onChangePassword={handlePasswordChange}
               onLogout={handleLogout}
             />
           </>
@@ -135,26 +120,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-  },  header: {
-    paddingTop: 40,
+  },
+  header: {
+    paddingTop: 50,
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 3,
+    marginBottom: 5,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
-    marginBottom: 0,
+    marginBottom: 20,
   },  content: {
     flex: 1,
+    padding: 20,
   },
   contentContainer: {
     paddingBottom: 120, // Extra padding to account for navigation bar

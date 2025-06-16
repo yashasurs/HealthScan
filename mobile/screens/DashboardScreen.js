@@ -67,19 +67,21 @@ const DashboardScreen = () => {
       ...prev,
       [field]: value    }));
   };
-
-  const renderField = (label, field, value, editable = true) => (
-    <View style={styles.patientInfoRow}>
-      <Text style={styles.patientInfoLabel}>{label}:</Text>
+  const renderField = (label, field, value, editable = true, required = false) => (
+    <View style={styles.infoItem}>
+      <Text style={styles.infoLabel}>{label}{required && ' *'}</Text>
       {isEditing && editable ? (
         <TextInput
-          style={styles.editInput}
+          style={[
+            styles.input,
+            required && !editData[field] && styles.requiredField
+          ]}
           value={editData[field] || ''}
           onChangeText={(text) => handleInputChange(field, text)}
           placeholder={`Enter ${label.toLowerCase()}`}
         />
       ) : (
-        <Text style={styles.patientInfoValue}>{value}</Text>
+        <Text style={styles.infoValue}>{value || 'Not provided'}</Text>
       )}
     </View>
   );
@@ -114,27 +116,25 @@ const DashboardScreen = () => {
             </TouchableOpacity>
           </View>
             <View style={styles.patientInfoContainer}>            <View style={styles.infoSection}>
-              <Text style={styles.sectionTitle}>Basic Info</Text>
-              {renderField('Full Name', 'full_name', `${patientData.first_name || ''} ${patientData.last_name || ''}`.trim())}
-              {renderField('Username', 'username', patientData.username)}
+              <Text style={styles.sectionTitle}>Basic Information</Text>
+              {renderField('Full Name', 'full_name', `${patientData.first_name || ''} ${patientData.last_name || ''}`.trim(), true, true)}
+              {renderField('Username', 'username', patientData.username, true, true)}
             </View>
 
             <View style={styles.infoSection}>
-              <Text style={styles.sectionTitle}>Medical Info</Text>
-              {renderField('Blood Group', 'blood_group', patientData.blood_group || 'Not specified')}
-              {renderField('Aadhar Card', 'aadhar_card', patientData.aadhar_card || 'Not provided')}
-              {renderField('Allergies', 'allergies', patientData.allergies || 'None reported')}
-              {renderField('Doctor Name', 'doctor_name', patientData.doctor_name || 'Not assigned')}
-              {renderField('Last Visit', 'visit_date', patientData.visit_date || 'No visits recorded', false)}
-            </View>
-
-            {isEditing && (
-              <View style={styles.editButtonsContainer}>
+              <Text style={styles.sectionTitle}>Medical Information</Text>
+              {renderField('Blood Group', 'blood_group', patientData.blood_group, true)}
+              {renderField('Aadhar Card', 'aadhar_card', patientData.aadhar_card, true)}
+              {renderField('Allergies', 'allergies', patientData.allergies, true)}
+              {renderField('Doctor Name', 'doctor_name', patientData.doctor_name, true)}
+              {renderField('Last Visit', 'visit_date', patientData.visit_date, false)}
+            </View>            {isEditing && (
+              <View style={styles.buttonsContainer}>
                 <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={handleCancelEdit}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSaveEdit}>
-                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                  <Text style={styles.buttonText}>Save Changes</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -187,7 +187,7 @@ const DashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#ffffff',
   },
   header: {
     paddingTop: 50,
@@ -195,12 +195,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#f0f0f0',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#000',
     marginBottom: 5,
   },
   subtitle: {
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#181818',
+    backgroundColor: '#000',
     paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: 8,
@@ -225,120 +225,92 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },  content: {
     flex: 1,
-    padding: 20,
-  },  section: {
+    backgroundColor: '#ffffff',
+  },
+  section: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 20,
   },
   patientCard: {
     flex: 1,
     backgroundColor: '#fff',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     overflow: 'hidden',
-  },  cardHeader: {
+  },
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    backgroundColor: '#f7f7f9',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#f8f9fa',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },cardTitleContainer: {
+    borderBottomColor: '#f0f0f0',
+  },
+  cardTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-  },  iconContainer: {
+  },
+  iconContainer: {
     backgroundColor: '#f0f0f0',
     padding: 6,
     borderRadius: 10,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
     marginLeft: 8,
   },
   editButton: {
     padding: 6,
     borderRadius: 6,
     backgroundColor: '#f0f0f0',
-  },  patientInfoContainer: {
+  },patientInfoContainer: {
     flex: 1,
-    padding: 12,
+    padding: 20,
   },
   infoSection: {
-    marginBottom: 18,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: 12,
-    paddingBottom: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },  patientInfoRow: {
-    flexDirection: 'row',
-    marginBottom: 10,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#000',
   },
-  lastRow: {
-    marginBottom: 0,
-    paddingBottom: 0,
-    borderBottomWidth: 0,
+  infoItem: {
+    marginBottom: 16,
   },
-  patientInfoLabel: {
-    width: 100,
+  infoLabel: {
     fontSize: 14,
-    fontWeight: '600',
     color: '#666',
+    marginBottom: 4,
   },
-  patientInfoValue: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
+  infoValue: {
+    fontSize: 16,
     fontWeight: '500',
+    color: '#000',
   },
-  highlightValue: {
-    color: '#333',
-    fontWeight: '700',
-  },  editInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
+  input: {
     borderWidth: 1,
     borderColor: '#ddd',
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#000',
     backgroundColor: '#fff',
-  },  editButtonsContainer: {
+  },
+  requiredField: {
+    borderColor: '#ff6b6b',
+  },
+  buttonsContainer: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    marginTop: 20,
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -348,18 +320,18 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
   },
   saveButton: {
-    backgroundColor: '#181818',
+    backgroundColor: '#000',
   },
   cancelButtonText: {
     color: '#666',
     fontSize: 16,
     fontWeight: '600',
   },
-  saveButtonText: {
+  buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },  loadingContainer: {
+  },loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -384,8 +356,9 @@ const styles = StyleSheet.create({
   emptyStateSubText: {
     fontSize: 14,
     color: '#666',
-  },scrollContent: {
+  },  scrollContent: {
     flexGrow: 1,
+    paddingBottom: 40, // Extra padding at the end of the screen
   },  scrollContentEditing: {
     paddingBottom: 150, // Extra padding when in edit mode
   },
@@ -396,7 +369,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
