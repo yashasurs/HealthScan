@@ -7,7 +7,8 @@ import {
   Alert,
   Linking,
   Platform,
-  SafeAreaView
+  SafeAreaView,
+  ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import QRScanner from '../components/scanner/QRScanner';
@@ -59,27 +60,22 @@ const QRScannerScreen = ({ navigation }) => {
 
   const closeScanner = () => {
     setShowScanner(false);
-  };
+  };  return (
+    <SafeAreaView style={styles.container}>      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>QR Scanner</Text>
+        <Text style={styles.subtitle}>Scan QR codes to access shared medical records</Text>
+      </View>
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity 
-            onPress={() => navigation.goBack()} 
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={24} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.title}>QR Scanner</Text>
-          <View style={styles.placeholder} />
-        </View>
-
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Main Content */}
-        <View style={styles.mainContent}>
-          <View style={styles.iconContainer}>
-            <Ionicons name="qr-code-outline" size={120} color="#4A90E2" />
+        <View style={styles.mainContent}><View style={styles.iconContainer}>
+            <Ionicons name="qr-code-outline" size={120} color="#000" />
           </View>
           
           <Text style={styles.heading}>Scan QR Codes</Text>
@@ -100,28 +96,26 @@ const QRScannerScreen = ({ navigation }) => {
 
           {/* Instructions */}
           <View style={styles.instructionsContainer}>
-            <Text style={styles.instructionsTitle}>How to use:</Text>
-            <View style={styles.instructionItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+            <Text style={styles.instructionsTitle}>How to use:</Text>            <View style={styles.instructionItem}>
+              <Ionicons name="checkmark-circle" size={20} color="#000" />
               <Text style={styles.instructionText}>
                 Tap "Start Scanning" to open the camera
               </Text>
             </View>
             <View style={styles.instructionItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+              <Ionicons name="checkmark-circle" size={20} color="#000" />
               <Text style={styles.instructionText}>
                 Point your camera at a ProjectSunga QR code
               </Text>
             </View>
             <View style={styles.instructionItem}>
-              <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+              <Ionicons name="checkmark-circle" size={20} color="#000" />
               <Text style={styles.instructionText}>
                 Review and save the shared content to your account
               </Text>
-            </View>
-          </View>
+            </View>          </View>
         </View>
-      </View>
+      </ScrollView>
 
       {/* QR Scanner Modal */}
       <QRScanner
@@ -133,33 +127,33 @@ const QRScannerScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
   content: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: '#ffffff',
+  },  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 60,
+  },  header: {
+    paddingTop: 50,
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
-  },
-  backButton: {
-    padding: 8,
+    borderBottomColor: '#f0f0f0',
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 32,
+    fontWeight: 'bold',
     color: '#000',
+    marginBottom: 5,
   },
-  placeholder: {
-    width: 40,
+  subtitle: {
+    fontSize: 16,
+    color: '#666',
   },
   mainContent: {
     flex: 1,
@@ -171,8 +165,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   heading: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 32,
+    fontWeight: 'bold',
     color: '#000',
     marginBottom: 12,
     textAlign: 'center',
@@ -188,16 +182,14 @@ const styles = StyleSheet.create({
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4A90E2',
+    justifyContent: 'center',
+    backgroundColor: '#000',
     paddingHorizontal: 30,
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 4,
     marginBottom: 50,
-    shadowColor: '#4A90E2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    borderWidth: 2,
+    borderColor: '#000',
   },
   scanButtonText: {
     color: '#fff',
@@ -207,9 +199,11 @@ const styles = StyleSheet.create({
   },
   instructionsContainer: {
     alignSelf: 'stretch',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
+    backgroundColor: '#fff',
+    borderRadius: 4,
     padding: 20,
+    borderWidth: 2,
+    borderColor: '#000',
   },
   instructionsTitle: {
     fontSize: 18,

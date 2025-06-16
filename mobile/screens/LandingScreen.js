@@ -138,7 +138,7 @@ const LandingScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8f9fa',
   },
   gradient: {
     flex: 1,
@@ -156,54 +156,55 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginBottom: 16,
-  },  iconBackground: {
+  },
+  iconBackground: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   logoImage: {
     width: 50,
     height: 50,
-  },
-  appName: {
+  },  appName: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#333',
     letterSpacing: -0.5,
   },
   tagline: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
     textAlign: 'center',
     lineHeight: 22,
   },
   featuresContainer: {
     paddingVertical: 20,
-  },
-  feature: {
+  },  feature: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginBottom: 8,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e5e5e5',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
   },
   featureIcon: {
     width: 40,
@@ -216,33 +217,31 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 16,
-    color: '#333333',
+    color: '#1a1a1a',
     fontWeight: '500',
     flex: 1,
   },
   ctaContainer: {
     alignItems: 'center',
     paddingVertical: 20,
-  },
-  ctaTitle: {
-    fontSize: 24,
+  },  ctaTitle: {
+    fontSize: 32,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#333',
     marginBottom: 8,
     textAlign: 'center',
   },
   ctaSubtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: 20,
   },
   buttonsContainer: {
     paddingVertical: 20,
-  },
-  signupButton: {
-    backgroundColor: '#000000',
+  },  signupButton: {
+    backgroundColor: '#181818',
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
@@ -251,16 +250,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   signupButtonText: {
-    color: '#ffffff',
+    color: '#fff',
     fontSize: 18,
     fontWeight: '600',
     marginRight: 8,
@@ -276,16 +272,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
   },
   loginButtonText: {
-    color: '#000000',
+    color: '#181818',
     fontSize: 18,
     fontWeight: '600',
-  },
-  footer: {
+  },  footer: {
     alignItems: 'center',
-    paddingBottom: 30,
+    paddingBottom: 50,
   },
   footerText: {
     fontSize: 12,

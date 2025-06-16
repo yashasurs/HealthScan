@@ -12,6 +12,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../Contexts/Authcontext';
 
 const SignupScreen = ({ navigation }) => {
@@ -28,8 +30,9 @@ const SignupScreen = ({ navigation }) => {
     allergies: '',
     doctor_name: '',
     visit_date: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  });  const [isLoading, setIsLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const { register, error, markLaunchComplete } = useAuth();
 
   // Mark launch complete when component mounts (user navigated from landing)
@@ -40,12 +43,24 @@ const SignupScreen = ({ navigation }) => {
   }, [markLaunchComplete]);
 
   const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleDateChange = (event, date) => {
+    setShowDatePicker(Platform.OS === 'ios');
+    if (date) {
+      setSelectedDate(date);
+      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+      handleInputChange('visit_date', formattedDate);
+    }
+  };
+
+  const showDatePickerModal = () => {
+    setShowDatePicker(true);
   };
 
   const validateForm = () => {
@@ -307,17 +322,28 @@ const SignupScreen = ({ navigation }) => {
                 onChangeText={(value) => handleInputChange('doctor_name', value)}
                 editable={!isLoading}
               />
-            </View>
-
-            <View style={styles.inputContainer}>
+            </View>            <View style={styles.inputContainer}>
               <Text style={styles.label}>Last Visit Date (Optional)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="YYYY-MM-DD"
-                value={formData.visit_date}
-                onChangeText={(value) => handleInputChange('visit_date', value)}
-                editable={!isLoading}
-              />
+              <TouchableOpacity 
+                style={styles.datePickerButton}
+                onPress={showDatePickerModal}
+                disabled={isLoading}
+              >
+                <Text style={[styles.datePickerText, !formData.visit_date && styles.placeholderText]}>
+                  {formData.visit_date || 'Select last visit date'}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#666" />
+              </TouchableOpacity>
+              
+              {showDatePicker && (
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={handleDateChange}
+                  maximumDate={new Date()}
+                />
+              )}
             </View>
 
             <TouchableOpacity 
@@ -348,11 +374,11 @@ const SignupScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8f9fa',
   },
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8f9fa',
   },
   content: {
     flex: 1,
@@ -367,12 +393,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
   },
   errorContainer: {
     backgroundColor: '#ffe6e6',
@@ -391,52 +417,66 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 20,
-  },
-  label: {
+  },  label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
     borderRadius: 4,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#000000',
+    color: '#1a1a1a',
   },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
-  },
-  pickerContainer: {
+  },  pickerContainer: {
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
     borderRadius: 4,
-    backgroundColor: '#ffffff',
-  },
-  picker: {
+    backgroundColor: '#fff',
+  },  picker: {
     height: 50,
-    color: '#000000',
+    color: '#1a1a1a',
+  },
+  datePickerButton: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#181818',
+    borderRadius: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  datePickerText: {
+    fontSize: 16,
+    color: '#1a1a1a',
+  },
+  placeholderText: {
+    color: '#666',
   },
   signupButton: {
-    backgroundColor: '#000000',
+    backgroundColor: '#181818',
     borderRadius: 4,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 30,
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
   },
   disabledButton: {
     opacity: 0.6,
-  },
-  signupButtonText: {
-    color: '#ffffff',
+  },  signupButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -447,11 +487,11 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
   },
   loginLink: {
     fontSize: 16,
-    color: '#000000',
+    color: '#181818',
     fontWeight: '600',
   },
 });

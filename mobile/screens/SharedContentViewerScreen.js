@@ -217,7 +217,7 @@ const SharedContentViewerScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   loadingContainer: {
     flex: 1,
@@ -231,57 +231,61 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   header: {
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
   },
   backButton: {
     padding: 8,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
   },
   placeholder: {
     width: 40,
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  headerInfo: {
+    padding: 20,
+  },  headerInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
   },
   contentTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#000',
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
     marginLeft: 12,
     flex: 1,
   },
   metadataContainer: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   metadataItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
-  },
-  metadataLabel: {
+  },  metadataLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#1a1a1a',
   },
   metadataValue: {
     fontSize: 16,
@@ -291,9 +295,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   descriptionLabel: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   descriptionText: {
@@ -304,30 +308,39 @@ const styles = StyleSheet.create({
   contentLabel: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
+    color: '#1a1a1a',
     marginBottom: 12,
   },
   contentScrollView: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   contentText: {
     fontSize: 16,
-    color: '#333',
+    color: '#1a1a1a',
     lineHeight: 24,
   },
   recordsList: {
     flex: 1,
     marginBottom: 20,
-  },
-  recordItem: {
-    backgroundColor: '#f8f9fa',
+  },  recordItem: {
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   recordHeader: {
     flexDirection: 'row',
@@ -337,7 +350,7 @@ const styles = StyleSheet.create({
   recordTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#1a1a1a',
     marginLeft: 8,
   },
   recordPreview: {
@@ -355,19 +368,18 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
-  },
-  saveButton: {
+  },  saveButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#181818',
     paddingVertical: 16,
     borderRadius: 12,
-    shadowColor: '#4A90E2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   saveButtonText: {
     color: '#fff',

@@ -133,11 +133,11 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8f9fa',
   },
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f8f9fa',
   },
   content: {
     flex: 1,
@@ -152,12 +152,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
   },
   errorContainer: {
     backgroundColor: '#ffe6e6',
@@ -176,38 +176,36 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     marginBottom: 20,
-  },
-  label: {
+  },  label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000000',
+    color: '#1a1a1a',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#fff',
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
     borderRadius: 4,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#000000',
+    color: '#1a1a1a',
   },
   loginButton: {
-    backgroundColor: '#000000',
+    backgroundColor: '#181818',
     borderRadius: 4,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 30,
     borderWidth: 2,
-    borderColor: '#000000',
+    borderColor: '#181818',
   },
   disabledButton: {
     opacity: 0.6,
-  },
-  loginButtonText: {
-    color: '#ffffff',
+  },  loginButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -218,11 +216,11 @@ const styles = StyleSheet.create({
   },
   signupText: {
     fontSize: 16,
-    color: '#666666',
+    color: '#666',
   },
   signupLink: {
     fontSize: 16,
-    color: '#000000',
+    color: '#181818',
     fontWeight: '600',
   },
 });
