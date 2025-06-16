@@ -107,8 +107,7 @@ const RecordDetailScreen = ({ navigation, route }) => {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={48} color="#999" />
-        <Text style={styles.errorText}>Record not found</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.errorText}>Record not found</Text>        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -118,9 +117,8 @@ const RecordDetailScreen = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+      <View style={styles.header}>        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle} numberOfLines={1}>
@@ -132,21 +130,19 @@ const RecordDetailScreen = ({ navigation, route }) => {
           <TouchableOpacity 
             onPress={handleShowQR} 
             style={styles.actionButton}
-          >
-            <Ionicons 
+          >            <Ionicons 
               name="qr-code-outline" 
               size={20} 
-              color="#4A90E2" 
+              color="#000" 
             />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={handleRename} 
             style={styles.actionButton}
-          >
-            <Ionicons 
+          >            <Ionicons 
               name="pencil-outline" 
               size={20} 
-              color="#4A90E2" 
+              color="#000" 
             />
           </TouchableOpacity>
           <TouchableOpacity 
@@ -269,9 +265,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
     backgroundColor: '#fff',
-  },
-  backButton: {
-    padding: 8,
+  },  backButton: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#000',
   },
   headerCenter: {
     flex: 1,
@@ -288,14 +285,19 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
     textAlign: 'center',
-  },
-  headerActions: {
+  },  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
   },
   actionButton: {
-    padding: 8,
-    marginLeft: 8,
+    padding: 10,
+    marginHorizontal: 4,
+    borderRadius: 10,
   },
   deleteButton: {
     padding: 8,
@@ -393,11 +395,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 24,
     fontWeight: '500',
-  },
-  backButtonText: {
+  },  backButtonText: {
     fontSize: 16,
-    color: '#000',
-    fontWeight: '500',
+    color: '#fff',
+    fontWeight: '600',
   },
   loadingOverlay: {
     position: 'absolute',

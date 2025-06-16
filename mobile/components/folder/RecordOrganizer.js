@@ -108,11 +108,10 @@ const RecordOrganizer = ({
         ]}
         onPress={() => setSelectedCollectionId(item.id)}
       >
-        <View style={styles.collectionContent}>
-          <Ionicons 
+        <View style={styles.collectionContent}>          <Ionicons 
             name="folder" 
             size={20} 
-            color={isSelected ? '#4A90E2' : '#666'} 
+            color={isSelected ? '#000' : '#666'} 
           />
           <View style={styles.collectionInfo}>
             <Text style={[
@@ -131,9 +130,8 @@ const RecordOrganizer = ({
             <View style={styles.currentBadge}>
               <Text style={styles.currentBadgeText}>Current</Text>
             </View>
-          )}
-          {isSelected && (
-            <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+          )}          {isSelected && (
+            <Ionicons name="checkmark-circle" size={20} color="#000" />
           )}
         </View>
       </TouchableOpacity>
@@ -145,15 +143,14 @@ const RecordOrganizer = ({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#666" />
+        <View style={styles.header}>          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.title}>Organize Record</Text>
           <View style={styles.placeholder} />
         </View>        <View style={styles.recordInfo}>
           <View style={styles.recordHeader}>
-            <Ionicons name="document-text" size={24} color="#4A90E2" />
+            <Ionicons name="document-text" size={24} color="#000" />
             <View style={styles.recordDetails}>
               <Text style={styles.recordName} numberOfLines={1}>
                 {record.filename}
@@ -171,7 +168,7 @@ const RecordOrganizer = ({
               style={styles.createButton}
               onPress={() => setShowCreateForm(!showCreateForm)}
             >
-              <Ionicons name="add-circle-outline" size={16} color="#4A90E2" />
+              <Ionicons name="add-circle-outline" size={16} color="#000" />
               <Text style={styles.createButtonText}>New Collection</Text>
             </TouchableOpacity>
           </View>
@@ -219,7 +216,7 @@ const RecordOrganizer = ({
               <Ionicons 
                 name="folder-open-outline" 
                 size={20} 
-                color={!selectedCollectionId ? '#4A90E2' : '#666'} 
+                color={!selectedCollectionId ? '#000' : '#666'} 
               />
               <View style={styles.collectionInfo}>
                 <Text style={[
@@ -231,9 +228,8 @@ const RecordOrganizer = ({
                 <Text style={styles.collectionDescription}>
                   Remove from any collection
                 </Text>
-              </View>
-              {!selectedCollectionId && (
-                <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+              </View>              {!selectedCollectionId && (
+                <Ionicons name="checkmark-circle" size={20} color="#000" />
               )}
             </View>
           </TouchableOpacity>
@@ -286,9 +282,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#e9ecef',
-  },
-  closeButton: {
-    padding: 8,
+  },  closeButton: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#000',
   },
   title: {
     fontSize: 18,
@@ -336,19 +333,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-  },
-  createButton: {
+  },  createButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
+    paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#e3f2fd',
-    borderRadius: 6,
+    backgroundColor: '#000',
+    borderRadius: 8,
   },
   createButtonText: {
     fontSize: 12,
-    color: '#4A90E2',
-    fontWeight: '500',
+    color: '#fff',
+    fontWeight: '600',
     marginLeft: 4,
   },
   createForm: {
@@ -375,22 +371,21 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginRight: 8,
-  },
-  cancelButtonText: {
+  },  cancelButtonText: {
     fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
+    color: '#000',
+    fontWeight: '600',
   },
   createConfirmButton: {
-    backgroundColor: '#4A90E2',
-    paddingVertical: 8,
+    backgroundColor: '#000',
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
   },
   createConfirmButtonText: {
     fontSize: 14,
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   collectionsList: {
     flex: 1,
@@ -401,10 +396,9 @@ const styles = StyleSheet.create({
     borderColor: '#e9ecef',
     borderRadius: 8,
     marginBottom: 8,
-  },
-  selectedItem: {
-    borderColor: '#4A90E2',
-    backgroundColor: '#e3f2fd',
+  },  selectedItem: {
+    borderColor: '#000',
+    backgroundColor: '#f5f5f5',
   },
   currentItem: {
     backgroundColor: '#fff3cd',
@@ -423,9 +417,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
     marginBottom: 2,
-  },
-  selectedText: {
-    color: '#4A90E2',
+  },  selectedText: {
+    color: '#000',
   },
   collectionDescription: {
     fontSize: 12,
@@ -447,9 +440,8 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
-  },
-  moveButton: {
-    backgroundColor: '#4A90E2',
+  },  moveButton: {
+    backgroundColor: '#000',
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',

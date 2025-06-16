@@ -77,16 +77,15 @@ const RenameRecordModal = ({ visible, onClose, record, onRecordRenamed }) => {
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.header}>
-            <Text style={styles.title}>Rename Record</Text>
-            <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#666" />
+            <Text style={styles.title}>Rename Record</Text>            <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
 
           <View style={styles.content}>
             <View style={styles.recordInfo}>
               <View style={styles.recordHeader}>
-                <Ionicons name="document-text" size={24} color="#4A90E2" />
+                <Ionicons name="document-text" size={24} color="#000" />
                 <View style={styles.recordDetails}>
                   <Text style={styles.currentFilename} numberOfLines={1}>
                     Current: {record.filename || record.original_filename}
@@ -178,9 +177,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#333',
-  },
-  closeButton: {
-    padding: 4,
+  },  closeButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#000',
   },
   content: {
     padding: 20,
@@ -242,33 +242,32 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#e5e5e5',
     gap: 12,
-  },
-  cancelButton: {
+  },  cancelButton: {
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e5e5e5',
+    borderColor: '#000',
     alignItems: 'center',
   },
   cancelButtonText: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#666',
+    fontWeight: '600',
+    color: '#000',
   },
   renameButton: {
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#000',
     alignItems: 'center',
     justifyContent: 'center',
   },
   renameButtonText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     color: '#fff',
   },
   disabledButton: {

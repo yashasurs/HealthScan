@@ -80,13 +80,12 @@ const RecordViewerScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
+      <View style={styles.header}>        <TouchableOpacity 
           onPress={() => navigation.goBack()} 
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color="#007AFF" />
-        </TouchableOpacity>          <View style={styles.headerCenter} />        <View style={styles.headerActions}>          <TouchableOpacity            onPress={() => {
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity><View style={styles.headerCenter} />        <View style={styles.headerActions}>          <TouchableOpacity            onPress={() => {
               const details = [
                 `Filename: ${record.filename || 'Untitled'}`,
                 `File Type: ${record.file_type || 'Unknown'}`,
@@ -104,25 +103,25 @@ const RecordViewerScreen = ({ route, navigation }) => {
             }}
             style={styles.actionButton}
           >
-            <Ionicons name="information-circle" size={24} color="#007AFF" />
+            <Ionicons name="information-circle" size={24} color="#000" />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={handleShowQR} 
             style={styles.actionButton}
           >
-            <Ionicons name="qr-code-outline" size={24} color="#007AFF" />
+            <Ionicons name="qr-code-outline" size={24} color="#000" />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={handleRename} 
             style={styles.actionButton}
           >
-            <Ionicons name="pencil" size={24} color="#007AFF" />
+            <Ionicons name="pencil" size={24} color="#000" />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={handleDelete} 
             style={styles.actionButton}
           >
-            <Ionicons name="trash" size={24} color="#FF3B30" />
+            <Ionicons name="trash" size={24} color="#000" />
           </TouchableOpacity>
         </View>
       </View>
@@ -138,7 +137,7 @@ const RecordViewerScreen = ({ route, navigation }) => {
       {/* Loading Overlay */}
       {loading && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color="#000" />
         </View>
       )}      {/* Modals */}
       <RenameRecordModal
@@ -176,24 +175,22 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.05)',
-  },
-  backButton: {
+  },  backButton: {
     padding: 10,
     borderRadius: 12,
-    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    backgroundColor: '#000',
   },
   headerCenter: {
     flex: 1,
     marginHorizontal: 12,
-  },
-  headerActions: {
+  },  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(248, 249, 250, 0.9)',
+    backgroundColor: '#f8f9fa',
     borderRadius: 12,
     paddingHorizontal: 6,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.05)',
+    borderColor: '#e5e5e5',
   },
   actionButton: {
     padding: 10,
