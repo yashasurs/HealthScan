@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { useAuth } from '../Contexts/Authcontext';
 
-const API_BASE_URL = 'http://10.0.2.2:8000';
+const API_BASE_URL = 'https://healthscan-e868bea9b278.herokuapp.com';
 
 /**
  * Creates an axios instance with authentication headers and refresh token functionality
@@ -131,8 +131,16 @@ export const useApiService = () => {
         const api = await getAuthenticatedApi();
         return api.delete(`/collections/${collectionId}/records/${recordId}`);
       },      getShared: async (shareToken) => {
+        // Public endpoint - no auth required
+        const publicApi = axios.create({
+          baseURL: API_BASE_URL,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return publicApi.get(`/collections/share/${shareToken}`);
+      },
+      saveShared: async (shareToken) => {
         const api = await getAuthenticatedApi();
-        return api.get(`/collections/share/${shareToken}`);
+        return api.post(`/collections/share/${shareToken}/save`);
       }
     },// Records API
     records: {
@@ -162,10 +170,13 @@ export const useApiService = () => {
         return api.get(`/records/${recordId}/pdf`, {
           responseType: 'blob'
         });
-      },
-      getShared: async (shareToken) => {
-        const api = await getAuthenticatedApi();
-        return api.get(`/records/share/${shareToken}`);
+      },      getShared: async (shareToken) => {
+        // Public endpoint - no auth required
+        const publicApi = axios.create({
+          baseURL: API_BASE_URL,
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return publicApi.get(`/records/share/${shareToken}`);
       },
       getSharedPdf: async (shareToken) => {
         const api = await getAuthenticatedApi();
@@ -207,6 +218,22 @@ export const useApiService = () => {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
+        });
+      }
+    },
+
+    // QR Code API
+    qr: {
+      getRecordQR: async (recordId) => {
+        const api = await getAuthenticatedApi();
+        return api.post(`/qr/record/${recordId}`, {}, {
+          responseType: 'blob'
+        });
+      },
+      getCollectionQR: async (collectionId) => {
+        const api = await getAuthenticatedApi();
+        return api.post(`/qr/collection/${collectionId}`, {}, {
+          responseType: 'blob'
         });
       }
     }

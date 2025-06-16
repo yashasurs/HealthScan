@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { RecordViewer } from '../components/document';
-import { RenameRecordModal } from '../components/modals';
+import { RenameRecordModal, QRModal } from '../components/modals';
 import { useApiService } from '../services/apiService';
 
 const formatFileSize = (bytes) => {
@@ -26,6 +26,7 @@ const RecordViewerScreen = ({ route, navigation }) => {
   const { record: initialRecord } = route.params;
   const [record, setRecord] = useState(initialRecord);
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const apiService = useApiService();
@@ -60,7 +61,6 @@ const RecordViewerScreen = ({ route, navigation }) => {
   const handleRename = () => {
     setShowRenameModal(true);
   };
-
   const handleRecordRenamed = async (recordId, newFilename) => {
     try {
       await apiService.records.update(recordId, { filename: newFilename });
@@ -73,6 +73,10 @@ const RecordViewerScreen = ({ route, navigation }) => {
     setShowRenameModal(false);
   };
 
+  const handleShowQR = () => {
+    setShowQRModal(true);
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -82,8 +86,7 @@ const RecordViewerScreen = ({ route, navigation }) => {
           style={styles.backButton}
         >
           <Ionicons name="arrow-back" size={24} color="#007AFF" />
-        </TouchableOpacity>          <View style={styles.headerCenter} />
-        <View style={styles.headerActions}>          <TouchableOpacity            onPress={() => {
+        </TouchableOpacity>          <View style={styles.headerCenter} />        <View style={styles.headerActions}>          <TouchableOpacity            onPress={() => {
               const details = [
                 `Filename: ${record.filename || 'Untitled'}`,
                 `File Type: ${record.file_type || 'Unknown'}`,
@@ -102,6 +105,12 @@ const RecordViewerScreen = ({ route, navigation }) => {
             style={styles.actionButton}
           >
             <Ionicons name="information-circle" size={24} color="#007AFF" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={handleShowQR} 
+            style={styles.actionButton}
+          >
+            <Ionicons name="qr-code-outline" size={24} color="#007AFF" />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={handleRename} 
@@ -131,14 +140,19 @@ const RecordViewerScreen = ({ route, navigation }) => {
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
-      )}
-
-      {/* Modals */}
+      )}      {/* Modals */}
       <RenameRecordModal
         visible={showRenameModal}
         onClose={() => setShowRenameModal(false)}
         record={record}
         onRecordRenamed={handleRecordRenamed}
+      />
+      
+      <QRModal
+        visible={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        recordId={record?.id}
+        title={`QR Code - ${record?.filename || 'Record'}`}
       />
     </View>
   );

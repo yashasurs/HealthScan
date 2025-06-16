@@ -169,10 +169,17 @@ const DashboardScreen = () => {
             onRefresh={handleRefresh}
             colors={['#333']}
           />
-        }
-      >
+        }      >
         {renderContent()}
       </ScrollView>
+      
+      {/* Floating QR Scanner Button */}
+      <TouchableOpacity 
+        style={styles.fabButton}
+        onPress={() => navigation.navigate('QRScanner')}
+      >
+        <Ionicons name="qr-code" size={28} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -379,9 +386,24 @@ const styles = StyleSheet.create({
     color: '#666',
   },scrollContent: {
     flexGrow: 1,
-  },
-  scrollContentEditing: {
+  },  scrollContentEditing: {
     paddingBottom: 150, // Extra padding when in edit mode
+  },
+  fabButton: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#4A90E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });
 

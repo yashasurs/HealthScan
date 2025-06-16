@@ -3,7 +3,7 @@ import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, RefreshCon
 import { Header } from '../components/common';
 import { FolderNavigator, RecordOrganizer } from '../components/folder';
 import { RecordViewer, RecordItem } from '../components/document';
-import { RenameRecordModal } from '../components/modals';
+import { RenameRecordModal, QRModal } from '../components/modals';
 import { useApiService } from '../services/apiService';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -14,9 +14,11 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [selectedCollection, setSelectedCollection] = useState(null);  const [showOrganizer, setShowOrganizer] = useState(false);  // Record viewer state has been removed in favor of navigation
   const [showEditCollectionModal, setShowEditCollectionModal] = useState(false);  const [showCreateCollectionModal, setShowCreateCollectionModal] = useState(false);
-  const [showRecordActionsModal, setShowRecordActionsModal] = useState(false);
-  const [showRecordPickerModal, setShowRecordPickerModal] = useState(false);
+  const [showRecordActionsModal, setShowRecordActionsModal] = useState(false);  const [showRecordPickerModal, setShowRecordPickerModal] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrCollection, setQrCollection] = useState(null);
+  const [qrRecord, setQrRecord] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -395,6 +397,16 @@ const FolderSystemScreen = ({ navigation, route }) => {
             </Text>            <View style={styles.actionButtons}>
               <TouchableOpacity
                 style={[styles.actionButton, { marginLeft: 0 }]}
+                onPress={() => {
+                  setQrCollection(collection);
+                  setQrRecord(null);
+                  setShowQRModal(true);
+                }}
+              >
+                <Ionicons name="qr-code-outline" size={20} color="#4A90E2" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, { marginLeft: 0 }]}
                 onPress={() => handleEditCollection(collection)}
               >
                 <Ionicons name="create-outline" size={20} color="#666" />
@@ -424,6 +436,16 @@ const FolderSystemScreen = ({ navigation, route }) => {
                   onPress={() => handleRecordSelect(record)}
                   onLongPress={() => handleRecordLongPress(record)}
                 />                <View style={styles.recordActions}>
+                  <TouchableOpacity
+                    style={styles.recordActionButton}
+                    onPress={() => {
+                      setQrRecord(record);
+                      setQrCollection(null);
+                      setShowQRModal(true);
+                    }}
+                  >
+                    <Ionicons name="qr-code-outline" size={16} color="#4A90E2" />
+                  </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.recordActionButton}
                     onPress={() => handleViewRecord(record)}
@@ -533,6 +555,16 @@ const FolderSystemScreen = ({ navigation, route }) => {
                     onPress={() => handleRecordSelect(record)}
                     onLongPress={() => handleRecordLongPress(record)}
                   />                  <View style={styles.recordActions}>
+                    <TouchableOpacity
+                      style={styles.recordActionButton}
+                      onPress={() => {
+                        setQrRecord(record);
+                        setQrCollection(null);
+                        setShowQRModal(true);
+                      }}
+                    >
+                      <Ionicons name="qr-code-outline" size={16} color="#4A90E2" />
+                    </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.recordActionButton}
                       onPress={() => handleViewRecord(record)}
@@ -888,8 +920,22 @@ const FolderSystemScreen = ({ navigation, route }) => {
               </View>
             )}
           </View>
-        </View>
-      </Modal>      {/* Record viewer modal has been replaced by RecordViewerScreen */}
+        </View>      </Modal>
+
+      {/* QR Code Modal */}
+      <QRModal
+        visible={showQRModal}
+        onClose={() => {
+          setShowQRModal(false);
+          setQrCollection(null);
+          setQrRecord(null);
+        }}
+        recordId={qrRecord?.id}
+        collectionId={qrCollection?.id}
+        title={qrRecord ? `QR Code - ${qrRecord.filename}` : qrCollection ? `QR Code - ${qrCollection.name}` : 'QR Code'}
+      />
+
+      {/* Record viewer modal has been replaced by RecordViewerScreen */}
     </View>
   );
 };

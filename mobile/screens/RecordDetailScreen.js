@@ -11,7 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { useApiService } from '../services/apiService';
-import { RenameRecordModal } from '../components/modals';
+import { RenameRecordModal, QRModal } from '../components/modals';
 
 /**
  * RecordDetailScreen - Full screen view for displaying record details
@@ -21,6 +21,7 @@ const RecordDetailScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(!initialRecord);
   const [deleting, setDeleting] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   
   const apiService = useApiService();
 
@@ -72,9 +73,12 @@ const RecordDetailScreen = ({ navigation, route }) => {
     } finally {
       setDeleting(false);
     }  };
-
   const handleRename = () => {
     setShowRenameModal(true);
+  };
+
+  const handleShowQR = () => {
+    setShowQRModal(true);
   };
 
   const handleRecordRenamed = (recordId, newFilename) => {
@@ -124,8 +128,17 @@ const RecordDetailScreen = ({ navigation, route }) => {
           </Text>
           <Text style={styles.headerSubtitle}>
             {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • {formatFileSize(record.file_size || 0)}
-          </Text>        </View>
-        <View style={styles.headerActions}>
+          </Text>        </View>        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            onPress={handleShowQR} 
+            style={styles.actionButton}
+          >
+            <Ionicons 
+              name="qr-code-outline" 
+              size={20} 
+              color="#4A90E2" 
+            />
+          </TouchableOpacity>
           <TouchableOpacity 
             onPress={handleRename} 
             style={styles.actionButton}
@@ -222,14 +235,20 @@ const RecordDetailScreen = ({ navigation, route }) => {
             <ActivityIndicator size="large" color="#000" />
             <Text style={styles.loadingText}>Deleting record...</Text>
           </View>        </View>
-      )}
-
-      {/* Rename Record Modal */}
+      )}      {/* Rename Record Modal */}
       <RenameRecordModal
         visible={showRenameModal}
         onClose={() => setShowRenameModal(false)}
         record={record}
         onRecordRenamed={handleRecordRenamed}
+      />
+
+      {/* QR Code Modal */}
+      <QRModal
+        visible={showQRModal}
+        onClose={() => setShowQRModal(false)}
+        recordId={record?.id}
+        title={`QR Code - ${record?.filename || 'Record'}`}
       />
     </View>
   );

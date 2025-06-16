@@ -7,6 +7,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider, useAuth } from './Contexts/Authcontext';
+import LandingScreen from './screens/LandingScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import DashboardScreen from './screens/DashboardScreen';
@@ -15,6 +16,8 @@ import ProfileScreen from './screens/ProfileScreen';
 import FolderSystemScreen from './screens/FolderSystemScreen';
 import RecordDetailScreen from './screens/RecordDetailScreen';
 import RecordViewerScreen from './screens/RecordViewerScreen';
+import QRScannerScreen from './screens/QRScannerScreen';
+import SharedContentViewerScreen from './screens/SharedContentViewerScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -41,8 +44,8 @@ function MainTabNavigator() {
             iconName = focused ? 'cloud-upload' : 'cloud-upload-outline';
           } else if (route.name === 'Collections') {
             iconName = focused ? 'folder-open' : 'folder-outline';
-          } else if (route.name === 'Records') {
-            iconName = focused ? 'document-text' : 'document-text-outline';
+          } else if (route.name === 'QRScanner') {
+            iconName = focused ? 'qr-code' : 'qr-code-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
           }
@@ -93,8 +96,7 @@ function MainTabNavigator() {
           marginTop: 4,
           letterSpacing: 0.2,
           textTransform: 'capitalize',
-        },
-        tabBarItemStyle: {
+        },        tabBarItemStyle: {
           paddingTop: 6,
           paddingBottom: 4,
           borderRadius: 18,
@@ -104,19 +106,19 @@ function MainTabNavigator() {
         headerShown: false,
       })}
     >
-      <Tab.Screen 
+      <Tab.Screen
         name="Dashboard" 
         component={DashboardScreen} 
         options={{ 
           tabBarLabel: 'Home',
         }} 
       />
-      <Tab.Screen 
+      <Tab.Screen
         name="Upload" 
         component={RecordUploadScreen} 
         options={{ 
           tabBarLabel: 'Upload',
-        }} 
+        }}
       />
       <Tab.Screen 
         name="Collections" 
@@ -126,6 +128,13 @@ function MainTabNavigator() {
         }} 
       />
       <Tab.Screen 
+        name="QRScanner" 
+        component={QRScannerScreen} 
+        options={{ 
+          tabBarLabel: 'Scan',
+        }} 
+      />
+      <Tab.Screen
         name="Profile" 
         component={ProfileScreen} 
         options={{ 
@@ -137,8 +146,7 @@ function MainTabNavigator() {
 }
 
 function AppContent() {
-  const { isAuthenticated, loading } = useAuth();
-
+  const { isAuthenticated, loading, isFirstLaunch } = useAuth();
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -147,10 +155,13 @@ function AppContent() {
     );
   }
 
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+  return (    <Stack.Navigator 
+      screenOptions={{ headerShown: false }}
+      initialRouteName={isFirstLaunch ? "Landing" : (!isAuthenticated ? "Login" : "MainTabs")}
+    >
       {!isAuthenticated ? (
         <>
+          {isFirstLaunch && <Stack.Screen name="Landing" component={LandingScreen} />}
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
         </>
@@ -173,6 +184,16 @@ function AppContent() {
           <Stack.Screen 
             name="RecordDetail" 
             component={RecordDetailScreen} 
+            options={{ headerShown: false, presentation: 'card' }} 
+          />
+          <Stack.Screen
+            name="QRScanner" 
+            component={QRScannerScreen} 
+            options={{ headerShown: false, presentation: 'modal' }} 
+          />
+          <Stack.Screen 
+            name="SharedContentViewer" 
+            component={SharedContentViewerScreen} 
             options={{ headerShown: false, presentation: 'card' }} 
           />
         </>
