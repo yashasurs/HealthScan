@@ -87,9 +87,8 @@ const QRModal = ({ visible, onClose, recordId, collectionId, title }) => {
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>{title || 'QR Code'}</Text>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#666" />
+            <Text style={styles.title}>{title || 'QR Code'}</Text>            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
 
@@ -97,7 +96,7 @@ const QRModal = ({ visible, onClose, recordId, collectionId, title }) => {
           <View style={styles.content}>
             {loading && (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4A90E2" />
+                <ActivityIndicator size="large" color="#000" />
                 <Text style={styles.loadingText}>Generating QR code...</Text>
               </View>
             )}
@@ -168,9 +167,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '600',
     color: '#333',
-  },
-  closeButton: {
-    padding: 4,
+  },  closeButton: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: '#000',
   },
   content: {
     padding: 20,
@@ -199,9 +199,8 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 20,
     textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: '#4A90E2',
+  },  retryButton: {
+    backgroundColor: '#000',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
@@ -231,9 +230,8 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
-  },
-  doneButton: {
-    backgroundColor: '#4A90E2',
+  },  doneButton: {
+    backgroundColor: '#000',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',

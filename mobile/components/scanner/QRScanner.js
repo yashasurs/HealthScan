@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   permissionButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#000',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 12,
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 20,
     height: 20,
-    borderColor: '#4A90E2',
+    borderColor: '#000',
     borderWidth: 3,
   },
   topLeft: {
@@ -295,7 +295,7 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     height: 2,
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#000',
     opacity: 0.8,
   },
   overlayBottom: {

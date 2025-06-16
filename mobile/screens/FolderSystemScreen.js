@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, RefreshControl, Modal, TextInput } from 'react-native';
 import { Header } from '../components/common';
-import { FolderNavigator, RecordOrganizer } from '../components/folder';
+import { RecordOrganizer } from '../components/folder';
 import { RecordViewer, RecordItem } from '../components/document';
 import { RenameRecordModal, QRModal } from '../components/modals';
 import { useApiService } from '../services/apiService';
@@ -381,7 +381,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
       <View key={collection.id} style={styles.collectionCard}>
         <View style={styles.collectionHeader}>
           <View style={styles.collectionTitleContainer}>
-            <Ionicons name="folder" size={24} color="#4A90E2" />
+            <Ionicons name="folder" size={24} color="#000" />
             <View style={styles.collectionInfo}>
               <Text style={styles.collectionTitle}>{collection.name}</Text>
               {collection.description && (
@@ -403,7 +403,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                   setShowQRModal(true);
                 }}
               >
-                <Ionicons name="qr-code-outline" size={20} color="#4A90E2" />
+                <Ionicons name="qr-code-outline" size={20} color="#000" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.actionButton, { marginLeft: 0 }]}
@@ -421,7 +421,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 style={styles.actionButton}
                 onPress={() => handleAddRecordsToCollection(collection)}
               >
-                <Ionicons name="add-outline" size={20} color="#4A90E2" />
+                <Ionicons name="add-outline" size={20} color="#000" />
               </TouchableOpacity>
             </View>
           </View>
@@ -444,7 +444,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                       setShowQRModal(true);
                     }}
                   >
-                    <Ionicons name="qr-code-outline" size={16} color="#4A90E2" />
+                    <Ionicons name="qr-code-outline" size={16} color="#000" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.recordActionButton}
@@ -474,7 +474,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
               style={styles.addRecordButton}
               onPress={() => handleAddRecordsToCollection(collection)}
             >
-              <Ionicons name="add-outline" size={16} color="#4A90E2" />
+              <Ionicons name="add-outline" size={16} color="#000" />
               <Text style={styles.addRecordText}>Add Records</Text>
             </TouchableOpacity>
           </View>
@@ -563,7 +563,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                         setShowQRModal(true);
                       }}
                     >
-                      <Ionicons name="qr-code-outline" size={16} color="#4A90E2" />
+                      <Ionicons name="qr-code-outline" size={16} color="#000" />
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={styles.recordActionButton}
@@ -774,7 +774,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 handleViewRecord(selectedRecord);
               }}
             >
-              <Ionicons name="eye-outline" size={24} color="#4A90E2" />
+              <Ionicons name="eye-outline" size={24} color="#000" />
               <Text style={styles.actionMenuText}>View Record</Text>
             </TouchableOpacity>            <TouchableOpacity
               style={styles.actionMenuItem}
@@ -783,7 +783,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 handleEditRecord(selectedRecord);
               }}
             >
-              <Ionicons name="create-outline" size={24} color="#4A90E2" />
+              <Ionicons name="create-outline" size={24} color="#000" />
               <Text style={styles.actionMenuText}>Edit Record</Text>
             </TouchableOpacity>
 
@@ -794,7 +794,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 handleRenameRecord(selectedRecord);
               }}
             >
-              <Ionicons name="pencil-outline" size={24} color="#4A90E2" />
+              <Ionicons name="pencil-outline" size={24} color="#000" />
               <Text style={styles.actionMenuText}>Rename Record</Text>
             </TouchableOpacity>
 
@@ -805,7 +805,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 handleRecordLongPress(selectedRecord);
               }}
             >
-              <Ionicons name="folder-outline" size={24} color="#4A90E2" />
+              <Ionicons name="folder-outline" size={24} color="#000" />
               <Text style={styles.actionMenuText}>Move to Collection</Text>
             </TouchableOpacity>
 
@@ -857,7 +857,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
           <View style={styles.modalContent}>
             {selectedCollectionForAdding && (
               <View style={styles.collectionInfoHeader}>
-                <Ionicons name="folder" size={24} color="#4A90E2" />
+                <Ionicons name="folder" size={24} color="#000" />
                 <View style={styles.collectionInfoText}>
                   <Text style={styles.collectionInfoName}>{selectedCollectionForAdding.name}</Text>
                   <Text style={styles.collectionInfoDesc}>
@@ -902,7 +902,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                           <Ionicons 
                             name={isSelected ? "checkbox" : "square-outline"} 
                             size={24} 
-                            color={isSelected ? "#4A90E2" : "#ccc"} 
+                            color={isSelected ? "#000" : "#ccc"} 
                           />
                         </View>
                       </View>
@@ -972,12 +972,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#000',
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
     marginVertical: 16,
-    shadowColor: '#4A90E2',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -1153,7 +1153,7 @@ const styles = StyleSheet.create({
   },
   addRecordText: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: '#000',
     marginLeft: 4,
   },  unorganizedList: {
     backgroundColor: '#fff',
@@ -1245,7 +1245,7 @@ const styles = StyleSheet.create({
   },  modalSaveButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#000',
     borderRadius: 6,
   },
   modalSaveButtonDisabled: {
@@ -1384,7 +1384,7 @@ const styles = StyleSheet.create({
     borderColor: '#f0f0f0',
   },
   recordPickerItemSelected: {
-    borderColor: '#4A90E2',
+    borderColor: '#000',
     backgroundColor: '#f0f8ff',
   },
   lastRecordPickerItem: {

@@ -82,7 +82,7 @@ const SharedContentViewerScreen = ({ route, navigation }) => {
   const renderRecordContent = () => (
     <View style={styles.contentContainer}>
       <View style={styles.headerInfo}>
-        <Ionicons name="document-text" size={24} color="#4A90E2" />
+        <Ionicons name="document-text" size={24} color="#000" />
         <Text style={styles.contentTitle}>{content.filename}</Text>
       </View>
       
@@ -115,7 +115,7 @@ const SharedContentViewerScreen = ({ route, navigation }) => {
   const renderCollectionContent = () => (
     <View style={styles.contentContainer}>
       <View style={styles.headerInfo}>
-        <Ionicons name="folder" size={24} color="#4A90E2" />
+        <Ionicons name="folder" size={24} color="#000" />
         <Text style={styles.contentTitle}>{content.collection.name}</Text>
       </View>
       
@@ -163,7 +163,7 @@ const SharedContentViewerScreen = ({ route, navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4A90E2" />
+          <ActivityIndicator size="large" color="#000" />
           <Text style={styles.loadingText}>Loading shared content...</Text>
         </View>
       </SafeAreaView>

@@ -75,9 +75,8 @@ const RecordViewer = ({
     <View style={styles.container}>
       {/* Header - only show if not embedded */}
       {!embedded && (
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#666" />
+        <View style={styles.header}>          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle} numberOfLines={1}>
@@ -91,22 +90,20 @@ const RecordViewer = ({
             <TouchableOpacity 
               onPress={handleRename} 
               style={styles.actionButton}
-            >
-              <Ionicons 
+            >              <Ionicons 
                 name="pencil-outline" 
                 size={20} 
-                color="#4A90E2" 
+                color="#000" 
               />
             </TouchableOpacity>
             <TouchableOpacity 
               onPress={handleDelete} 
               style={styles.actionButton}
               disabled={deleting}
-            >
-              <Ionicons 
+            >              <Ionicons 
                 name="trash-outline" 
                 size={20} 
-                color={deleting ? "#ccc" : "#dc3545"} 
+                color={deleting ? "#ccc" : "#000"} 
               />
             </TouchableOpacity>
           </View>
@@ -115,7 +112,7 @@ const RecordViewer = ({
 
       {/* Content */}      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.fileHeader}>
-          <Ionicons name="document-text" size={24} color="#4A90E2" />
+          <Ionicons name="document-text" size={24} color="#000" />
           <Text style={styles.fileName} numberOfLines={1}>{record.filename}</Text>
           <Text style={styles.fileType}>
             {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'}
@@ -181,9 +178,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
     backgroundColor: '#fff',
-  },
-  closeButton: {
-    padding: 8,
+  },  closeButton: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#000',
   },
   headerCenter: {
     flex: 1,
@@ -201,14 +199,19 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
     textAlign: 'center',
-  },
-  headerActions: {
+  },  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
   },
   actionButton: {
-    padding: 8,
-    marginLeft: 8,
+    padding: 10,
+    marginHorizontal: 4,
+    borderRadius: 10,
   },
   deleteButton: {
     padding: 8,

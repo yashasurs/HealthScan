@@ -73,18 +73,18 @@ const styles = StyleSheet.create({
   recordSize: {
     fontSize: 12,
     color: '#777',
-  },
-  recordRemove: {
+  },  recordRemove: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
   },
   recordRemoveText: {
-    color: '#777',
+    color: '#fff',
     fontSize: 16,
+    fontWeight: '600',
   },
 });
 

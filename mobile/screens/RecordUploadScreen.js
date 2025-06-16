@@ -179,7 +179,7 @@ const RecordUploadScreen = ({ navigation }) => {
         {/* Upload Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="cloud-upload-outline" size={24} color="#007AFF" />
+            <Ionicons name="cloud-upload-outline" size={24} color="#000" />
             <Text style={styles.sectionTitle}>Upload Records</Text>
           </View>
           <Text style={styles.sectionSubtitle}>
@@ -192,7 +192,7 @@ const RecordUploadScreen = ({ navigation }) => {
         {/* Selected Records */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="document-text-outline" size={24} color="#007AFF" />
+            <Ionicons name="document-text-outline" size={24} color="#000" />
             <Text style={styles.sectionTitle}>Selected Records</Text>
           </View>
           
@@ -218,7 +218,7 @@ const RecordUploadScreen = ({ navigation }) => {
 
         {uploading && (
           <View style={styles.uploadingContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
+            <ActivityIndicator size="large" color="#000" />
             <Text style={styles.uploadingText}>{uploadStatus}</Text>
           </View>        )}
       </ScrollView>
@@ -269,9 +269,8 @@ const RecordUploadScreen = ({ navigation }) => {
                   <Text style={styles.collectionOptionDesc}>
                     Upload files without assigning to a collection
                   </Text>
-                </View>
-                {!selectedCollection && (
-                  <Ionicons name="checkmark-circle" size={24} color="#4A90E2" />
+                </View>                {!selectedCollection && (
+                  <Ionicons name="checkmark-circle" size={24} color="#000" />
                 )}
               </View>
             </TouchableOpacity>
@@ -279,7 +278,7 @@ const RecordUploadScreen = ({ navigation }) => {
             {/* Collections list */}
             {loadingCollections ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#4A90E2" />
+                <ActivityIndicator size="large" color="#000" />
                 <Text style={styles.loadingText}>Loading collections...</Text>
               </View>
             ) : (
@@ -296,15 +295,14 @@ const RecordUploadScreen = ({ navigation }) => {
                   }}
                 >
                   <View style={styles.collectionOptionContent}>
-                    <Ionicons name="folder" size={24} color="#4A90E2" />
+                    <Ionicons name="folder" size={24} color="#000" />
                     <View style={styles.collectionOptionInfo}>
                       <Text style={styles.collectionOptionName}>{collection.name}</Text>
                       <Text style={styles.collectionOptionDesc}>
                         {collection.description || 'No description'}
                       </Text>
-                    </View>
-                    {selectedCollection?.id === collection.id && (
-                      <Ionicons name="checkmark-circle" size={24} color="#4A90E2" />
+                    </View>                    {selectedCollection?.id === collection.id && (
+                      <Ionicons name="checkmark-circle" size={24} color="#000" />
                     )}
                   </View>
                 </TouchableOpacity>
@@ -498,10 +496,9 @@ const styles = StyleSheet.create({
   clearButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-  },
-  clearButtonText: {
+  },  clearButtonText: {
     fontSize: 16,
-    color: '#4A90E2',
+    color: '#000',
     fontWeight: '600',
   },
   modalContent: {
@@ -514,10 +511,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e5e5e5',
-  },
-  selectedOption: {
-    borderColor: '#4A90E2',
-    backgroundColor: '#f0f8ff',
+  },  selectedOption: {
+    borderColor: '#000',
+    backgroundColor: '#f5f5f5',
   },
   collectionOptionContent: {
     flexDirection: 'row',
