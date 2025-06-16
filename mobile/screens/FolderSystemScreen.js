@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, RefreshControl, Modal, TextInput } from 'react-native';
 import { Header } from '../components/common';
 import { RecordOrganizer } from '../components/folder';
-import { RecordViewer, RecordItem } from '../components/document';
+import { RecordItem } from '../components/document';
 import { RenameRecordModal, QRModal } from '../components/modals';
 import { useApiService } from '../services/apiService';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,6 +15,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const [selectedCollection, setSelectedCollection] = useState(null);  const [showOrganizer, setShowOrganizer] = useState(false);  // Record viewer state has been removed in favor of navigation
   const [showEditCollectionModal, setShowEditCollectionModal] = useState(false);  const [showCreateCollectionModal, setShowCreateCollectionModal] = useState(false);
   const [showRecordActionsModal, setShowRecordActionsModal] = useState(false);  const [showRecordPickerModal, setShowRecordPickerModal] = useState(false);
+  const [showCollectionViewModal, setShowCollectionViewModal] = useState(false);
+  const [viewingCollection, setViewingCollection] = useState(null);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCollection, setQrCollection] = useState(null);
@@ -93,9 +95,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
     setRefreshing(true);
     await loadData();
     setRefreshing(false);
-  };
-
-  const handleRecordSelect = (record) => {
+  };  const handleRecordSelect = (record) => {
     navigation.navigate('RecordDetail', {
       recordId: record.id,
       record: record
@@ -109,8 +109,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const handleRecordMoved = () => {
     setRefreshTrigger(prev => prev + 1);
   };
-
   // === COLLECTION MANAGEMENT FUNCTIONS ===
+  
+  const handleViewCollection = (collection) => {
+    setViewingCollection(collection);
+    setShowCollectionViewModal(true);
+  };
   
   const handleEditCollection = (collection) => {
     setSelectedCollection(collection);
@@ -211,18 +215,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
       ]
     );
   };
-
   // === RECORD MANAGEMENT FUNCTIONS ===
-  const handleViewRecord = async (record) => {
-    try {
-      const response = await apiService.records.get(record.id);
-      navigation.navigate('RecordViewer', { record: response.data });
-    } catch (error) {
-      console.error('Error fetching record details:', error);
-      Alert.alert('Error', 'Failed to load record details');
-    }
-  };
-
   const handleEditRecord = (record) => {
     navigation.navigate('RecordDetail', {
       recordId: record.id,
@@ -377,98 +370,60 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const renderCollection = (collection) => {
     const recordCount = collection.records?.length || 0;
     
-    return (
-      <View key={collection.id} style={styles.collectionCard}>
+    return (      <View key={collection.id} style={styles.collectionCard}>
         <View style={styles.collectionHeader}>
           <View style={styles.collectionTitleContainer}>
             <Ionicons name="folder" size={24} color="#000" />
-            <View style={styles.collectionInfo}>
+            <TouchableOpacity 
+              style={styles.collectionInfo}
+              onPress={() => handleViewCollection(collection)}
+            >
               <Text style={styles.collectionTitle}>{collection.name}</Text>
               {collection.description && (
-                <Text style={styles.collectionDescription} numberOfLines={1}>
+                <Text style={styles.collectionDescription} numberOfLines={2}>
                   {collection.description}
                 </Text>
               )}
-            </View>
-          </View>
-          <View style={styles.collectionActions}>
-            <Text style={styles.recordCount}>
-              {recordCount} {recordCount === 1 ? 'record' : 'records'}
-            </Text>            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                style={[styles.actionButton, { marginLeft: 0 }]}
-                onPress={() => {
-                  setQrCollection(collection);
-                  setQrRecord(null);
-                  setShowQRModal(true);
-                }}
-              >
-                <Ionicons name="qr-code-outline" size={20} color="#000" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionButton, { marginLeft: 0 }]}
-                onPress={() => handleEditCollection(collection)}
-              >
-                <Ionicons name="create-outline" size={20} color="#666" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleDeleteCollection(collection)}
-              >
-                <Ionicons name="trash-outline" size={20} color="#ff4444" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => handleAddRecordsToCollection(collection)}
-              >
-                <Ionicons name="add-outline" size={20} color="#000" />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
         
-        {collection.records && collection.records.length > 0 ? (
-          <View style={styles.recordsList}>
-            {collection.records.map(record => (
-              <View key={record.id} style={styles.recordItemContainer}>
-                <RecordItem
-                  record={record}
-                  onPress={() => handleRecordSelect(record)}
-                  onLongPress={() => handleRecordLongPress(record)}
-                />                <View style={styles.recordActions}>
-                  <TouchableOpacity
-                    style={styles.recordActionButton}
-                    onPress={() => {
-                      setQrRecord(record);
-                      setQrCollection(null);
-                      setShowQRModal(true);
-                    }}
-                  >
-                    <Ionicons name="qr-code-outline" size={16} color="#000" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.recordActionButton}
-                    onPress={() => handleViewRecord(record)}
-                  >
-                    <Ionicons name="eye-outline" size={16} color="#666" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.recordActionButton}
-                    onPress={() => handleEditRecord(record)}
-                  >
-                    <Ionicons name="create-outline" size={16} color="#666" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.recordActionButton}
-                    onPress={() => handleRemoveRecordFromCollection(collection.id, record.id)}
-                  >
-                    <Ionicons name="remove-circle-outline" size={16} color="#ff4444" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
-          </View>
-        ) : (
+        <View style={styles.collectionActionsRow}>
+          <Text style={styles.recordCount}>
+            {recordCount} {recordCount === 1 ? 'record' : 'records'}
+          </Text>
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionButton, { marginLeft: 0, marginRight: 8 }]}
+              onPress={() => {
+                setQrCollection(collection);
+                setQrRecord(null);
+                setShowQRModal(true);
+              }}
+            >
+              <Ionicons name="qr-code-outline" size={20} color="#000" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionButton, { marginLeft: 0 }]}
+              onPress={() => handleEditCollection(collection)}
+            >
+              <Ionicons name="create-outline" size={20} color="#666" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleDeleteCollection(collection)}
+            >
+              <Ionicons name="trash-outline" size={20} color="#ff4444" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleAddRecordsToCollection(collection)}
+            >
+              <Ionicons name="add-outline" size={20} color="#000" />
+            </TouchableOpacity>
+          </View></View>
+        
+        {collection.records && collection.records.length === 0 && (
           <View style={styles.emptyCollectionContainer}>
             <Text style={styles.emptyText}>No records in this collection</Text>            <TouchableOpacity
               style={styles.addRecordButton}
@@ -513,10 +468,9 @@ const FolderSystemScreen = ({ navigation, route }) => {
             <Text style={styles.statLabel}>Unorganized</Text>
           </View>
         </View>
-      </View>
-
-      <ScrollView
+      </View>      <ScrollView
         style={styles.content}
+        contentContainerStyle={styles.contentContainer}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -543,40 +497,46 @@ const FolderSystemScreen = ({ navigation, route }) => {
               <Text style={styles.sectionSubtitle}>
                 Records not yet added to any collection
               </Text>
-            </View>
-            <View style={styles.unorganizedList}>
+            </View>            <View style={styles.unorganizedList}>
               {unorganizedRecords.map((record, index) => (
                 <View key={record.id} style={[
                   styles.recordItemContainer,
                   index === unorganizedRecords.length - 1 && styles.lastRecordItem
                 ]}>
-                  <RecordItem
-                    record={record}
+                  <TouchableOpacity
+                    style={styles.recordItemContent}
                     onPress={() => handleRecordSelect(record)}
                     onLongPress={() => handleRecordLongPress(record)}
-                  />                  <View style={styles.recordActions}>
-                    <TouchableOpacity
-                      style={styles.recordActionButton}
-                      onPress={() => {
-                        setQrRecord(record);
-                        setQrCollection(null);
-                        setShowQRModal(true);
-                      }}
-                    >
-                      <Ionicons name="qr-code-outline" size={16} color="#000" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.recordActionButton}
-                      onPress={() => handleViewRecord(record)}
-                    >
-                      <Ionicons name="eye-outline" size={16} color="#666" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.recordActionButton}
-                      onPress={() => handleRecordActions(record)}
-                    >
-                      <Ionicons name="ellipsis-horizontal" size={16} color="#666" />
-                    </TouchableOpacity>
+                  >
+                    <RecordItem
+                      record={record}
+                      onPress={() => handleRecordSelect(record)}
+                      onLongPress={() => handleRecordLongPress(record)}
+                    />
+                  </TouchableOpacity>
+                  
+                  <View style={styles.recordActionsRow}>
+                    <Text style={styles.recordMetaText}>
+                      {record.file_type ? record.file_type.split('/')[1]?.toUpperCase() || 'FILE' : 'FILE'} • {new Date(record.created_at).toLocaleDateString()}
+                    </Text>
+                    <View style={styles.recordActions}>
+                      <TouchableOpacity
+                        style={styles.recordActionButton}
+                        onPress={() => {
+                          setQrRecord(record);
+                          setQrCollection(null);
+                          setShowQRModal(true);
+                        }}
+                      >
+                        <Ionicons name="qr-code-outline" size={16} color="#000" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.recordActionButton}
+                        onPress={() => handleRecordActions(record)}
+                      >
+                        <Ionicons name="ellipsis-horizontal" size={16} color="#666" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               ))}
@@ -744,6 +704,81 @@ const FolderSystemScreen = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
+        </View>      </Modal>
+
+      {/* Collection View Modal */}
+      <Modal
+        visible={showCollectionViewModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowCollectionViewModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={() => setShowCollectionViewModal(false)}
+              style={styles.modalCloseButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>
+              {viewingCollection?.name || 'Collection'}
+            </Text>
+            <View style={styles.placeholder} />
+          </View>
+
+          <View style={styles.modalContent}>
+            {viewingCollection?.description && (
+              <View style={styles.collectionDescriptionContainer}>
+                <Text style={styles.collectionDescriptionText}>
+                  {viewingCollection.description}
+                </Text>
+              </View>
+            )}
+
+            <Text style={styles.recordsListTitle}>
+              Records ({viewingCollection?.records?.length || 0})
+            </Text>
+
+            {viewingCollection?.records && viewingCollection.records.length > 0 ? (
+              <ScrollView style={styles.recordsModalList} showsVerticalScrollIndicator={false}>
+                {viewingCollection.records.map((record, index) => (
+                  <TouchableOpacity
+                    key={record.id}
+                    style={[
+                      styles.recordModalItem,
+                      index === viewingCollection.records.length - 1 && styles.lastRecordModalItem
+                    ]}
+                    onPress={() => {
+                      setShowCollectionViewModal(false);
+                      handleRecordSelect(record);
+                    }}
+                  >
+                    <View style={styles.recordModalContent}>
+                      <View style={styles.recordModalInfo}>
+                        <Text style={styles.recordModalTitle} numberOfLines={1}>
+                          {record.filename || 'Untitled Record'}
+                        </Text>
+                        <Text style={styles.recordModalSubtitle}>
+                          {record.file_type ? record.file_type.split('/')[1] || 'Unknown' : 'Unknown'} • 
+                          {new Date(record.created_at).toLocaleDateString()}
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={20} color="#666" />
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.emptyRecordsModalState}>
+                <Ionicons name="document-outline" size={48} color="#ccc" />
+                <Text style={styles.emptyRecordsModalText}>No records in this collection</Text>
+                <Text style={styles.emptyRecordsModalSubText}>
+                  Add records to this collection to view them here
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </Modal>
 
@@ -764,19 +799,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Record Actions</Text>
             <View style={styles.placeholder} />
-          </View>
-
-          <View style={styles.modalContent}>
+          </View>          <View style={styles.modalContent}>
             <TouchableOpacity
-              style={styles.actionMenuItem}
-              onPress={() => {
-                setShowRecordActionsModal(false);
-                handleViewRecord(selectedRecord);
-              }}
-            >
-              <Ionicons name="eye-outline" size={24} color="#000" />
-              <Text style={styles.actionMenuText}>View Record</Text>
-            </TouchableOpacity>            <TouchableOpacity
               style={styles.actionMenuItem}
               onPress={() => {
                 setShowRecordActionsModal(false);
@@ -931,11 +955,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
           setQrRecord(null);
         }}
         recordId={qrRecord?.id}
-        collectionId={qrCollection?.id}
-        title={qrRecord ? `QR Code - ${qrRecord.filename}` : qrCollection ? `QR Code - ${qrCollection.name}` : 'QR Code'}
+        collectionId={qrCollection?.id}        title={qrRecord ? `QR Code - ${qrRecord.filename}` : qrCollection ? `QR Code - ${qrCollection.name}` : 'QR Code'}
       />
-
-      {/* Record viewer modal has been replaced by RecordViewerScreen */}
     </View>
   );
 };
@@ -992,8 +1013,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 16,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: '#e9ecef',
     shadowColor: '#000',
@@ -1002,33 +1023,36 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
     marginTop: 8,
+    alignItems: 'center',
+    width: '100%',
+    minHeight: 80,
   },statItem: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },  statNumber: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: '700',
     color: '#1a1a1a',
-    marginBottom: 6,
+    marginBottom: 3,
     textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: 13,
+  },  statLabel: {
+    fontSize: 11,
     color: '#666',
     fontWeight: '600',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     textAlign: 'center',
-  },
-  statSeparator: {
+  },  statSeparator: {
     width: 1,
     backgroundColor: '#e0e0e0',
-    height: '60%',
-    alignSelf: 'center',
-    marginHorizontal: 24,
-  },
-  content: {
+    height: 35,
+    marginHorizontal: 8,
+  },content: {
     flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 50,
   },
   section: {
     padding: 20,
@@ -1055,28 +1079,30 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 6,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-  },collectionHeader: {
+    borderColor: 'rgba(0,0,0,0.04)',  },
+  collectionHeader: {
+    marginBottom: 12,
+  },
+  collectionActionsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
+    alignItems: 'center',
+    marginTop: 8,
   },
   collectionTitleContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flex: 1,
-    marginRight: 16,
   },
   collectionInfo: {
     marginLeft: 12,
     flex: 1,
-  },
-  collectionTitle: {
+  },  collectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#212529',
-    lineHeight: 22,
+    lineHeight: 24,
+    flexWrap: 'wrap',
   },
   collectionDescription: {
     fontSize: 14,
@@ -1103,12 +1129,9 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   recordsList: {
-    marginTop: 8,
-  },  recordItemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 14,
+    marginTop: 8,  },  recordItemContainer: {
+    flexDirection: 'column',
+    paddingVertical: 16,
     paddingHorizontal: 16,
     marginBottom: 12,
     backgroundColor: '#fff',
@@ -1120,10 +1143,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 6,
     elevation: 2,
-    minHeight: 64,
+  },
+  recordItemContent: {
+    width: '100%',
+    marginBottom: 8,
+  },
+  recordActionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  recordMetaText: {
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
   },recordActions: {
     flexDirection: 'row',
-    marginLeft: 12,
     flexWrap: 'wrap',
   },
   recordActionButton: {
@@ -1404,12 +1440,79 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 16,
     alignItems: 'center',
-  },
-  selectionSummaryText: {
-    fontSize: 14,
+  },  selectionSummaryText: {    fontSize: 14,
     fontWeight: '600',
     color: '#1976d2',
-  },  // Record viewer styles have been moved to RecordViewerScreen
+  },
+  // Collection View Modal Styles
+  collectionDescriptionContainer: {
+    backgroundColor: '#f8f9fa',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  collectionDescriptionText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  recordsModalList: {
+    flex: 1,
+    maxHeight: 500,
+  },
+  recordModalItem: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  lastRecordModalItem: {
+    marginBottom: 0,
+  },
+  recordModalContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  recordModalInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  recordModalTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  recordModalSubtitle: {
+    fontSize: 14,
+    color: '#666',
+  },
+  emptyRecordsModalState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyRecordsModalText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyRecordsModalSubText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 });
 
 export default FolderSystemScreen;
