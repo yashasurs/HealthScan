@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   StyleSheet, 
   View, 
@@ -7,7 +7,9 @@ import {
   ActivityIndicator, 
   Text,
   TouchableOpacity,
-  SafeAreaView
+  SafeAreaView,
+  Modal,
+  Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/common';
@@ -22,8 +24,28 @@ const RecordUploadScreen = ({ navigation }) => {
     totalSize: 0,
     count: 0
   });
+  const [collections, setCollections] = useState([]);
+  const [selectedCollection, setSelectedCollection] = useState(null);
+  const [showCollectionModal, setShowCollectionModal] = useState(false);
+  const [loadingCollections, setLoadingCollections] = useState(false);
 
   const apiService = useApiService();
+
+  useEffect(() => {
+    loadCollections();
+  }, []);
+
+  const loadCollections = async () => {
+    try {
+      setLoadingCollections(true);
+      const response = await apiService.collections.getAll();
+      setCollections(response.data);
+    } catch (error) {
+      console.error('Error loading collections:', error);
+    } finally {
+      setLoadingCollections(false);
+    }
+  };
     const handleRecordPicked = (record) => {
     const processedRecord = {
       ...record,
@@ -51,7 +73,6 @@ const RecordUploadScreen = ({ navigation }) => {
   const handleNavigateToCollections = () => {
     navigation.navigate('CollectionSystem');
   };
-
   const handleUploadAll = async () => {
     if (records.length === 0) {
       Alert.alert('Error', 'Please select at least one record to upload');
@@ -61,7 +82,8 @@ const RecordUploadScreen = ({ navigation }) => {
     setUploading(true);
     setUploadStatus('Uploading and processing records...');
 
-    try {      // Convert picked records to file objects for the API
+    try {      
+      // Convert picked records to file objects for the API
       const files = records.map(doc => ({
         uri: doc.uri,
         type: doc.mimeType || doc.type || 'image/jpeg',
@@ -69,14 +91,22 @@ const RecordUploadScreen = ({ navigation }) => {
         file_size: doc.size || 0
       }));
       
-      const response = await apiService.ocr.processFiles(files);
+      // Pass collection_id if a collection is selected
+      const response = selectedCollection 
+        ? await apiService.ocr.processFilesToCollection(files, selectedCollection.id)
+        : await apiService.ocr.processFiles(files);
       
       setUploadStatus('');
       setRecords([]);
+      setStats({ totalSize: 0, count: 0 });
+      
+      const targetLocation = selectedCollection 
+        ? `"${selectedCollection.name}" collection`
+        : 'unorganized records';
       
       Alert.alert(
         "Upload Successful",
-        `${response.data.length} record(s) have been processed and uploaded.`,
+        `${response.data.length} record(s) have been processed and saved to ${targetLocation}.`,
         [
           { 
             text: "View Collections", 
@@ -101,9 +131,25 @@ const RecordUploadScreen = ({ navigation }) => {
   };
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Upload Records</Text>
+      <View style={styles.header}>        <Text style={styles.title}>Upload Records</Text>
         <Text style={styles.subtitle}>Upload and process your medical records</Text>
+        
+        {/* Collection Selection */}
+        <TouchableOpacity 
+          style={styles.collectionSelector}
+          onPress={() => setShowCollectionModal(true)}
+        >
+          <View style={styles.collectionSelectorContent}>
+            <Ionicons name="folder-outline" size={20} color="#666" />
+            <View style={styles.collectionInfo}>
+              <Text style={styles.collectionLabel}>Upload to:</Text>
+              <Text style={styles.collectionName}>
+                {selectedCollection ? selectedCollection.name : 'Unorganized Records'}
+              </Text>
+            </View>
+            <Ionicons name="chevron-down" size={20} color="#666" />
+          </View>
+        </TouchableOpacity>
         
         <TouchableOpacity 
           style={styles.navigateButton} 
@@ -174,9 +220,99 @@ const RecordUploadScreen = ({ navigation }) => {
           <View style={styles.uploadingContainer}>
             <ActivityIndicator size="large" color="#007AFF" />
             <Text style={styles.uploadingText}>{uploadStatus}</Text>
-          </View>
-        )}
+          </View>        )}
       </ScrollView>
+
+      {/* Collection Selection Modal */}
+      <Modal
+        visible={showCollectionModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowCollectionModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              onPress={() => setShowCollectionModal(false)}
+              style={styles.modalCloseButton}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Select Upload Destination</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setSelectedCollection(null);
+                setShowCollectionModal(false);
+              }}
+              style={styles.clearButton}
+            >
+              <Text style={styles.clearButtonText}>Clear</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            {/* Unorganized option */}
+            <TouchableOpacity
+              style={[
+                styles.collectionOption,
+                !selectedCollection && styles.selectedOption
+              ]}
+              onPress={() => {
+                setSelectedCollection(null);
+                setShowCollectionModal(false);
+              }}
+            >
+              <View style={styles.collectionOptionContent}>
+                <Ionicons name="folder-outline" size={24} color="#666" />
+                <View style={styles.collectionOptionInfo}>
+                  <Text style={styles.collectionOptionName}>Unorganized Records</Text>
+                  <Text style={styles.collectionOptionDesc}>
+                    Upload files without assigning to a collection
+                  </Text>
+                </View>
+                {!selectedCollection && (
+                  <Ionicons name="checkmark-circle" size={24} color="#4A90E2" />
+                )}
+              </View>
+            </TouchableOpacity>
+
+            {/* Collections list */}
+            {loadingCollections ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#4A90E2" />
+                <Text style={styles.loadingText}>Loading collections...</Text>
+              </View>
+            ) : (
+              collections.map((collection) => (
+                <TouchableOpacity
+                  key={collection.id}
+                  style={[
+                    styles.collectionOption,
+                    selectedCollection?.id === collection.id && styles.selectedOption
+                  ]}
+                  onPress={() => {
+                    setSelectedCollection(collection);
+                    setShowCollectionModal(false);
+                  }}
+                >
+                  <View style={styles.collectionOptionContent}>
+                    <Ionicons name="folder" size={24} color="#4A90E2" />
+                    <View style={styles.collectionOptionInfo}>
+                      <Text style={styles.collectionOptionName}>{collection.name}</Text>
+                      <Text style={styles.collectionOptionDesc}>
+                        {collection.description || 'No description'}
+                      </Text>
+                    </View>
+                    {selectedCollection?.id === collection.id && (
+                      <Ionicons name="checkmark-circle" size={24} color="#4A90E2" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -185,9 +321,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-  },
-  header: {
-    paddingTop: 50,
+  },  header: {
+    paddingTop: Platform.OS === 'ios' ? 50 : 40,
     paddingHorizontal: 20,
     paddingBottom: 20,
     backgroundColor: '#fff',
@@ -195,17 +330,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#1a1a1a',
     marginBottom: 5,
   },
   subtitle: {
     fontSize: 16,
     color: '#666',
     marginBottom: 20,
-  },
-  navigateButton: {
+  },navigateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -215,6 +349,32 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 24,
   },
+  collectionSelector: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
+  collectionSelectorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  collectionInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  collectionLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 2,
+  },
+  collectionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+  },
   buttonText: {
     color: '#fff',
     fontSize: 16,
@@ -223,9 +383,8 @@ const styles = StyleSheet.create({
   },  content: {
     flex: 1,
     padding: 20,
-  },
-  scrollContent: {
-    paddingBottom: 40,
+  },  scrollContent: {
+    paddingBottom: 80,
   },
   section: {
     backgroundColor: '#fff',
@@ -282,7 +441,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   uploadButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -307,12 +466,87 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 20,
-  },
-  uploadingText: {
+  },  uploadingText: {
     marginTop: 12,
     fontSize: 16,
     color: '#fff',
     fontWeight: '500',
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalCloseButton: {
+    padding: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#000',
+  },
+  clearButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  clearButtonText: {
+    fontSize: 16,
+    color: '#4A90E2',
+    fontWeight: '600',
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  collectionOption: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e5e5e5',
+  },
+  selectedOption: {
+    borderColor: '#4A90E2',
+    backgroundColor: '#f0f8ff',
+  },
+  collectionOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  collectionOptionInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  collectionOptionName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  collectionOptionDesc: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
   },
 });
 

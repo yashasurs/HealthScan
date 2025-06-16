@@ -219,6 +219,29 @@ export const useApiService = () => {
             'Content-Type': 'multipart/form-data'
           }
         });
+      },
+      processFilesToCollection: async (files, collectionId) => {
+        const api = await getAuthenticatedApi();
+        const formData = new FormData();
+        
+        files.forEach((file, index) => {
+          // Ensure the file object has the correct properties for React Native FormData
+          const fileObject = {
+            uri: file.uri,
+            type: file.type || file.mimeType || 'image/jpeg',
+            name: file.filename || file.name || `file_${index}.jpg`
+          };
+          
+          formData.append('files', fileObject);
+        });
+
+        let url = `/ocr/get-text?collection_id=${collectionId}`;
+        
+        return api.post(url, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
       }
     },
 
