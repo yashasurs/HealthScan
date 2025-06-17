@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, Modal, TextInput, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Header } from '../components/common';
 import { RecordOrganizer } from '../components/folder';
 import { RecordItem } from '../components/document';
 import { RenameRecordModal, QRModal } from '../components/modals';
 import { useApiService } from '../services/apiService';
+import { showToast, showConfirmToast } from '../utils/toast';
 import { Ionicons } from '@expo/vector-icons';
 
 const FolderSystemScreen = ({ navigation, route }) => {
@@ -93,13 +94,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
         records: allRecordsResponse.data.length,
         unorganized: unorganizedResponse.data.length
       });
-      
-    } catch (error) {
+        } catch (error) {
       console.error('Error loading data:', error);
       if (error.response?.status === 401) {
-        Alert.alert('Authentication Error', 'Your session has expired. Please log in again.');
+        showToast.error('Authentication Error', 'Your session has expired. Please log in again.');
       } else {
-        Alert.alert('Error', 'Failed to load data. Please try again later.');
+        showToast.error('Error', 'Failed to load data. Please try again later.');
       }
     } finally {
       if (initialLoad) {
@@ -138,10 +138,9 @@ const FolderSystemScreen = ({ navigation, route }) => {
       description: collection.description || ''
     });
     setShowEditCollectionModal(true);
-  };
-  const handleUpdateCollection = async () => {
+  };  const handleUpdateCollection = async () => {
     if (!editingCollection.name.trim()) {
-      Alert.alert('Error', 'Collection name cannot be empty');
+      showToast.error('Error', 'Collection name cannot be empty');
       return;
     }
 
@@ -153,69 +152,55 @@ const FolderSystemScreen = ({ navigation, route }) => {
       
       setShowEditCollectionModal(false);
       setRefreshTrigger(prev => prev + 1);
-      Alert.alert('Success', 'Collection updated successfully');
+      showToast.success('Success', 'Collection updated successfully');
     } catch (error) {
       console.error('Error updating collection:', error);
-      Alert.alert('Error', 'Failed to update collection');
+      showToast.error('Error', 'Failed to update collection');
     }
-  };
-  const handleDeleteCollection = (collection) => {
-    Alert.alert(
+  };  const handleDeleteCollection = (collection) => {
+    showConfirmToast(
       'Delete Collection',
       `Are you sure you want to delete "${collection.name}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await apiService.collections.delete(collection.id);
-              setRefreshTrigger(prev => prev + 1);
-              Alert.alert('Success', 'Collection deleted successfully');
-            } catch (error) {
-              console.error('Error deleting collection:', error);
-              Alert.alert('Error', 'Failed to delete collection');
-            }
-          }
+      async () => {
+        try {
+          await apiService.collections.delete(collection.id);
+          setRefreshTrigger(prev => prev + 1);
+          showToast.success('Success', 'Collection deleted successfully');
+        } catch (error) {
+          console.error('Error deleting collection:', error);
+          showToast.error('Error', 'Failed to delete collection');
         }
-      ]
+      },
+      () => {}
     );
-  };
-  const handleAddRecordToCollection = async (collectionId, recordId) => {
+  };  const handleAddRecordToCollection = async (collectionId, recordId) => {
     try {
       await apiService.collections.addRecord(collectionId, recordId);
       setRefreshTrigger(prev => prev + 1);
-      Alert.alert('Success', 'Record added to collection');
+      showToast.success('Success', 'Record added to collection');
     } catch (error) {
       console.error('Error adding record to collection:', error);
-      Alert.alert('Error', 'Failed to add record to collection');
+      showToast.error('Error', 'Failed to add record to collection');
     }
   };
 
   const handleRemoveRecordFromCollection = async (collectionId, recordId) => {
-    Alert.alert(
+    showConfirmToast(
       'Remove Record',
       'Are you sure you want to remove this record from the collection?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await apiService.collections.removeRecord(collectionId, recordId);
-              setRefreshTrigger(prev => prev + 1);
-              Alert.alert('Success', 'Record removed from collection');
-            } catch (error) {
-              console.error('Error removing record from collection:', error);
-              Alert.alert('Error', 'Failed to remove record from collection');
-            } finally {
-              setLoading(false);
-            }
-          }
+      async () => {
+        setLoading(true);
+        try {
+          await apiService.collections.removeRecord(collectionId, recordId);
+          setRefreshTrigger(prev => prev + 1);
+          showToast.success('Success', 'Record removed from collection');
+        } catch (error) {
+          console.error('Error removing record from collection:', error);          showToast.error('Error', 'Failed to remove record from collection');
+        } finally {
+          setLoading(false);
         }
-      ]
+      },
+      () => {}
     );
   };
   // === RECORD MANAGEMENT FUNCTIONS ===
@@ -231,40 +216,32 @@ const FolderSystemScreen = ({ navigation, route }) => {
     setLoading(true);
     try {
       await apiService.records.update(recordId, content);
-      setRefreshTrigger(prev => prev + 1);
-      Alert.alert('Success', 'Record updated successfully');
+      setRefreshTrigger(prev => prev + 1);      showToast.success('Success', 'Record updated successfully');
     } catch (error) {
       console.error('Error updating record:', error);
-      Alert.alert('Error', 'Failed to update record');
+      showToast.error('Error', 'Failed to update record');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteRecord = (record) => {
-    Alert.alert(
+    showConfirmToast(
       'Delete Record',
       'Are you sure you want to delete this record? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            setLoading(true);
-            try {
-              await apiService.records.delete(record.id);
-              setRefreshTrigger(prev => prev + 1);
-              Alert.alert('Success', 'Record deleted successfully');
-            } catch (error) {
-              console.error('Error deleting record:', error);
-              Alert.alert('Error', 'Failed to delete record');
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
+      async () => {
+        setLoading(true);
+        try {
+          await apiService.records.delete(record.id);
+          setRefreshTrigger(prev => prev + 1);
+          showToast.success('Success', 'Record deleted successfully');
+        } catch (error) {
+          console.error('Error deleting record:', error);
+          showToast.error('Error', 'Failed to delete record');
+        } finally {
+          setLoading(false);
+        }      },
+      () => {}
     );
   };
   const handleRecordActions = (record) => {
@@ -289,7 +266,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
     setShowCreateCollectionModal(true);
   };  const handleCreateCollectionSubmit = async () => {
     if (!newCollection.name.trim()) {
-      Alert.alert('Error', 'Collection name cannot be empty');
+      showToast.error('Error', 'Collection name cannot be empty');
       return;
     }
 
@@ -301,7 +278,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
       
       setShowCreateCollectionModal(false);
       setRefreshTrigger(prev => prev + 1);
-      Alert.alert('Success', 'Collection created successfully');
+      showToast.success('Success', 'Collection created successfully');
       
       // Reset form
       setNewCollection({
@@ -310,14 +287,14 @@ const FolderSystemScreen = ({ navigation, route }) => {
       });
     } catch (error) {
       console.error('Error creating collection:', error);
-      Alert.alert('Error', 'Failed to create collection');
+      showToast.error('Error', 'Failed to create collection');
     }
   };
 
   // Add records to collection functionality
   const handleAddRecordsToCollection = (collection) => {
     if (unorganizedRecords.length === 0) {
-      Alert.alert('No Records', 'No unorganized records available to add');
+      showToast.info('No Records', 'No unorganized records available to add');
       return;
     }
     setSelectedCollectionForAdding(collection);
@@ -335,10 +312,9 @@ const FolderSystemScreen = ({ navigation, route }) => {
       }
     });
   };
-
   const handleAddSelectedRecords = async () => {
     if (selectedRecordsForAdding.length === 0) {
-      Alert.alert('Error', 'Please select at least one record to add');
+      showToast.error('Error', 'Please select at least one record to add');
       return;
     }
 
@@ -351,7 +327,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
       
       setShowRecordPickerModal(false);
       setRefreshTrigger(prev => prev + 1);
-      Alert.alert(
+      showToast.success(
         'Success', 
         `${selectedRecordsForAdding.length} record(s) added to ${selectedCollectionForAdding.name}`
       );
@@ -361,7 +337,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
       setSelectedCollectionForAdding(null);
     } catch (error) {
       console.error('Error adding records to collection:', error);
-      Alert.alert('Error', 'Failed to add records to collection');
+      showToast.error('Error', 'Failed to add records to collection');
     } finally {
       setLoading(false);
     }
@@ -369,7 +345,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const renderCollection = (collection) => {
     const recordCount = collection.records?.length || 0;
     
-    return (      <View key={collection.id} style={styles.collectionCard}>
+    return (
+      <View key={collection.id} style={styles.collectionCard}>
         <View style={styles.collectionHeader}>
           <View style={styles.collectionTitleContainer}>
             <Ionicons name="folder" size={24} color="#000" />
@@ -471,24 +448,23 @@ const FolderSystemScreen = ({ navigation, route }) => {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#000" />
-          <Text style={styles.loadingText}>Loading collections...</Text>
-        </View>
-      ) : (<ScrollView
+          <Text style={styles.loadingText}>Loading collections...</Text>        </View>
+      ) : (
+        <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Collections Section */}
+      >        {/* Collections Section */}
         <View style={styles.section}>
-          {collections.map(renderCollection)}
+          {(collections || []).map(renderCollection)}
           
-          {collections.length === 0 && !refreshing && (
+          {(collections || []).length === 0 && !refreshing && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>No collections yet</Text>
               <Text style={styles.emptyStateSubText}>Create a collection to get started</Text>
             </View>
           )}
-        </View>        {/* Unorganized Records Section */}
+        </View>{/* Unorganized Records Section */}
         {unorganizedRecords.length > 0 ? (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -497,7 +473,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 Records not yet added to any collection
               </Text>
             </View>            <View style={styles.unorganizedList}>
-              {unorganizedRecords.map((record, index) => (
+              {unorganizedRecords && Array.isArray(unorganizedRecords) && unorganizedRecords.length > 0 ? unorganizedRecords.map((record, index) => (
                 <View key={record.id} style={[
                   styles.recordItemContainer,
                   index === unorganizedRecords.length - 1 && styles.lastRecordItem
@@ -536,9 +512,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
                         <Ionicons name="ellipsis-horizontal" size={16} color="#666" />
                       </TouchableOpacity>
                     </View>
-                  </View>
+                  </View>                </View>
+              )) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>No unorganized records</Text>
                 </View>
-              ))}
+              )}
             </View>
           </View>
         ) : allRecords.length > 0 && (
@@ -904,9 +883,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
                   All records are already organized in collections
                 </Text>
               </View>
-            ) : (
-              <ScrollView style={styles.recordsPickerList} showsVerticalScrollIndicator={false}>
-                {unorganizedRecords.map((record, index) => {
+            ) : (              <ScrollView style={styles.recordsPickerList} showsVerticalScrollIndicator={false}>
+                {unorganizedRecords && Array.isArray(unorganizedRecords) && unorganizedRecords.length > 0 ? unorganizedRecords.map((record, index) => {
                   const isSelected = selectedRecordsForAdding.some(r => r.id === record.id);
                   return (
                     <TouchableOpacity
@@ -931,9 +909,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
                           />
                         </View>
                       </View>
-                    </TouchableOpacity>
-                  );
-                })}
+                    </TouchableOpacity>                  );
+                }) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>No unorganized records available</Text>
+                  </View>
+                )}
               </ScrollView>
             )}
 

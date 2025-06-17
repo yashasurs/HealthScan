@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { showToast } from '../../utils/toast';
 
 /**
  * Profile actions component with buttons for various actions
@@ -23,15 +24,14 @@ const ProfileActions = ({
     newPassword: '',
     confirmPassword: '',
   });
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const handlePasswordChange = async () => {
+  const [isChangingPassword, setIsChangingPassword] = useState(false);  const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      Alert.alert('Error', 'New passwords do not match');
+      showToast.error('Error', 'New passwords do not match');
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      showToast.error('Error', 'Password must be at least 6 characters long');
       return;
     }
 
@@ -44,7 +44,7 @@ const ProfileActions = ({
       setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
       console.error('Password change error:', error);
-      Alert.alert('Error', 'Failed to change password');
+      showToast.error('Error', 'Failed to change password');
     } finally {
       setIsChangingPassword(false);
     }

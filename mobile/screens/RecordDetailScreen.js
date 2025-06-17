@@ -5,13 +5,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { useApiService } from '../services/apiService';
 import { RenameRecordModal, QRModal } from '../components/modals';
+import { showToast, showConfirmToast } from '../utils/toast';
 
 /**
  * RecordDetailScreen - Full screen view for displaying record details
@@ -31,14 +31,13 @@ const RecordDetailScreen = ({ navigation, route }) => {
     }
   }, [recordId]);
 
-  const fetchRecord = async () => {
-    try {
+  const fetchRecord = async () => {    try {
       setLoading(true);
       const response = await apiService.records.get(recordId);
       setRecord(response.data);
     } catch (error) {
       console.error('Error fetching record:', error);
-      Alert.alert('Error', 'Failed to load record details');
+      showToast.error('Error', 'Failed to load record details');
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -46,17 +45,11 @@ const RecordDetailScreen = ({ navigation, route }) => {
   };
 
   const handleDelete = () => {
-    Alert.alert(
+    showConfirmToast(
       'Delete Record',
       `Are you sure you want to delete "${record.filename}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: confirmDelete
-        }
-      ]
+      confirmDelete,
+      () => {}
     );
   };
 
@@ -64,15 +57,15 @@ const RecordDetailScreen = ({ navigation, route }) => {
     setDeleting(true);
     try {
       await apiService.records.delete(record.id);
-      Alert.alert('Success', 'Record deleted successfully');
+      showToast.success('Success', 'Record deleted successfully');
       // Navigate back and refresh the previous screen
       navigation.goBack();
     } catch (error) {
       console.error('Error deleting record:', error);
-      Alert.alert('Error', 'Failed to delete record');
+      showToast.error('Error', 'Failed to delete record');
     } finally {
       setDeleting(false);
-    }  };
+    }};
   const handleRename = () => {
     setShowRenameModal(true);
   };

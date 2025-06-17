@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  Alert,
   Image,
   Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApiService } from '../../services/apiService';
+import { showToast } from '../../utils/toast';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -61,10 +61,9 @@ const QRModal = ({ visible, onClose, recordId, collectionId, title }) => {
       } else {
         throw new Error('No QR code data received');
       }
-    } catch (error) {
-      console.error('Error generating QR code:', error);
+    } catch (error) {      console.error('Error generating QR code:', error);
       setError('Failed to generate QR code');
-      Alert.alert('Error', 'Failed to generate QR code. Please try again.');
+      showToast.error('Error', 'Failed to generate QR code. Please try again.');
     } finally {
       setLoading(false);
     }

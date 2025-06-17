@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   Linking,
   Platform,
   SafeAreaView,
@@ -13,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import QRScanner from '../components/scanner/QRScanner';
 import { useApiService } from '../services/apiService';
+import { showToast, showConfirmToast } from '../utils/toast';
 
 const QRScannerScreen = ({ navigation }) => {
   const [showScanner, setShowScanner] = useState(false);
@@ -26,49 +26,39 @@ const QRScannerScreen = ({ navigation }) => {
       const urlPattern = /^(https?:\/\/)/i;
       if (urlPattern.test(data)) {
         // It's a URL, ask user if they want to open it
-        Alert.alert(
+        showConfirmToast(
           'Open Website',
           `Do you want to open this website?\n\n${data}`,
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Open', 
-              onPress: async () => {
-                try {
-                  const supported = await Linking.canOpenURL(data);
-                  if (supported) {
-                    await Linking.openURL(data);
-                  } else {
-                    Alert.alert('Error', 'Cannot open this URL');
-                  }
-                } catch (error) {
-                  Alert.alert('Error', 'Failed to open URL');
-                }
+          async () => {
+            try {
+              const supported = await Linking.canOpenURL(data);
+              if (supported) {
+                await Linking.openURL(data);
+              } else {
+                showToast.error('Error', 'Cannot open this URL');
               }
+            } catch (error) {
+              showToast.error('Error', 'Failed to open URL');
             }
-          ]
+          },
+          () => {}
         );
       } else {
         // It's some other data, show it to the user
-        Alert.alert(
+        showConfirmToast(
           'QR Code Scanned',
           `Content: ${data}`,
-          [
-            { text: 'OK' },
-            {
-              text: 'Copy',
-              onPress: () => {
-                // Note: You might want to add clipboard functionality here
-                Alert.alert('Info', 'Content copied to clipboard (feature not implemented)');
-              }
-            }
-          ]
+          () => {
+            // Note: You might want to add clipboard functionality here
+            showToast.info('Info', 'Content copied to clipboard (feature not implemented)');
+          },
+          () => {}
         );
       }
 
     } catch (error) {
       console.error('Error processing QR code:', error);
-      Alert.alert('Error', 'Failed to process QR code. Please try again.');
+      showToast.error('Error', 'Failed to process QR code. Please try again.');
     } finally {
       setLoading(false);
     }

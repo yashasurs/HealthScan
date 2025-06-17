@@ -4,13 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Alert,
   Modal,
   TextInput,
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useApiService } from '../../services/apiService';
+import { showToast } from '../../utils/toast';
 
 /**
  * Modal component for renaming records
@@ -31,15 +31,14 @@ const RenameRecordModal = ({ visible, onClose, record, onRecordRenamed }) => {
       setNewFilename(record.filename || record.original_filename || '');
     }
   }, [record, visible]);
-
   const handleRename = async () => {
     if (!newFilename.trim()) {
-      Alert.alert('Error', 'Filename cannot be empty');
+      showToast.error('Error', 'Filename cannot be empty');
       return;
     }
 
     if (newFilename.trim() === (record.filename || record.original_filename)) {
-      Alert.alert('Info', 'Filename is the same as current name');
+      showToast.info('Info', 'Filename is the same as current name');
       return;
     }
 
@@ -49,12 +48,12 @@ const RenameRecordModal = ({ visible, onClose, record, onRecordRenamed }) => {
         filename: newFilename.trim()
       });
 
-      Alert.alert('Success', 'Record renamed successfully');
+      showToast.success('Success', 'Record renamed successfully');
       onRecordRenamed?.(record.id, newFilename.trim());
       onClose();
     } catch (error) {
       console.error('Error renaming record:', error);
-      Alert.alert('Error', 'Failed to rename record. Please try again.');
+      showToast.error('Error', 'Failed to rename record. Please try again.');
     } finally {
       setRenaming(false);
     }

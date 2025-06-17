@@ -4,7 +4,6 @@ import {
   Text, 
   StyleSheet, 
   TouchableOpacity, 
-  Alert, 
   Modal,
   FlatList,
   TextInput
@@ -12,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useApiService } from '../../services/apiService';
 import { LoadingOverlay } from '../common';
+import { showToast } from '../../utils/toast';
 
 /**
  * Record organizer component for moving records between collections
@@ -54,15 +54,14 @@ const RecordOrganizer = ({
           await apiService.collections.addRecord(selectedCollectionId, record.id);
         }
         
-        // Notify parent component for automatic refresh
-        onRecordMoved?.();
+        // Notify parent component for automatic refresh        onRecordMoved?.();
         onClose();
       } else {
-        Alert.alert('Info', 'Record is already in the selected collection');
+        showToast.info('Info', 'Record is already in the selected collection');
       }
     } catch (error) {
       console.error('Error moving record:', error);
-      Alert.alert('Error', 'Failed to move record');
+      showToast.error('Error', 'Failed to move record');
     } finally {
       setMoving(false);
     }
@@ -70,7 +69,7 @@ const RecordOrganizer = ({
 
   const handleCreateCollection = async () => {
     if (!newCollectionName.trim()) {
-      Alert.alert('Error', 'Please enter a collection name');
+      showToast.error('Error', 'Please enter a collection name');
       return;
     }
 
@@ -85,11 +84,10 @@ const RecordOrganizer = ({
       // Notify parent component for automatic refresh instead of showing alert
       setNewCollectionName('');
       setShowCreateForm(false);
-      onRecordMoved?.();
-      onClose();
+      onRecordMoved?.();      onClose();
     } catch (error) {
       console.error('Error creating collection:', error);
-      Alert.alert('Error', 'Failed to create collection');
+      showToast.error('Error', 'Failed to create collection');
     } finally {
       setCreating(false);
     }
@@ -128,9 +126,9 @@ const RecordOrganizer = ({
           </View>
           {isCurrent && (
             <View style={styles.currentBadge}>
-              <Text style={styles.currentBadgeText}>Current</Text>
-            </View>
-          )}          {isSelected && (
+              <Text style={styles.currentBadgeText}>Current</Text>            </View>
+          )}
+          {isSelected && (
             <Ionicons name="checkmark-circle" size={20} color="#000" />
           )}
         </View>

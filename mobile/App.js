@@ -1,11 +1,48 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, Platform, Text, LogBox } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Toast from 'react-native-toast-message';
+
+// Ignore common warnings that can cause crashes
+LogBox.ignoreLogs([
+  'Warning: Text strings must be rendered within a <Text> component',
+  'Warning: Failed prop type',
+  'Warning: componentWillReceiveProps',
+  'Warning: componentWillMount',
+]);
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.errorMessage}>Please restart the app</Text>
+        </View>
+      );
+    }    return this.props.children;
+  }
+}
+
 import { AuthProvider, useAuth } from './Contexts/Authcontext';
 import LandingScreen from './screens/LandingScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -153,7 +190,8 @@ function AppContent() {
     );
   }
 
-  return (    <Stack.Navigator 
+  return (
+    <Stack.Navigator 
       screenOptions={{ headerShown: false }}
       initialRouteName={isFirstLaunch ? "Landing" : (!isAuthenticated ? "Login" : "MainTabs")}
     >
@@ -188,12 +226,15 @@ function AppContent() {
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <AuthProvider>
-        <AppContent />
-        <StatusBar style="dark" />
-      </AuthProvider>
-    </NavigationContainer>
+    <ErrorBoundary>
+      <NavigationContainer>
+        <AuthProvider>
+          <AppContent />
+          <StatusBar style="dark" />
+        </AuthProvider>
+        <Toast />
+      </NavigationContainer>
+    </ErrorBoundary>
   );
 }
 
@@ -228,13 +269,30 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(255, 255, 255, 0.2)',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
-  },
-  focusIndicator: {
+  },  focusIndicator: {
     position: 'absolute',
     bottom: -12,
     width: 4,
     height: 4,
     borderRadius: 2,
     backgroundColor: '#FFFFFF',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 10,
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });

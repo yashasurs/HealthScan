@@ -46,7 +46,8 @@ const LandingScreen = ({ navigation }) => {
     navigation.navigate('Signup');
   };
 
-  return (    <SafeAreaView style={styles.container}>
+  return (
+    <SafeAreaView style={styles.container}>
       <LinearGradient
         colors={['#ffffff', '#f8f9fa']}
         style={styles.gradient}
