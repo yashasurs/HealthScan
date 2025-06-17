@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, View, Text, ActivityIndicator, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../Contexts/Authcontext';
@@ -8,30 +8,43 @@ import { useApiService } from '../services/apiService';
 const DashboardScreen = () => {
   const navigation = useNavigation();  const [patientData, setPatientData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
   const { user } = useAuth();
-  const apiService = useApiService();  const loadData = async () => {
+  const apiService = useApiService();  const loadData = useCallback(async () => {
     try {
+      if (initialLoad) {
+        setLoading(true);
+      }
+      
       const response = await apiService.auth.getCurrentUser();
       setPatientData(response.data);
     } catch (error) {
       console.error('Error fetching user data:', error);
     } finally {
-      setLoading(false);
+      if (initialLoad) {
+        setLoading(false);
+        setInitialLoad(false);
+      }
     }
-  };
+  }, [apiService, initialLoad]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  };  const handleAddRecord = () => {
+  // Auto-reload when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!initialLoad) {
+        loadData();
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, loadData, initialLoad]);
+  const handleAddRecord = () => {
     navigation.navigate('Upload');
-  };  const renderField = (label, field, value) => (
+  };const renderField = (label, field, value) => (
     <View style={styles.infoItem}>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue}>{value || 'Not provided'}</Text>
@@ -98,13 +111,7 @@ const DashboardScreen = () => {
       </View>      <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={['#333']}
-          />
-        }
+        showsVerticalScrollIndicator={false}
       >
         {renderContent()}
       </ScrollView>
