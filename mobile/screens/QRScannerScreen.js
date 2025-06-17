@@ -40,7 +40,8 @@ const QRScannerScreen = ({ navigation }) => {
             } catch (error) {
               showToast.error('Error', 'Failed to open URL');
             }
-          }
+          },
+          () => {}
         );
       } else {
         // It's some other data, show it to the user
@@ -51,7 +52,7 @@ const QRScannerScreen = ({ navigation }) => {
             // Note: You might want to add clipboard functionality here
             showToast.info('Info', 'Content copied to clipboard (feature not implemented)');
           },
-          null
+          () => {}
         );
       }
 

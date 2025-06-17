@@ -345,7 +345,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const renderCollection = (collection) => {
     const recordCount = collection.records?.length || 0;
     
-    return (      <View key={collection.id} style={styles.collectionCard}>
+    return (
+      <View key={collection.id} style={styles.collectionCard}>
         <View style={styles.collectionHeader}>
           <View style={styles.collectionTitleContainer}>
             <Ionicons name="folder" size={24} color="#000" />
@@ -447,24 +448,23 @@ const FolderSystemScreen = ({ navigation, route }) => {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#000" />
-          <Text style={styles.loadingText}>Loading collections...</Text>
-        </View>
-      ) : (<ScrollView
+          <Text style={styles.loadingText}>Loading collections...</Text>        </View>
+      ) : (
+        <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Collections Section */}
+      >        {/* Collections Section */}
         <View style={styles.section}>
-          {collections.map(renderCollection)}
+          {(collections || []).map(renderCollection)}
           
-          {collections.length === 0 && !refreshing && (
+          {(collections || []).length === 0 && !refreshing && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>No collections yet</Text>
               <Text style={styles.emptyStateSubText}>Create a collection to get started</Text>
             </View>
           )}
-        </View>        {/* Unorganized Records Section */}
+        </View>{/* Unorganized Records Section */}
         {unorganizedRecords.length > 0 ? (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -473,7 +473,7 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 Records not yet added to any collection
               </Text>
             </View>            <View style={styles.unorganizedList}>
-              {unorganizedRecords.map((record, index) => (
+              {unorganizedRecords && Array.isArray(unorganizedRecords) && unorganizedRecords.length > 0 ? unorganizedRecords.map((record, index) => (
                 <View key={record.id} style={[
                   styles.recordItemContainer,
                   index === unorganizedRecords.length - 1 && styles.lastRecordItem
@@ -512,9 +512,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
                         <Ionicons name="ellipsis-horizontal" size={16} color="#666" />
                       </TouchableOpacity>
                     </View>
-                  </View>
+                  </View>                </View>
+              )) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>No unorganized records</Text>
                 </View>
-              ))}
+              )}
             </View>
           </View>
         ) : allRecords.length > 0 && (
@@ -880,9 +883,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
                   All records are already organized in collections
                 </Text>
               </View>
-            ) : (
-              <ScrollView style={styles.recordsPickerList} showsVerticalScrollIndicator={false}>
-                {unorganizedRecords.map((record, index) => {
+            ) : (              <ScrollView style={styles.recordsPickerList} showsVerticalScrollIndicator={false}>
+                {unorganizedRecords && Array.isArray(unorganizedRecords) && unorganizedRecords.length > 0 ? unorganizedRecords.map((record, index) => {
                   const isSelected = selectedRecordsForAdding.some(r => r.id === record.id);
                   return (
                     <TouchableOpacity
@@ -907,9 +909,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
                           />
                         </View>
                       </View>
-                    </TouchableOpacity>
-                  );
-                })}
+                    </TouchableOpacity>                  );
+                }) : (
+                  <View style={styles.emptyState}>
+                    <Text style={styles.emptyStateText}>No unorganized records available</Text>
+                  </View>
+                )}
               </ScrollView>
             )}
 

@@ -274,9 +274,8 @@ const RecordUploadScreen = ({ navigation }) => {
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#000" />
                 <Text style={styles.loadingText}>Loading collections...</Text>
-              </View>
-            ) : (
-              collections.map((collection) => (
+              </View>            ) : (
+              collections && Array.isArray(collections) && collections.length > 0 ? collections.map((collection) => (
                 <TouchableOpacity
                   key={collection.id}
                   style={[
@@ -298,9 +297,12 @@ const RecordUploadScreen = ({ navigation }) => {
                     </View>                    {selectedCollection?.id === collection.id && (
                       <Ionicons name="checkmark-circle" size={24} color="#000" />
                     )}
-                  </View>
-                </TouchableOpacity>
-              ))
+                  </View>                </TouchableOpacity>
+              )) : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyStateText}>No collections available</Text>
+                </View>
+              )
             )}
           </ScrollView>
         </View>

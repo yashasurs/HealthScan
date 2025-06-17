@@ -126,9 +126,9 @@ const RecordOrganizer = ({
           </View>
           {isCurrent && (
             <View style={styles.currentBadge}>
-              <Text style={styles.currentBadgeText}>Current</Text>
-            </View>
-          )}          {isSelected && (
+              <Text style={styles.currentBadgeText}>Current</Text>            </View>
+          )}
+          {isSelected && (
             <Ionicons name="checkmark-circle" size={20} color="#000" />
           )}
         </View>
