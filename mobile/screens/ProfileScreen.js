@@ -57,8 +57,7 @@ const ProfileScreen = () => {
         },
       ]
     );
-  };
-  const handleUpdateProfile = async (updatedData) => {
+  };  const handleUpdateProfile = async (updatedData) => {
     try {
       setIsLoading(true);
       const response = await apiService.auth.updateUser(updatedData);
@@ -69,6 +68,16 @@ const ProfileScreen = () => {
       Alert.alert('Error', error.response?.data?.detail || 'Failed to update profile');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (oldPassword, newPassword) => {
+    try {
+      // You'll need to implement this API call in your backend
+      // For now, just show a message
+      Alert.alert('Coming Soon', 'Password change feature will be available in a future update.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to change password');
     }
   };
   if (isLoading) {
@@ -101,12 +110,12 @@ const ProfileScreen = () => {
               user={userData}
               isEditing={isEditing}
               onUpdate={handleUpdateProfile}
-            />
-              <ProfileActions 
+            />            <ProfileActions 
               isLoggingOut={isLoggingOut}
               isEditing={isEditing}
               onEditProfile={() => setIsEditing(true)}
               onCancelEdit={() => setIsEditing(false)}
+              onChangePassword={handleChangePassword}
               onLogout={handleLogout}
             />
           </>
@@ -142,9 +151,8 @@ const styles = StyleSheet.create({
   },  content: {
     flex: 1,
     padding: 20,
-  },
-  contentContainer: {
-    paddingBottom: 120, // Extra padding to account for navigation bar
+  },  contentContainer: {
+    paddingBottom: 160, // Extra padding to account for navigation bar and additional content
   },
   loadingContainer: {
     flex: 1,

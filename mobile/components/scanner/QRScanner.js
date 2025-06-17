@@ -34,8 +34,7 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
     if (visible) {
       setScanned(false);
     }
-  }, [visible]);
-  const handleBarCodeScanned = ({ type, data }) => {
+  }, [visible]);  const handleBarCodeScanned = ({ type, data }) => {
     if (scanned) return;
     
     setScanned(true);
@@ -45,22 +44,10 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
       Vibration.vibrate(100);
     }
 
-    // Check if it's a QR code and contains our expected URL pattern
-    if (type === 'qr') {
-      // Check if it's one of our app's QR codes
-      if (data.includes('/records/share?token=') || data.includes('/collections/share?token=')) {
-        onQRScanned(data);
-        onClose();
-      } else {
-        // It's a QR code but not from our app
-        Alert.alert(
-          'Invalid QR Code',
-          'This QR code is not from ProjectSunga. Please scan a valid record or collection QR code.',
-          [
-            { text: 'OK', onPress: () => setScanned(false) }
-          ]
-        );
-      }
+    // Handle any QR code
+    if (type === 'qr' || type === 'org.iso.QRCode') {
+      onQRScanned(data);
+      onClose();
     } else {
       // Not a QR code
       Alert.alert(

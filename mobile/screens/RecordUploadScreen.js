@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },  scrollContent: {
-    paddingBottom: 80,
+    paddingBottom: 100,
   },
   section: {
     backgroundColor: '#fff',
