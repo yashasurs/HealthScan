@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { showToast } from '../../utils/toast';
 
 /**
  * Profile information component showing user details with full field support
@@ -43,10 +44,9 @@ const ProfileInfo = ({ user, isEditing, onUpdate }) => {  const [formData, setFo
         const value = formData[field];
         return !value || String(value).trim() === '';
       });
-      
-      if (missing.length > 0) {
+        if (missing.length > 0) {
         const missingFieldsString = missing.map(field => field.replace(/_/g, ' ')).join(', ');
-        Alert.alert('Error', `Please fill in all required fields: ${missingFieldsString}`);
+        showToast.error('Error', `Please fill in all required fields: ${missingFieldsString}`);
         return;
       }
 
@@ -54,7 +54,7 @@ const ProfileInfo = ({ user, isEditing, onUpdate }) => {  const [formData, setFo
       const phoneNumber = String(formData.phone_number || '');
       const phoneRegex = /^\+?[1-9]\d{9,14}$/;
       if (!phoneRegex.test(phoneNumber.replace(/\s+/g, ''))) {
-        Alert.alert('Error', 'Please enter a valid phone number');
+        showToast.error('Error', 'Please enter a valid phone number');
         return;
       }
 
@@ -63,7 +63,7 @@ const ProfileInfo = ({ user, isEditing, onUpdate }) => {  const [formData, setFo
       if (email) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-          Alert.alert('Error', 'Please enter a valid email address');
+          showToast.error('Error', 'Please enter a valid email address');
           return;
         }
       }
@@ -82,10 +82,9 @@ const ProfileInfo = ({ user, isEditing, onUpdate }) => {  const [formData, setFo
         doctor_name: String(formData.doctor_name || '').trim(),
       };
 
-      onUpdate(cleanedData);
-    } catch (error) {
+      onUpdate(cleanedData);    } catch (error) {
       console.error('Error in handleSave:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      showToast.error('Error', 'An unexpected error occurred. Please try again.');
     }
   };
   const renderField = (label, value, field, inputProps = {}, required = false) => (

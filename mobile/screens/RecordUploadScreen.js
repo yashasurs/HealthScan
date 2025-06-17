@@ -3,7 +3,6 @@ import {
   StyleSheet, 
   View, 
   ScrollView, 
-  Alert, 
   ActivityIndicator, 
   Text,
   TouchableOpacity,
@@ -15,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/common';
 import { RecordUploader, RecordList } from '../components/document';
 import { useApiService } from '../services/apiService';
+import { showToast, showConfirmToast } from '../utils/toast';
 
 const RecordUploadScreen = ({ navigation }) => {
   const [records, setRecords] = useState([]);
@@ -72,10 +72,9 @@ const RecordUploadScreen = ({ navigation }) => {
 
   const handleNavigateToCollections = () => {
     navigation.navigate('CollectionSystem');
-  };
-  const handleUploadAll = async () => {
+  };  const handleUploadAll = async () => {
     if (records.length === 0) {
-      Alert.alert('Error', 'Please select at least one record to upload');
+      showToast.error('Error', 'Please select at least one record to upload');
       return;
     }
 
@@ -104,24 +103,19 @@ const RecordUploadScreen = ({ navigation }) => {
         ? `"${selectedCollection.name}" collection`
         : 'unorganized records';
       
-      Alert.alert(
+      showConfirmToast(
         "Upload Successful",
         `${response.data.length} record(s) have been processed and saved to ${targetLocation}.`,
-        [
-          { 
-            text: "View Collections", 
-            onPress: () => navigation.navigate('CollectionSystem', { recordsAdded: true })
-          },
-          { 
-            text: "Upload More", 
-            style: "cancel"
-          }
-        ]
+        () => navigation.navigate('CollectionSystem', { recordsAdded: true }),
+        () => {} // For "Upload More" option
       );
+      
+      // Also show a success toast
+      showToast.success('Upload Complete', `${response.data.length} record(s) processed successfully`);
     } catch (error) {
       console.error('Upload error:', error);
       setUploadStatus('');
-      Alert.alert(
+      showToast.error(
         'Upload Failed',
         error.response?.data?.detail || 'Failed to upload records. Please try again.'
       );

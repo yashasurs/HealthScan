@@ -8,13 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../Contexts/Authcontext';
+import { showToast } from '../utils/toast';
 
 const SignupScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -62,62 +62,61 @@ const SignupScreen = ({ navigation }) => {
   const showDatePickerModal = () => {
     setShowDatePicker(true);
   };
-
   const validateForm = () => {
     const { email, username, password, confirmPassword, blood_group, first_name, last_name, phone_number } = formData;
     
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email');
+      showToast.error('Error', 'Please enter your email');
       return false;
     }
     
     if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      showToast.error('Error', 'Please enter a valid email address');
       return false;
     }
     
     if (!username.trim()) {
-      Alert.alert('Error', 'Please enter a username');
+      showToast.error('Error', 'Please enter a username');
       return false;
     }
 
     if (!first_name.trim()) {
-      Alert.alert('Error', 'Please enter your first name');
+      showToast.error('Error', 'Please enter your first name');
       return false;
     }
 
     if (!last_name.trim()) {
-      Alert.alert('Error', 'Please enter your last name');
+      showToast.error('Error', 'Please enter your last name');
       return false;
     }
 
     if (!phone_number.trim()) {
-      Alert.alert('Error', 'Please enter your phone number');
+      showToast.error('Error', 'Please enter your phone number');
       return false;
     }
 
     if (phone_number.length < 10) {
-      Alert.alert('Error', 'Please enter a valid phone number');
+      showToast.error('Error', 'Please enter a valid phone number');
       return false;
     }
     
     if (!password.trim()) {
-      Alert.alert('Error', 'Please enter a password');
+      showToast.error('Error', 'Please enter a password');
       return false;
     }
     
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      showToast.error('Error', 'Password must be at least 6 characters');
       return false;
     }
     
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showToast.error('Error', 'Passwords do not match');
       return false;
     }
 
     if (!blood_group) {
-      Alert.alert('Error', 'Please select your blood group');
+      showToast.error('Error', 'Please select your blood group');
       return false;
     }
     
@@ -142,18 +141,16 @@ const SignupScreen = ({ navigation }) => {
         allergies: formData.allergies || null,
         doctor_name: formData.doctor_name || null,
         visit_date: formData.visit_date || null
-      };
-
-      const result = await register(userData);
+      };      const result = await register(userData);
       
       if (result.success) {
-        Alert.alert('Success', 'Account created successfully!');
+        showToast.success('Success', 'Account created successfully!');
         // Navigation will happen automatically due to auth state change
       } else {
-        Alert.alert('Registration Failed', result.error || 'Please try again');
+        showToast.error('Registration Failed', result.error || 'Please try again');
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      showToast.error('Error', 'An unexpected error occurred');
       console.error('Signup error:', error);
     } finally {
       setIsLoading(false);

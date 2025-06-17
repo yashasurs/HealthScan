@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  Alert,
   Dimensions,
   StatusBar,
   Vibration,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import { CameraView, Camera } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+import { showToast } from '../../utils/toast';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -47,16 +47,10 @@ const QRScanner = ({ visible, onClose, onQRScanned }) => {
     // Handle any QR code
     if (type === 'qr' || type === 'org.iso.QRCode') {
       onQRScanned(data);
-      onClose();
-    } else {
+      onClose();    } else {
       // Not a QR code
-      Alert.alert(
-        'Not a QR Code',
-        'Please scan a QR code.',
-        [
-          { text: 'OK', onPress: () => setScanned(false) }
-        ]
-      );
+      showToast.error('Not a QR Code', 'Please scan a QR code.');
+      setScanned(false);
     }
   };
 

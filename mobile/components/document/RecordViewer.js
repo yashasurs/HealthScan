@@ -5,12 +5,12 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  ScrollView,
-  Alert
+  ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Markdown from 'react-native-markdown-display';
 import { useApiService } from '../../services/apiService';
+import { showToast, showConfirmToast } from '../../utils/toast';
 
 /**
  * RecordViewer component for displaying OCR-processed record content
@@ -28,19 +28,12 @@ const RecordViewer = ({
   const apiService = useApiService();
 
   if (!record) return null;
-
   const handleDelete = () => {
-    Alert.alert(
+    showConfirmToast(
       'Delete Record',
       `Are you sure you want to delete "${record.filename}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: confirmDelete
-        }
-      ]
+      confirmDelete,
+      () => {}
     );
   };
 
@@ -48,12 +41,12 @@ const RecordViewer = ({
     setDeleting(true);
     try {
       await apiService.records.delete(record.id);
-      Alert.alert('Success', 'Record deleted successfully');
+      showToast.success('Success', 'Record deleted successfully');
       onRecordDeleted?.(record.id);
       if (onClose) onClose();
     } catch (error) {
       console.error('Error deleting record:', error);
-      Alert.alert('Error', 'Failed to delete record');
+      showToast.error('Error', 'Failed to delete record');
     } finally {
       setDeleting(false);
     }

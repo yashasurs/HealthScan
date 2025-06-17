@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, Alert, View, ActivityIndicator, Text } from 'react-native';
+import { StyleSheet, ScrollView, View, ActivityIndicator, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Header } from '../components/common';
 import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
 import { useAuth } from '../Contexts/Authcontext';
 import { useApiService } from '../services/apiService';
+import { showToast, showConfirmToast } from '../utils/toast';
 
 const ProfileScreen = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -32,30 +33,20 @@ const ProfileScreen = () => {
   useEffect(() => {
     loadUserData();
   }, []);
-
   const handleLogout = async () => {
-    Alert.alert(
+    showConfirmToast(
       'Confirm Logout',
       'Are you sure you want to log out?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Logout',
-          onPress: async () => {
-            setIsLoggingOut(true);
-            try {
-              await logout();
-              setIsLoggingOut(false);
-            } catch (error) {
-              Alert.alert('Error', 'Failed to logout');
-              setIsLoggingOut(false);
-            }
-          },
-        },
-      ]
+      async () => {
+        setIsLoggingOut(true);
+        try {
+          await logout();
+          setIsLoggingOut(false);
+        } catch (error) {
+          showToast.error('Error', 'Failed to logout');
+          setIsLoggingOut(false);
+        }
+      }
     );
   };  const handleUpdateProfile = async (updatedData) => {
     try {
@@ -63,9 +54,9 @@ const ProfileScreen = () => {
       const response = await apiService.auth.updateUser(updatedData);
       setUserData(response.data);
       setIsEditing(false);
-      Alert.alert('Success', 'Profile updated successfully');
+      showToast.success('Success', 'Profile updated successfully');
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to update profile');
+      showToast.error('Error', error.response?.data?.detail || 'Failed to update profile');
     } finally {
       setIsLoading(false);
     }
@@ -75,9 +66,9 @@ const ProfileScreen = () => {
     try {
       // You'll need to implement this API call in your backend
       // For now, just show a message
-      Alert.alert('Coming Soon', 'Password change feature will be available in a future update.');
+      showToast.info('Coming Soon', 'Password change feature will be available in a future update.');
     } catch (error) {
-      Alert.alert('Error', 'Failed to change password');
+      showToast.error('Error', 'Failed to change password');
     }
   };
   if (isLoading) {

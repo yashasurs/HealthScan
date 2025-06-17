@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { showToast } from '../../utils/toast';
 
 /**
  * Profile header component showing user avatar, name and role with real user data
@@ -28,7 +29,7 @@ const ProfileHeader = ({ user, isEditing, onUpdate }) => {
         {isEditing && (
           <TouchableOpacity 
             style={styles.editAvatarButton}
-            onPress={() => Alert.alert('Coming Soon', 'Avatar upload feature will be available in a future update.')}
+            onPress={() => showToast.info('Coming Soon', 'Avatar upload feature will be available in a future update.')}
           >
             <Text style={styles.editAvatarButtonText}>Change</Text>
           </TouchableOpacity>

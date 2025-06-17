@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Toast from 'react-native-toast-message';
 import { AuthProvider, useAuth } from './Contexts/Authcontext';
 import LandingScreen from './screens/LandingScreen';
 import LoginScreen from './screens/LoginScreen';
@@ -190,9 +191,9 @@ export default function App() {
   return (
     <NavigationContainer>
       <AuthProvider>
-        <AppContent />
-        <StatusBar style="dark" />
+        <AppContent />        <StatusBar style="dark" />
       </AuthProvider>
+      <Toast />
     </NavigationContainer>
   );
 }

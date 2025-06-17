@@ -8,10 +8,10 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { useAuth } from '../Contexts/Authcontext';
+import { showToast, showConfirmToast } from '../utils/toast';
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
@@ -25,15 +25,14 @@ const LoginScreen = ({ navigation }) => {
       markLaunchComplete();
     }
   }, [markLaunchComplete]);
-
   const handleLogin = async () => {
     if (!username.trim()) {
-      Alert.alert('Error', 'Please enter your username');
+      showToast.error('Validation Error', 'Please enter your username');
       return;
     }
 
     if (!password.trim()) {
-      Alert.alert('Error', 'Please enter your password');
+      showToast.error('Validation Error', 'Please enter your password');
       return;
     }
 
@@ -43,12 +42,13 @@ const LoginScreen = ({ navigation }) => {
       const result = await login(username, password);
       
       if (result.success) {
+        showToast.success('Login Successful', 'Welcome back!');
         // Navigation will happen automatically due to auth state change
       } else {
-        Alert.alert('Login Failed', result.error || 'Please check your credentials');
+        showToast.error('Login Failed', result.error || 'Please check your credentials');
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      showToast.error('Login Error', 'An unexpected error occurred');
       console.error('Login error:', error);
     } finally {
       setIsLoading(false);
