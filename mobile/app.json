@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ProjectSunga",
-    "slug": "project-sunga",
+    "name": "HealthScan",
+    "slug": "healthscan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/health-scan.png",
@@ -24,7 +24,7 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.projectsunga",
+      "package": "com.anonymous.healthscan",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
