@@ -18,33 +18,53 @@ const QRScannerScreen = ({ navigation }) => {
   const [showScanner, setShowScanner] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const apiService = useApiService();
-
-  const handleQRScanned = async (data) => {
+  const apiService = useApiService();  const handleQRScanned = async (data) => {
     try {
       setLoading(true);
       
-      // Extract token from URL
-      let token = null;
-      let type = null;
-      
-      if (data.includes('/records/share?token=')) {
-        token = data.split('token=')[1];
-        type = 'record';
-      } else if (data.includes('/collections/share?token=')) {
-        token = data.split('token=')[1];
-        type = 'collection';
+      // Check if it's a URL
+      const urlPattern = /^(https?:\/\/)/i;
+      if (urlPattern.test(data)) {
+        // It's a URL, ask user if they want to open it
+        Alert.alert(
+          'Open Website',
+          `Do you want to open this website?\n\n${data}`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Open', 
+              onPress: async () => {
+                try {
+                  const supported = await Linking.canOpenURL(data);
+                  if (supported) {
+                    await Linking.openURL(data);
+                  } else {
+                    Alert.alert('Error', 'Cannot open this URL');
+                  }
+                } catch (error) {
+                  Alert.alert('Error', 'Failed to open URL');
+                }
+              }
+            }
+          ]
+        );
+      } else {
+        // It's some other data, show it to the user
+        Alert.alert(
+          'QR Code Scanned',
+          `Content: ${data}`,
+          [
+            { text: 'OK' },
+            {
+              text: 'Copy',
+              onPress: () => {
+                // Note: You might want to add clipboard functionality here
+                Alert.alert('Info', 'Content copied to clipboard (feature not implemented)');
+              }
+            }
+          ]
+        );
       }
-      
-      if (!token || !type) {
-        Alert.alert('Error', 'Invalid QR code format');        return;
-      }
-
-      // Navigate to SharedContentViewerScreen to display the content
-      navigation.navigate('SharedContentViewer', {
-        shareToken: token,
-        shareType: type
-      });
 
     } catch (error) {
       console.error('Error processing QR code:', error);
@@ -61,10 +81,9 @@ const QRScannerScreen = ({ navigation }) => {
   const closeScanner = () => {
     setShowScanner(false);
   };  return (
-    <SafeAreaView style={styles.container}>      {/* Header */}
-      <View style={styles.header}>
+    <SafeAreaView style={styles.container}>      {/* Header */}      <View style={styles.header}>
         <Text style={styles.title}>QR Scanner</Text>
-        <Text style={styles.subtitle}>Scan QR codes to access shared medical records</Text>
+        <Text style={styles.subtitle}>Scan any QR code to access content or websites</Text>
       </View>
 
       {/* Scrollable Content */}
@@ -76,11 +95,9 @@ const QRScannerScreen = ({ navigation }) => {
         {/* Main Content */}
         <View style={styles.mainContent}><View style={styles.iconContainer}>
             <Ionicons name="qr-code-outline" size={120} color="#000" />
-          </View>
-          
-          <Text style={styles.heading}>Scan QR Codes</Text>
+          </View>          <Text style={styles.heading}>Scan QR Codes</Text>
           <Text style={styles.description}>
-            Scan QR codes to access shared medical records and collections from other ProjectSunga users.
+            Scan any QR code to access websites, view content, or get information.
           </Text>
 
           <TouchableOpacity 
@@ -101,19 +118,17 @@ const QRScannerScreen = ({ navigation }) => {
               <Text style={styles.instructionText}>
                 Tap "Start Scanning" to open the camera
               </Text>
-            </View>
-            <View style={styles.instructionItem}>
+            </View>            <View style={styles.instructionItem}>
               <Ionicons name="checkmark-circle" size={20} color="#000" />
               <Text style={styles.instructionText}>
-                Point your camera at a ProjectSunga QR code
+                Point your camera at any QR code
               </Text>
-            </View>
-            <View style={styles.instructionItem}>
+            </View>            <View style={styles.instructionItem}>
               <Ionicons name="checkmark-circle" size={20} color="#000" />
               <Text style={styles.instructionText}>
-                Review and save the shared content to your account
+                View content, open websites, or get information
               </Text>
-            </View>          </View>
+            </View></View>
         </View>
       </ScrollView>
 
@@ -136,8 +151,8 @@ const styles = StyleSheet.create({  container: {
     backgroundColor: '#ffffff',
   },  scrollContent: {
     flexGrow: 1,
-    paddingBottom: 60,
-  },  header: {
+    paddingBottom: 90,
+  },header: {
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 20,

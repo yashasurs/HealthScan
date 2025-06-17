@@ -16,7 +16,6 @@ import ProfileScreen from './screens/ProfileScreen';
 import FolderSystemScreen from './screens/FolderSystemScreen';
 import RecordDetailScreen from './screens/RecordDetailScreen';
 import QRScannerScreen from './screens/QRScannerScreen';
-import SharedContentViewerScreen from './screens/SharedContentViewerScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -175,16 +174,10 @@ function AppContent() {
             name="RecordDetail" 
             component={RecordDetailScreen} 
             options={{ headerShown: false, presentation: 'card' }} 
-          />
-          <Stack.Screen
+          />          <Stack.Screen
             name="QRScanner" 
             component={QRScannerScreen} 
             options={{ headerShown: false, presentation: 'modal' }} 
-          />
-          <Stack.Screen 
-            name="SharedContentViewer" 
-            component={SharedContentViewerScreen} 
-            options={{ headerShown: false, presentation: 'card' }} 
           />
         </>
       )}

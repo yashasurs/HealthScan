@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Modal, TextInput } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert } from 'react-native';
 
 /**
  * Profile actions component with buttons for various actions
@@ -18,14 +18,12 @@ const ProfileActions = ({
   onChangePassword, 
   onLogout 
 }) => {
-  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);  const [passwordForm, setPasswordForm] = useState({
     oldPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       Alert.alert('Error', 'New passwords do not match');
@@ -39,11 +37,14 @@ const ProfileActions = ({
 
     setIsChangingPassword(true);
     try {
-      await onChangePassword(passwordForm.oldPassword, passwordForm.newPassword);
+      if (onChangePassword) {
+        await onChangePassword(passwordForm.oldPassword, passwordForm.newPassword);
+      }
       setIsPasswordModalVisible(false);
       setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      // Error handling is done in the parent component
+      console.error('Password change error:', error);
+      Alert.alert('Error', 'Failed to change password');
     } finally {
       setIsChangingPassword(false);
     }
@@ -94,35 +95,33 @@ const ProfileActions = ({
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Change Password</Text>
-            
-            <TextInput
+              <TextInput
               style={styles.input}
               placeholder="Current Password"
-              value={passwordForm.oldPassword}
-              onChangeText={(text) => setPasswordForm(prev => ({ ...prev, oldPassword: text }))}
+              value={String(passwordForm.oldPassword || '')}
+              onChangeText={(text) => setPasswordForm(prev => ({ ...prev, oldPassword: String(text || '') }))}
               secureTextEntry
             />
             
             <TextInput
               style={styles.input}
               placeholder="New Password"
-              value={passwordForm.newPassword}
-              onChangeText={(text) => setPasswordForm(prev => ({ ...prev, newPassword: text }))}
+              value={String(passwordForm.newPassword || '')}
+              onChangeText={(text) => setPasswordForm(prev => ({ ...prev, newPassword: String(text || '') }))}
               secureTextEntry
             />
             
             <TextInput
               style={styles.input}
               placeholder="Confirm New Password"
-              value={passwordForm.confirmPassword}
-              onChangeText={(text) => setPasswordForm(prev => ({ ...prev, confirmPassword: text }))}
+              value={String(passwordForm.confirmPassword || '')}
+              onChangeText={(text) => setPasswordForm(prev => ({ ...prev, confirmPassword: String(text || '') }))}
               secureTextEntry
             />
 
             <View style={styles.modalButtons}>
               <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelModalButton]}
-                onPress={() => {
+                style={[styles.modalButton, styles.cancelModalButton]}                onPress={() => {
                   setIsPasswordModalVisible(false);
                   setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
                 }}
