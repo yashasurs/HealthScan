@@ -162,8 +162,8 @@ function AppContent() {
           {isFirstLaunch && <Stack.Screen name="Landing" component={LandingScreen} />}
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Signup" component={SignupScreen} />
-        </>
-      ) : (        <>
+        </>      ) : (
+        <>
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
           <Stack.Screen 
             name="CollectionSystem" 
@@ -174,7 +174,8 @@ function AppContent() {
             name="RecordDetail" 
             component={RecordDetailScreen} 
             options={{ headerShown: false, presentation: 'card' }} 
-          />          <Stack.Screen
+          />
+          <Stack.Screen
             name="QRScanner" 
             component={QRScannerScreen} 
             options={{ headerShown: false, presentation: 'modal' }} 

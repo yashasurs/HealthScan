@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   Animated,
   Image,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,21 +46,25 @@ const LandingScreen = ({ navigation }) => {
     navigation.navigate('Signup');
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
+  return (    <SafeAreaView style={styles.container}>
       <LinearGradient
         colors={['#ffffff', '#f8f9fa']}
         style={styles.gradient}
       >
-        <Animated.View 
-          style={[
-            styles.content,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }]
-            }
-          ]}
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
+          <Animated.View 
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
           {/* Header Section */}          <View style={styles.header}>
             <View style={styles.logoContainer}>
               <View style={styles.iconBackground}>
@@ -127,9 +132,9 @@ const LandingScreen = ({ navigation }) => {
           <View style={styles.footer}>
             <Text style={styles.footerText}>
               By continuing, you agree to our Terms of Service and Privacy Policy
-            </Text>
-          </View>
+            </Text>          </View>
         </Animated.View>
+        </ScrollView>
       </LinearGradient>
     </SafeAreaView>
   );
@@ -139,9 +144,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f9fa',
-  },
-  gradient: {
+  },  gradient: {
     flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   content: {
     flex: 1,
@@ -280,7 +290,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },  footer: {
     alignItems: 'center',
-    paddingBottom: 50,
+    paddingBottom: 70,
   },
   footerText: {
     fontSize: 12,

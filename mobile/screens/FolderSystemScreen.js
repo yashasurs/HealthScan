@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, RefreshControl, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, Alert, Text, TouchableOpacity, ScrollView, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { Header } from '../components/common';
 import { RecordOrganizer } from '../components/folder';
 import { RecordItem } from '../components/document';
@@ -21,9 +21,9 @@ const FolderSystemScreen = ({ navigation, route }) => {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrCollection, setQrCollection] = useState(null);
   const [qrRecord, setQrRecord] = useState(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [editingCollection, setEditingCollection] = useState({
     name: '',
     description: ''
@@ -40,11 +40,21 @@ const FolderSystemScreen = ({ navigation, route }) => {
   });
 
   const apiService = useApiService();
-
   // Load data on initial render and when refreshTrigger changes
   useEffect(() => {
     loadData();
   }, [refreshTrigger]);
+
+  // Focus listener to reload data when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!initialLoad) {
+        setRefreshTrigger(prev => prev + 1);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, initialLoad]);
   
   // Check if navigated from record upload with new records
   useEffect(() => {
@@ -52,9 +62,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
       setRefreshTrigger(prev => prev + 1);
       navigation.setParams({ recordsAdded: false });
     }
-  }, [route.params?.recordsAdded]);
-  const loadData = async () => {
+  }, [route.params?.recordsAdded]);  const loadData = useCallback(async () => {
     try {
+      if (initialLoad) {
+        setLoading(true);
+      }
+
       const [collectionsResponse, unorganizedResponse, allRecordsResponse] = await Promise.all([
         apiService.collections.getAll(),
         apiService.records.getUnorganized(),
@@ -88,14 +101,16 @@ const FolderSystemScreen = ({ navigation, route }) => {
       } else {
         Alert.alert('Error', 'Failed to load data. Please try again later.');
       }
+    } finally {
+      if (initialLoad) {
+        setLoading(false);
+        setInitialLoad(false);
+      }
     }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  };  const handleRecordSelect = (record) => {
+  }, [apiService, initialLoad]);
+  const handleRefresh = useCallback(async () => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);const handleRecordSelect = (record) => {
     navigation.navigate('RecordDetail', {
       recordId: record.id,
       record: record
@@ -124,14 +139,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
     });
     setShowEditCollectionModal(true);
   };
-
   const handleUpdateCollection = async () => {
     if (!editingCollection.name.trim()) {
       Alert.alert('Error', 'Collection name cannot be empty');
       return;
     }
 
-    setLoading(true);
     try {
       await apiService.collections.update(selectedCollection.id, {
         name: editingCollection.name.trim(),
@@ -144,11 +157,8 @@ const FolderSystemScreen = ({ navigation, route }) => {
     } catch (error) {
       console.error('Error updating collection:', error);
       Alert.alert('Error', 'Failed to update collection');
-    } finally {
-      setLoading(false);
     }
   };
-
   const handleDeleteCollection = (collection) => {
     Alert.alert(
       'Delete Collection',
@@ -159,7 +169,6 @@ const FolderSystemScreen = ({ navigation, route }) => {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            setLoading(true);
             try {
               await apiService.collections.delete(collection.id);
               setRefreshTrigger(prev => prev + 1);
@@ -167,17 +176,13 @@ const FolderSystemScreen = ({ navigation, route }) => {
             } catch (error) {
               console.error('Error deleting collection:', error);
               Alert.alert('Error', 'Failed to delete collection');
-            } finally {
-              setLoading(false);
             }
           }
         }
       ]
     );
   };
-
   const handleAddRecordToCollection = async (collectionId, recordId) => {
-    setLoading(true);
     try {
       await apiService.collections.addRecord(collectionId, recordId);
       setRefreshTrigger(prev => prev + 1);
@@ -185,8 +190,6 @@ const FolderSystemScreen = ({ navigation, route }) => {
     } catch (error) {
       console.error('Error adding record to collection:', error);
       Alert.alert('Error', 'Failed to add record to collection');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -284,14 +287,12 @@ const FolderSystemScreen = ({ navigation, route }) => {
       description: ''
     });
     setShowCreateCollectionModal(true);
-  };
-  const handleCreateCollectionSubmit = async () => {
+  };  const handleCreateCollectionSubmit = async () => {
     if (!newCollection.name.trim()) {
       Alert.alert('Error', 'Collection name cannot be empty');
       return;
     }
 
-    setLoading(true);
     try {
       await apiService.collections.create({
         name: newCollection.name.trim(),
@@ -310,8 +311,6 @@ const FolderSystemScreen = ({ navigation, route }) => {
     } catch (error) {
       console.error('Error creating collection:', error);
       Alert.alert('Error', 'Failed to create collection');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -437,7 +436,6 @@ const FolderSystemScreen = ({ navigation, route }) => {
       </View>
     );
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -468,16 +466,17 @@ const FolderSystemScreen = ({ navigation, route }) => {
             <Text style={styles.statLabel}>Unorganized</Text>
           </View>
         </View>
-      </View>      <ScrollView
+      </View>
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#000" />
+          <Text style={styles.loadingText}>Loading collections...</Text>
+        </View>
+      ) : (<ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={['#333']}
-          />
-        }
+        showsVerticalScrollIndicator={false}
       >
         {/* Collections Section */}
         <View style={styles.section}>
@@ -557,9 +556,11 @@ const FolderSystemScreen = ({ navigation, route }) => {
                 Great job! All your records are organized in collections.
               </Text>
             </View>
-          </View>
-        )}
-      </ScrollView>      {showOrganizer && (
+          </View>        )}
+      </ScrollView>
+      )}
+
+      {showOrganizer && (
         <RecordOrganizer
           visible={showOrganizer}
           onClose={() => {
@@ -961,11 +962,22 @@ const FolderSystemScreen = ({ navigation, route }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
+const styles = StyleSheet.create({  container: {
     flex: 1,
     backgroundColor: '#f5f7fa',
-  },  header: {
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f7fa',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 16,
+    fontWeight: '500',
+  },header: {
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
