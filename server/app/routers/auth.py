@@ -81,11 +81,6 @@ def delete_user(
     db.commit()
     return {"detail": "User deleted"}
 
-@router.get("/users")
-def get_all_users(db: Session = Depends(database.get_db)):
-    users = db.query(models.User).all()
-    return users
-
 @router.put("/user", response_model=schemas.UserOut)
 def update_user(
     user_update: schemas.UserUpdate,
