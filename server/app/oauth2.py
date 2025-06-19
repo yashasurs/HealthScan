@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 import os
+import base64
+import pyotp
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
@@ -18,6 +20,24 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', 
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.environ.get('REFRESH_TOKEN_EXPIRE_DAYS', 7))
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+
+
+# TOTP functions
+def generate_totp_secret():
+    """Generate a random base32 encoded secret for TOTP"""
+    return pyotp.random_base32()
+
+
+def get_totp_provisioning_uri(username: str, secret: str):
+    """Generate the provisioning URI for QR code generation"""
+    totp = pyotp.TOTP(secret)
+    return totp.provisioning_uri(name=username, issuer_name="HealthScan")
+
+
+def verify_totp(secret: str, code: str):
+    """Verify the TOTP code against the secret"""
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code)
 
 
 def create_access_token(data: dict):

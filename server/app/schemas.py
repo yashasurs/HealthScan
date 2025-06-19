@@ -8,6 +8,7 @@ class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    require_totp: bool = False
 
 
 class TokenData(BaseModel):
@@ -114,9 +115,32 @@ class UserOut(BaseModel):
     allergies: Optional[str] = None
     doctor_name: Optional[str] = None
     visit_date: Optional[datetime] = None
+    totp_enabled: bool = False
 
     class Config:
         from_attributes = True
+
+
+class TOTPSetup(BaseModel):
+    totp_secret: str
+    provisioning_uri: str
+
+
+class TOTPVerify(BaseModel):
+    totp_code: str
+
+
+class TOTPDisable(BaseModel):
+    totp_code: str
+
+
+class LoginResponse(BaseModel):
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    token_type: Optional[str] = None
+    require_totp: bool = False
+    user_id: Optional[int] = None
+
 
 class MessageResponse(BaseModel):
     message: str

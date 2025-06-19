@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import List
+import qrcode
+import io
 from .. import models, schemas, utils, oauth2, database
 
 router = APIRouter(tags=["Authentication"])
@@ -27,7 +29,8 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
         aadhar=user.aadhar,
         allergies=user.allergies,
         doctor_name=user.doctor_name,
-        visit_date=user.visit_date
+        visit_date=user.visit_date,
+        totp_enabled=False
     )
     db.add(new_user)
     db.commit()
@@ -40,10 +43,11 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     return {
         "access_token": access_token, 
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "require_totp": False
     }
 
-@router.post("/login", response_model=schemas.Token)
+@router.post("/login", response_model=schemas.LoginResponse)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(database.get_db)
@@ -56,16 +60,168 @@ def login(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        
-    # Generate tokens
+    
+    # Check if 2FA is enabled for this user
+    if user.totp_enabled:
+        return {
+            "require_totp": True,
+            "user_id": user.id
+        }
+    
+    # If 2FA is not enabled, proceed with normal login
     access_token = oauth2.create_access_token(data={"user_id": user.id})
     refresh_token = oauth2.create_refresh_token(data={"user_id": user.id})
     
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "require_totp": False
     }
+
+@router.post("/login/verify-totp", response_model=schemas.Token)
+def verify_totp(
+    totp_data: schemas.TOTPVerify,
+    user_id: int,
+    db: Session = Depends(database.get_db)
+):
+    """Verify TOTP code and complete login if successful"""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+        
+    if not user.totp_enabled or not user.totp_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="TOTP not enabled for this user"
+        )
+    
+    # Verify the TOTP code
+    if not oauth2.verify_totp(user.totp_secret, totp_data.totp_code):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid TOTP code"
+        )
+    
+    # Code is valid, generate tokens
+    access_token = oauth2.create_access_token(data={"user_id": user.id})
+    refresh_token = oauth2.create_refresh_token(data={"user_id": user.id})
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "require_totp": False
+    }
+
+@router.post("/totp/setup")
+def setup_totp(
+    response_format: str = "json",
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Generate and setup TOTP for a user
+    
+    Parameters:
+    - response_format: Set to "qrcode" to return QR code image directly, or "json" for JSON response
+    """
+    # Generate a new TOTP secret
+    totp_secret = oauth2.generate_totp_secret()
+    
+    # Generate the provisioning URI
+    provisioning_uri = oauth2.get_totp_provisioning_uri(
+        current_user.username, 
+        totp_secret
+    )
+    
+    # Store the secret but don't enable it yet (verification required)
+    current_user.totp_secret = totp_secret
+    db.commit()
+    
+    # Return QR code image if requested
+    if response_format == "qrcode":
+        # Generate QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(provisioning_uri)
+        qr.make(fit=True)
+        
+        # Create an image from the QR code
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Convert image to bytes
+        img_byte_arr = io.BytesIO()
+        img.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
+        
+        # Return the image
+        return Response(content=img_byte_arr.getvalue(), media_type="image/png")
+    
+    # Return JSON response by default
+    return schemas.TOTPSetup(
+        totp_secret=totp_secret,
+        provisioning_uri=provisioning_uri
+    )
+
+@router.post("/totp/activate", response_model=schemas.MessageResponse)
+def activate_totp(
+    totp_data: schemas.TOTPVerify,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Verify and activate TOTP for a user"""
+    if not current_user.totp_secret:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="TOTP setup required before activation"
+        )
+    
+    # Verify the TOTP code
+    if not oauth2.verify_totp(current_user.totp_secret, totp_data.totp_code):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid TOTP code"
+        )
+    
+    # Enable TOTP for the user
+    current_user.totp_enabled = True
+    db.commit()
+    
+    return {"message": "TOTP successfully enabled"}
+
+@router.post("/totp/disable", response_model=schemas.MessageResponse)
+def disable_totp(
+    totp_data: schemas.TOTPDisable,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Disable TOTP for a user"""
+    if not current_user.totp_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="TOTP is not enabled for this user"
+        )
+    
+    # Verify the TOTP code one last time
+    if not oauth2.verify_totp(current_user.totp_secret, totp_data.totp_code):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid TOTP code"
+        )
+    
+    # Disable and clear TOTP info
+    current_user.totp_enabled = False
+    current_user.totp_secret = None
+    db.commit()
+    
+    return {"message": "TOTP successfully disabled"}
 
 @router.delete("/user")
 def delete_user(
