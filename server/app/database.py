@@ -19,9 +19,6 @@ if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
 else:
     print(f"Database URL is already in correct format: {SQLALCHEMY_DATABASE_URL}")
 
-# Hardcode the URL if the environment variable isn't working
-# SQLALCHEMY_DATABASE_URL = "postgresql://u5cnv07a8en4pf:p2df2c0be37caeb9236cd1ace49b403bd878feee0c7b7bae9d1f67bd483cd7daa@c2fbt7u7f4htth.cluster-czz5s0kz4scl.eu-west-1.rds.amazonaws.com:5432/dg3vnaeou21p3"
-
 print(f"Connecting to database at {SQLALCHEMY_DATABASE_URL}")
 
 # Add some options to the engine creation to handle connection issues

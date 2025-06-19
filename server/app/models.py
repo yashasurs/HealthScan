@@ -22,6 +22,8 @@ class User(Base):
         TIMESTAMP(timezone=True), nullable=False, server_default=text("CURRENT_TIMESTAMP")
     )
     blood_group = Column(String(3), nullable=False)  # Blood group (e.g., A+, O-, etc.)
+    totp_secret = Column(String(100), nullable=True)  # Secret key for TOTP
+    totp_enabled = Column(Boolean, default=False)  # Whether 2FA is enabled
     
     # Relationships
     collections = relationship("Collection", back_populates="owner", cascade="all, delete-orphan")
