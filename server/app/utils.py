@@ -1,6 +1,7 @@
 from typing import List
 from passlib.context import CryptContext
 from pydantic_ai.models.gemini import GeminiModel
+from pydantic_ai import BinaryContent
 from pydantic_ai.agent import Agent
 from pydantic_ai.providers.google_gla import GoogleGLAProvider
 import os
@@ -14,6 +15,11 @@ import markdown
 from weasyprint import HTML, CSS
 import pytesseract
 import cv2
+from pypdf import PdfReader
+from . import schemas
+from fastapi import UploadFile, File, HTTPException, status, Depends
+from sqlalchemy.orm import Session
+from app import database, models, oauth2
 
 load_dotenv()
 
@@ -185,44 +191,93 @@ class MarkupAgent():
             return f"Error: {e}"
 
 
+class ResumeVerifierAgent():
+    def __init__(self):
+        self.model = GeminiModel(
+            "gemini-2.0-flash",
+            provider=GoogleGLAProvider(
+                api_key=str(os.getenv("GEMINI_API_KEY")),
+            ),
+        )
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
+
+    async def verify_resume(self, resume) -> schemas.ResumeVerifierResponse:
+        try:
+            
+            # Handle the resume content
+            resume_content = ""
+            with io.BytesIO(resume) as pdf_file:
+                try:
+                    # Try to read as PDF
+                    pdf_reader = PdfReader(pdf_file)
+                    
+                    for i, page in enumerate(pdf_reader.pages):
+                        page_text = page.extract_text()
+                        resume_content += page_text or ""
+                    
+                except Exception as e:
+                    # If PDF reading fails, try OCR
+                    pdf_file.seek(0)  # Reset file pointer
+                    
+                    result = process_single_image_tesseract(
+                        resume, 
+                        "resume.jpg", 
+                        len(resume), 
+                        "application/octet-stream"
+                    )
+                    resume_content = result.get('extracted_text', '')
+                    if result.get('error'):
+                        print(f"OCR error: {result.get('error')}")
+
+        except Exception as e:
+            print(f"Global error in verify_resume: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return schemas.ResumeVerifierResponse(
+                veridication_status=False,
+                confidence=0,
+                message=f"Error processing resume: {str(e)}"
+            )
+        
+        # If no content extracted, return error
+        if not resume_content or len(resume_content.strip()) < 10:
+            return schemas.ResumeVerifierResponse(
+                veridication_status=False,
+                confidence=0,
+                message="Could not extract text from the resume"
+            )
+        
+        agent = Agent(
+            self.model,
+            result_type=schemas.ResumeVerifierResponse,
+            system_prompt=(
+                "You are a resume checker who is tasked with verifying the resume of doctors. "
+                "You must return True in the veridication_status field if the resume appears to be from a medical doctor, "
+                "or False if it does not appear to be from a medical doctor. "
+                "Look for medical degrees (MD, MBBS, DO), medical specializations, hospital experience, "
+                "clinical rotations, medical licenses, and other indicators of medical training. "
+                "You must also return a confidence score (0-100) indicating how confident you are in your assessment. "
+                "In the message field, provide a brief explanation of your decision."
+            )
+        )
+
+        try:
+            response = await agent.run(
+                f"Verify if the following resume belongs to a medical doctor:\n\n{resume_content}"
+            )
+            return response.output
+        
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return schemas.ResumeVerifierResponse(
+                veridication_status=False,
+                confidence=0,
+                message=f"Error analyzing resume: {str(e)}"
+            )
     
-if __name__ == "__main__":
 
-    async def main():
-        agent = MarkupAgent()
-        # Define sample texts
-        sample_texts = [
-            """
-            Anirudh Kashyap +91 6366201598 anirudhkashyap321@gmailcom github com /dynamite-123 linkedin EDUCATION JSS Science and Technology University, Mysore CGPA: 9.2/10 Bachelor of Engineering in Computer Science Oct 2023 present PROJECT EXPERIENCE Smart Stock - Feb 2025 PES University Built with a team of four and shortlisted in the top 10 at a hackathon Led backend development using Django REST Framework for a web app providing stock insights, recommendations, and sentiment analysis Frontend built with React: GitHub: https:L Lgithub com [dvnamite-L23 /NextGen 2 Raytracing in € - March 2025 Built a program in C to demonstrate raytracing using the SDL library: GitHub: https:L Lgithub com /dynamite-L23 [Ravtracing CRM Webapp Dec 2024 Built a customer relationship management app using Django framework GitHub: https LLgithubcomLdynamite-L23 /diango-crm API for CRUD operations Sep 2024 Built a simple RESTful API using FastAPI to handle CRUD (create, read; update, delete) operations GitHub: https:L Lgithub com /dynamite-123 [Social_Media App
-            """,
 
-            """
-            JAkash Savanur +6581732147 | akash013@e.ntu.edu.sg linkedin com/in/akash-savanur EDUCATION Nanyang Technological University, Singapore CGPA: 4.84/5.00 Bachelor of Engineering in Computer Science, Second Major in Business 2023 _ July 2027 Relevant Coursework Data Structures and Algorithms, Data Science and Artificial Intelligence, Digital Logic, Financial Management ExPERIENCE Full Stack Development Intern June 2024 _ July 2024 DoozieSoft Bangalore, India Engineered a full-fledged temple management website the PERN stack (PostgreSQL, Express_ React; Node js). Designed and deploved 15+ microservices, reducing API response times by 40%,and handled over 2000 user registrations and 500+ payments through Razorpay with a 98% success rate  Integrated WhatsApp APIs for OTP generation and notifications, enhancing user authentication and engagement; along with automated audit logs and receipt generation for secure transactions Managed the deployment process on AWS services, ensuring high scalability and reliability ofthe application, and maintained robust version control using GitHub. Registered over 2000 users within the beta phase, facilitated by efficient event booking and donation management features, contributing to high user satisfaction and engagement: Phishing Email Detection using Machine Learning 2024 May 2024 Nanyang Technological University Singapore Designed a Machine Learning solution to accurately classify and detect phishing emails, providing practical insights to prevent individuals from victim to phishing attacks in real-world scenarios_ Utilised Logistic Regression, Random Forest; GRU Neural Network and SVM machine learning models Best-F performing model had an Fl-score of 0.97. The findings of this project have practical implications in real-world scenarios, where individuals can use the developed model to identify and avoid phishing emails, thereby reducing the risk of victim to cyber attacks. Aug using Apr falling falling
-            """,
-
-            """
-            To exit full screen; press and hold Esc vinyas bharadwaj 8310055407 vinyasbharadwaj101@gmail com Mysore, Karnataka Profile Im always looking to connect with others who inspire me to be my best: have a strong passion for backend and API development, and I've gained experience with FastAPI , Django, other backend technologies_ Im also skilled in using API tools like Postman to test and refine my work. Im eager to keep learning and expanding my skills in these areas  and Im excited to explore new technologies that can help me grow and contribute to my work. Skills Django Backend Developer; Python Programming; API Development with FastAPI, Web Development Fundamentals Communication skills Education JSS Science And Technology University Ist semester: 9.63 GPA Excel Public School Shortlisted among the top 50 teams across India in the Atal  Innovation Marathon (AIM): developed an innovative design for a vertical axis wind turbine to surmount the inherent limitations of  conventional wind energy harvesting technologies_ Projects Customer Relationship Management (CRM) System Developed a CRM system with Django, featuring authentication mechanisms and a user-friendly, interactive Ul. Secure user authentication, dynamic and responsive interface for seamless user interaction: RESTful API for CRUD Operations Designed and implemented a RESTful API using FastAPI , capable of handling all CRUD (Create, Read, Update, Delete) operations_ The API is optimized for performance and scalability, full CRUD functionality, fast and lightweight, with asynchronous capabilities. Well-documented endpoints_ Accomplishments JEE Mains: 98.729 percentile KCET: ranked 135th in my state and We
-            """
-        ]
-        
-        # Merge the texts into a single string with the separator
-        separator = "\n\n---\n\n"
-        merged_text = merge_texts(sample_texts, separator)
-        
-        print("Input merged text length:", len(merged_text))
-
-        response = await agent.generate_markup(merged_text)
-        print("\nFormatted output (type={}):\n".format(type(response)))
-        print(f"Number of records: {len(response)}")
-        for i, record in enumerate(response):
-            print(f"\nRecord {i+1}:\n{record.markup}")
-        
-        # Write the first formatted output to test.md
-        output_dir = os.path.dirname(os.path.abspath(__file__))
-        output_path = os.path.join(output_dir, "test.md")
-        if response:
-            with open(output_path, "w") as f:
-                f.write(response[0].markup)
-
-    asyncio.run(main())
 

@@ -4,7 +4,7 @@ import os
 import sys
 from . import models
 from .database import engine
-from .routers import ocr, auth, collections, records, qr
+from .routers import ocr, auth, collections, records, qr, doctor  # Add doctor and users imports
 
 # Initialize database tables
 try:
@@ -33,6 +33,7 @@ app.include_router(auth.router)
 app.include_router(collections.router)
 app.include_router(records.router)
 app.include_router(qr.router)
+app.include_router(doctor.router)  
 
 @app.get("/")
 def root():
