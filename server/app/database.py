@@ -23,7 +23,7 @@ print(f"Connecting to database at {SQLALCHEMY_DATABASE_URL}")
 
 # Add some options to the engine creation to handle connection issues
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    SQLALCHEMY_DATABASE_URL or 'sqlite:///./sql_app.db',
     pool_size=5,
     max_overflow=0,
     pool_timeout=30,
