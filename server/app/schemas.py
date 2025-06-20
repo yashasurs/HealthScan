@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, List
 
 from pydantic import Field, BaseModel, EmailStr
-
+from .models import UserRole
 
 class Token(BaseModel):
     access_token: str
@@ -26,10 +26,16 @@ class UserCreate(UserLogin):
     last_name: str
     phone_number: str
     blood_group: str
+    role: UserRole = UserRole.PATIENT
     aadhar: Optional[str] = None
     allergies: Optional[str] = None
     doctor_name: Optional[str] = None
     visit_date: Optional[datetime] = None
+
+# Add doctor registration schema
+class DoctorRegistration(BaseModel):
+    user: UserCreate
+    resume: str = Field(..., description="Base64 encoded image of doctor's resume")
 
 class UserDelete(BaseModel):
     user_id: int
@@ -111,11 +117,14 @@ class UserOut(BaseModel):
     last_name: str
     phone_number: str
     blood_group: str
+    role: UserRole
     aadhar: Optional[str] = None
     allergies: Optional[str] = None
     doctor_name: Optional[str] = None
     visit_date: Optional[datetime] = None
     totp_enabled: bool = False
+    resume_verification_status: Optional[bool] = None
+    resume_verification_confidence: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -183,4 +192,27 @@ class CollectionSummaryContent(BaseModel):
     collection_name: str
     summary_content: str
     record_count: int
+
+
+class ResumeVerifierResponse(BaseModel):
+    """Schema for AI verification of doctor resume"""
+    veridication_status: bool
+    confidence: int
+    message: str = "Resume verification complete"
+
+class DoctorVerificationResult(BaseModel):
+    """Schema for the result of doctor registration and verification"""
+    message: str
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    token_type: Optional[str] = None
+    verification_status: bool
+    verification_confidence: int = 0
+
+class DoctorInfoUpdate(BaseModel):
+    """Schema for updating doctor-specific information"""
+    specialization: Optional[str] = None
+    medical_license_number: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+    years_of_experience: Optional[int] = None
 

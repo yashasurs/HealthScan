@@ -22,14 +22,21 @@ else:
 print(f"Connecting to database at {SQLALCHEMY_DATABASE_URL}")
 
 # Add some options to the engine creation to handle connection issues
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    pool_size=5,
-    max_overflow=0,
-    pool_timeout=30,
-    pool_recycle=1800,
-    connect_args={"connect_timeout": 15}
-)
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, 
+        connect_args={"check_same_thread": False}
+    )
+else:
+    # For PostgreSQL and other databases, use these parameters
+    # Remove connect_timeout from connect_args
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        pool_size=5,
+        max_overflow=0,
+        pool_timeout=30,
+        pool_recycle=1800
+    )
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 

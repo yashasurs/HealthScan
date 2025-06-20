@@ -1,8 +1,14 @@
-from sqlalchemy import TIMESTAMP, DateTime, Column, ForeignKey, Integer, String, Text, Boolean, text
+from sqlalchemy import TIMESTAMP, DateTime, Column, ForeignKey, Integer, String, Text, Boolean, text, Enum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
 from .database import Base
+import enum
+
+class UserRole(enum.Enum):
+    PATIENT = "patient"
+    DOCTOR = "doctor"
+    PENDING_DOCTOR = "pending_doctor"
 
 
 class User(Base):
@@ -24,6 +30,15 @@ class User(Base):
     blood_group = Column(String(3), nullable=False)  # Blood group (e.g., A+, O-, etc.)
     totp_secret = Column(String(100), nullable=True)  # Secret key for TOTP
     totp_enabled = Column(Boolean, default=False)  # Whether 2FA is enabled
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.PATIENT)
+    resume_verification_status = Column(Boolean, nullable=True)
+    resume_verification_confidence = Column(Integer, nullable=True)
+    
+    # Doctor-specific fields
+    specialization = Column(String(100), nullable=True)
+    medical_license_number = Column(String(50), nullable=True)
+    hospital_affiliation = Column(String(100), nullable=True)
+    years_of_experience = Column(Integer, nullable=True)
     
     # Relationships
     collections = relationship("Collection", back_populates="owner", cascade="all, delete-orphan")

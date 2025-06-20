@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response, File, UploadFile, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from typing import List
 import qrcode
 import io
 from .. import models, schemas, utils, oauth2, database
@@ -10,6 +9,7 @@ router = APIRouter(tags=["Authentication"])
 
 @router.post("/register", response_model=schemas.Token)
 def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    """Register a new user (always as patient by default)"""
     # Check if email or username already exists
     if db.query(models.User).filter(models.User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -17,6 +17,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     if db.query(models.User).filter(models.User.username == user.username).first():
         raise HTTPException(status_code=400, detail="Username already taken")
 
+    # Override any role in the request - all users start as patients
     hashed_password = utils.hash(user.password)    
     new_user = models.User(
         email=user.email,
@@ -30,7 +31,8 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
         allergies=user.allergies,
         doctor_name=user.doctor_name,
         visit_date=user.visit_date,
-        totp_enabled=False
+        totp_enabled=False,
+        role=models.UserRole.PATIENT  # Always set as PATIENT
     )
     db.add(new_user)
     db.commit()
@@ -46,6 +48,7 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
         "token_type": "bearer",
         "require_totp": False
     }
+
 
 @router.post("/login", response_model=schemas.LoginResponse)
 def login(
