@@ -1,4 +1,3 @@
-import React from 'react';
 import LoginForm from '../components/LoginForm';
 
 // Pre-define SVG to reduce render work

@@ -1,4 +1,3 @@
-import React from 'react';
 import RegisterForm from '../components/RegisterForm';
 
 // Pre-define SVG to reduce render work

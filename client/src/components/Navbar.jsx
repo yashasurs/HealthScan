@@ -34,11 +34,6 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
 
-  // useEffect(() => {
-  //   // Set to true by default for consistent appearance
-  //   setScrolled(true);
-  // }, []);
-  
   // Close mobile menu when changing routes
   useEffect(() => {
     setMobileMenuOpen(false);
