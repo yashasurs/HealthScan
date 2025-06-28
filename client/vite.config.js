@@ -30,8 +30,17 @@ export default defineConfig({
           // Separate vendor libraries into their own chunks
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
+          utils: ['axios'],
         }
       }
-    }
+    },
+    // Remove console.log in production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
   },
 })

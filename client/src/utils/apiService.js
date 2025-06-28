@@ -1,29 +1,30 @@
 // A centralized API service with authentication
 import axios from 'axios';
+import { API_BASE_URL, STORAGE_KEYS } from './constants';
 
 /**
  * Refresh the access token using the refresh token
  * @returns {Promise<string>} New access token
  */
 const refreshAccessToken = async () => {
-  const refreshToken = localStorage.getItem('refresh_token');
+  const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
   if (!refreshToken) {
     throw new Error('No refresh token available');
   }
   try {
-    const response = await axios.post('https://healthscan-e868bea9b278.herokuapp.com/refresh', null, {
+    const response = await axios.post(`${API_BASE_URL}/refresh`, null, {
       params: { refresh_token: refreshToken }
     });
 
     const { access_token, refresh_token: new_refresh_token } = response.data;
-    localStorage.setItem('token', access_token);
-    localStorage.setItem('refresh_token', new_refresh_token);
+    localStorage.setItem(STORAGE_KEYS.TOKEN, access_token);
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, new_refresh_token);
     
     return access_token;
   } catch (error) {
     // If refresh fails, clear tokens and redirect to login
-    localStorage.removeItem('token');
-    localStorage.removeItem('refresh_token');
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
     window.location.href = '/login';
     throw error;
   }
@@ -34,9 +35,9 @@ const refreshAccessToken = async () => {
  * @returns {axios.AxiosInstance}
  */
 export const createApiService = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
     const instance = axios.create({
-    baseURL: 'https://healthscan-e868bea9b278.herokuapp.com',
+    baseURL: API_BASE_URL,
     headers: {
       'Authorization': token ? `Bearer ${token}` : ''
     }
