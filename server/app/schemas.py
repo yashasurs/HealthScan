@@ -216,3 +216,115 @@ class DoctorInfoUpdate(BaseModel):
     hospital_affiliation: Optional[str] = None
     years_of_experience: Optional[int] = None
 
+class PatientInfo(BaseModel):
+    """Basic patient information for doctor's patient list"""
+    id: int
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    phone_number: str
+    blood_group: str
+    allergies: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class DoctorInfo(BaseModel):
+    """Basic doctor information"""
+    id: int
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    specialization: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+    years_of_experience: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+class AssignDoctorRequest(BaseModel):
+    """Request to assign a doctor to a patient"""
+    doctor_id: int
+
+class AssignDoctorResponse(BaseModel):
+    """Response after assigning a doctor"""
+    message: str
+    doctor: DoctorInfo
+
+class AdminUserCreate(BaseModel):
+    """Schema for admin to create users with any role"""
+    email: EmailStr
+    username: str
+    password: str
+    first_name: str
+    last_name: str
+    phone_number: str
+    blood_group: str
+    role: UserRole
+    aadhar: Optional[str] = None
+    allergies: Optional[str] = None
+    doctor_name: Optional[str] = None
+    visit_date: Optional[datetime] = None
+    # Doctor-specific fields
+    specialization: Optional[str] = None
+    medical_license_number: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+    years_of_experience: Optional[int] = None
+
+class AdminUserUpdate(BaseModel):
+    """Schema for admin to update users"""
+    email: Optional[EmailStr] = None
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    blood_group: Optional[str] = None
+    role: Optional[UserRole] = None
+    aadhar: Optional[str] = None
+    allergies: Optional[str] = None
+    doctor_name: Optional[str] = None
+    visit_date: Optional[datetime] = None
+    specialization: Optional[str] = None
+    medical_license_number: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+    years_of_experience: Optional[int] = None
+    doctor_id: Optional[int] = None
+
+class AdminUserList(BaseModel):
+    """Schema for admin user list view"""
+    id: int
+    email: str
+    username: str
+    first_name: str
+    last_name: str
+    phone_number: str
+    role: UserRole
+    created_at: datetime
+    totp_enabled: bool
+    resume_verification_status: Optional[bool] = None
+    specialization: Optional[str] = None
+    medical_license_number: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class AdminStats(BaseModel):
+    """Admin dashboard statistics"""
+    total_users: int
+    total_patients: int
+    total_doctors: int
+    total_admins: int
+    total_collections: int
+    total_records: int
+    verified_doctors: int
+    unverified_doctors: int
+
+class RoleUpdateRequest(BaseModel):
+    """Request to update user role"""
+    user_id: int
+    new_role: UserRole
+
