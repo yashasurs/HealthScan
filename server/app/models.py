@@ -8,7 +8,7 @@ import enum
 class UserRole(enum.Enum):
     PATIENT = "patient"
     DOCTOR = "doctor"
-    PENDING_DOCTOR = "pending_doctor"
+    ADMIN = "admin"
 
 
 class User(Base):
@@ -40,9 +40,18 @@ class User(Base):
     hospital_affiliation = Column(String(100), nullable=True)
     years_of_experience = Column(Integer, nullable=True)
     
+    # Add doctor-patient relationship
+    doctor_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Patient's assigned doctor
+    
     # Relationships
     collections = relationship("Collection", back_populates="owner", cascade="all, delete-orphan")
     records = relationship("Record", back_populates="owner", cascade="all, delete-orphan")
+    
+    # Doctor-Patient relationships
+    doctor = relationship("User", remote_side=[id], backref="patients")
+    # This creates a self-referential relationship where:
+    # - A doctor can have many patients (via backref "patients")
+    # - A patient can have one doctor (via "doctor")
 
 
 class Collection(Base):

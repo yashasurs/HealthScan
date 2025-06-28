@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
+from typing import List
 from .. import models, schemas, utils, oauth2, database
 
 router = APIRouter(
@@ -13,8 +14,7 @@ async def verify_doctor(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """
-    Verify a user as a doctor by submitting their medical credentials
+    """Verify a user as a doctor by submitting their medical credentials
     This endpoint allows existing users to upgrade their role from patient to doctor
     """
     try:
@@ -23,6 +23,13 @@ async def verify_doctor(
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User is already verified as a doctor"
+            )
+        
+        # Only patients can apply to become doctors
+        if current_user.role != models.UserRole.PATIENT:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only patients can apply for doctor verification"
             )
         
         # Read the file content
@@ -102,3 +109,73 @@ def update_doctor_info(
     db.refresh(current_user)
     
     return current_user
+
+@router.get("/patients", response_model=List[schemas.PatientInfo])
+def get_doctor_patients(
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Get all patients assigned to the current doctor"""
+    # Check if user is a verified doctor
+    if current_user.role != models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only verified doctors can access patient lists"
+        )
+    
+    try:
+        # Get all patients assigned to this doctor
+        patients = db.query(models.User).filter(
+            models.User.doctor_id == current_user.id,
+            models.User.role == models.UserRole.PATIENT
+        ).all()
+        
+        print(f"Doctor {current_user.username} has {len(patients)} patients")
+        
+        return patients
+    
+    except Exception as e:
+        print(f"Error getting patients for doctor {current_user.id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving patient list: {str(e)}"
+        )
+
+@router.get("/patient/{patient_id}", response_model=schemas.PatientInfo)
+def get_patient_details(
+    patient_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Get detailed information about a specific patient"""
+    # Check if user is a verified doctor
+    if current_user.role != models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only verified doctors can access patient details"
+        )
+    
+    try:
+        # Get the specific patient and verify they belong to this doctor
+        patient = db.query(models.User).filter(
+            models.User.id == patient_id,
+            models.User.doctor_id == current_user.id,
+            models.User.role == models.UserRole.PATIENT
+        ).first()
+        
+        if not patient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found or not assigned to you"
+            )
+        
+        return patient
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error getting patient {patient_id} for doctor {current_user.id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error retrieving patient details: {str(e)}"
+        )
