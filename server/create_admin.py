@@ -83,15 +83,7 @@ def get_user_input():
 
 def create_admin():
     db = SessionLocal()
-    try:
-        # Check if admin already exists
-        admin = db.query(models.User).filter(models.User.role == UserRole.ADMIN).first()
-        if admin:
-            print(f"Admin user already exists: {admin.username}")
-            response = input("Do you want to create another admin user? (y/n): ").strip().lower()
-            if response != 'y':
-                return
-        
+    try:        
         # Get user input
         admin_data = get_user_input()
         
@@ -153,7 +145,7 @@ def create_admin():
         db.close()
 
 def main():
-    print("ProjectSunga Admin Creator")
+    print("HealthScan Admin Creator")
     print("=" * 25)
     
     try:
