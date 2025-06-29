@@ -11,7 +11,6 @@ import {
   Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Header } from '../components/common';
 import { RecordUploader, RecordList } from '../components/document';
 import { useApiService } from '../services/apiService';
 import { showToast, showConfirmToast } from '../utils/toast';

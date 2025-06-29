@@ -76,7 +76,8 @@ const RenameRecordModal = ({ visible, onClose, record, onRecordRenamed }) => {
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
           <View style={styles.header}>
-            <Text style={styles.title}>Rename Record</Text>            <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
+            <Text style={styles.title}>Rename Record</Text>            
+            <TouchableOpacity onPress={handleCancel} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#fff" />
             </TouchableOpacity>
           </View>

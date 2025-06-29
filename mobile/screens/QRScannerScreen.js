@@ -71,7 +71,9 @@ const QRScannerScreen = ({ navigation }) => {
   const closeScanner = () => {
     setShowScanner(false);
   };  return (
-    <SafeAreaView style={styles.container}>      {/* Header */}      <View style={styles.header}>
+    <SafeAreaView style={styles.container}>     
+     {/* Header */}     
+      <View style={styles.header}>
         <Text style={styles.title}>QR Scanner</Text>
         <Text style={styles.subtitle}>Scan any QR code to access content or websites</Text>
       </View>
