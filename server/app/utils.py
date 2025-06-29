@@ -24,14 +24,14 @@ from app import database, models, oauth2
 load_dotenv()
 
 # Configure pytesseract with explicit path for deployment environments
-if os.environ.get('DYNO'):  # Check if running on Heroku
-    pytesseract.pytesseract.tesseract_cmd = '/app/.apt/usr/bin/tesseract'
-    os.environ['TESSDATA_PREFIX'] = '/app/.apt/usr/share/tesseract-ocr/5/tessdata'
+if os.environ.get("DYNO"):  # Check if running on Heroku
+    pytesseract.pytesseract.tesseract_cmd = "/app/.apt/usr/bin/tesseract"
+    os.environ["TESSDATA_PREFIX"] = "/app/.apt/usr/share/tesseract-ocr/5/tessdata"
 
 if __name__ == "__main__":
-    from schemas import MarkupResponse
+    from schemas import MarkupResponse, OcrResponseGemini
 else:
-    from .schemas import MarkupResponse
+    from .schemas import MarkupResponse, OcrResponseGemini
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -43,62 +43,67 @@ def hash(password: str):
 def verify(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
-    
-def process_single_image_tesseract(image_data: bytes, filename: str, file_size: int, file_type: str) -> dict:
+
+def process_single_image_tesseract(
+    image_data: bytes, filename: str, file_size: int, file_type: str
+) -> dict:
     """
     Process a single image with Tesseract OCR (much faster than EasyOCR)
     """
     try:
         # Convert bytes to numpy array for faster processing
         nparr = np.frombuffer(image_data, np.uint8)
-        
+
         # Decode image directly with OpenCV (faster than PIL)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
+
         if img is None:
             raise ValueError("Could not decode image")
-        
+
         # Convert to grayscale for faster OCR
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
+
         # Optimize image size for speed (resize if too large)
         height, width = gray.shape
         if width > 2000 or height > 2000:
-            scale_factor = min(2000/width, 2000/height)
+            scale_factor = min(2000 / width, 2000 / height)
             new_width = int(width * scale_factor)
             new_height = int(height * scale_factor)
-            gray = cv2.resize(gray, (new_width, new_height), interpolation=cv2.INTER_AREA)
-        
+            gray = cv2.resize(
+                gray, (new_width, new_height), interpolation=cv2.INTER_AREA
+            )
+
         # Apply threshold for better text contrast
         _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        
+
         # Convert back to PIL Image for pytesseract
         pil_image = Image.fromarray(thresh)
-        
+
         # Use pytesseract with optimized configuration
         extracted_text = pytesseract.image_to_string(
             pil_image,
-            config='--psm 6 --oem 3'  # Page segmentation mode 6, OCR Engine Mode 3
+            config="--psm 6 --oem 3",  # Page segmentation mode 6, OCR Engine Mode 3
         )
-        
+
         return {
-            'success': True,
-            'extracted_text': extracted_text.strip(),
-            'filename': filename,
-            'file_size': file_size,
-            'file_type': file_type,
-            'error': None
+            "success": True,
+            "extracted_text": extracted_text.strip(),
+            "filename": filename,
+            "file_size": file_size,
+            "file_type": file_type,
+            "error": None,
         }
-        
+
     except Exception as e:
         return {
-            'success': False,
-            'extracted_text': None,
-            'filename': filename,
-            'file_size': file_size,
-            'file_type': file_type,
-            'error': str(e)
+            "success": False,
+            "extracted_text": None,
+            "filename": filename,
+            "file_size": file_size,
+            "file_type": file_type,
+            "error": str(e),
         }
+
 
 def make_qr(link: str):
     qr = qrcode.QRCode(
@@ -131,22 +136,21 @@ def markdown_to_pdf_bytes(markdown_text: str) -> bytes:
     return pdf_io.getvalue()
 
 
-
 def merge_texts(texts: List[str], separator: str = "\n\n---\n\n") -> str:
     """
     Merges a list of texts into a single string using a separator.
-    
+
     :param texts: A list of text strings to merge.
     :param separator: The string to use as a separator between texts (default: "\n\n---\n\n").
     :return: A single string containing all texts joined by the separator.
     """
     if not texts:
         return ""
-    
+
     return separator.join(texts)
 
 
-class MarkupAgent():
+class MarkupAgent:
     def __init__(self):
         self.model = GeminiModel(
             "gemini-2.0-flash",
@@ -157,20 +161,20 @@ class MarkupAgent():
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
-    
+
     async def generate_markup(
-            self,
-            merged_text: str = "",
+        self,
+        merged_text: str = "",
     ) -> List[MarkupResponse]:
         """
         Uses the LLM to format the input text as markup language, without changing its content.
         The input text should contain multiple texts separated by the specified separator.
-        
+
         :param merged_text: A single string containing multiple texts separated by the specified separator.
         :param separator: The separator used to split the text into multiple parts (default: "\n\n---\n\n").
         :return: A list of MarkupResponse objects, each containing formatted text.
         """
-            
+
         agent = Agent(
             self.model,
             result_type=List[MarkupResponse],
@@ -183,15 +187,15 @@ class MarkupAgent():
             ),
         )
 
-        try:        
+        try:
             response = await agent.run(merged_text)
             return response.output
-        
+
         except Exception as e:
             return f"Error: {e}"
 
 
-class ResumeVerifierAgent():
+class ResumeVerifierAgent:
     def __init__(self):
         self.model = GeminiModel(
             "gemini-2.0-flash",
@@ -205,50 +209,48 @@ class ResumeVerifierAgent():
 
     async def verify_resume(self, resume) -> schemas.ResumeVerifierResponse:
         try:
-            
+
             # Handle the resume content
             resume_content = ""
             with io.BytesIO(resume) as pdf_file:
                 try:
                     # Try to read as PDF
                     pdf_reader = PdfReader(pdf_file)
-                    
+
                     for i, page in enumerate(pdf_reader.pages):
                         page_text = page.extract_text()
                         resume_content += page_text or ""
-                    
+
                 except Exception as e:
                     # If PDF reading fails, try OCR
                     pdf_file.seek(0)  # Reset file pointer
-                    
+
                     result = process_single_image_tesseract(
-                        resume, 
-                        "resume.jpg", 
-                        len(resume), 
-                        "application/octet-stream"
+                        resume, "resume.jpg", len(resume), "application/octet-stream"
                     )
-                    resume_content = result.get('extracted_text', '')
-                    if result.get('error'):
+                    resume_content = result.get("extracted_text", "")
+                    if result.get("error"):
                         print(f"OCR error: {result.get('error')}")
 
         except Exception as e:
             print(f"Global error in verify_resume: {str(e)}")
             import traceback
+
             traceback.print_exc()
             return schemas.ResumeVerifierResponse(
                 veridication_status=False,
                 confidence=0,
-                message=f"Error processing resume: {str(e)}"
+                message=f"Error processing resume: {str(e)}",
             )
-        
+
         # If no content extracted, return error
         if not resume_content or len(resume_content.strip()) < 10:
             return schemas.ResumeVerifierResponse(
                 veridication_status=False,
                 confidence=0,
-                message="Could not extract text from the resume"
+                message="Could not extract text from the resume",
             )
-        
+
         agent = Agent(
             self.model,
             result_type=schemas.ResumeVerifierResponse,
@@ -260,7 +262,7 @@ class ResumeVerifierAgent():
                 "clinical rotations, medical licenses, and other indicators of medical training. "
                 "You must also return a confidence score (0-100) indicating how confident you are in your assessment. "
                 "In the message field, provide a brief explanation of your decision."
-            )
+            ),
         )
 
         try:
@@ -268,16 +270,47 @@ class ResumeVerifierAgent():
                 f"Verify if the following resume belongs to a medical doctor:\n\n{resume_content}"
             )
             return response.output
-        
+
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             return schemas.ResumeVerifierResponse(
                 veridication_status=False,
                 confidence=0,
-                message=f"Error analyzing resume: {str(e)}"
+                message=f"Error analyzing resume: {str(e)}",
             )
-    
 
+class OcrAgent:
+    def __init__(self):
+        self.model = GeminiModel(
+            "gemini-2.5-flash",
+            provider=GoogleGLAProvider(
+                api_key='AIzaSyBGwKu1NHBWvXSfCK_Q83i0eX3aQBc1eQM',
+            ),
+        )
+        self.headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        }
 
+    async def generate_text_from_image(self, image: bytes):
+        agent = Agent(
+            model=self.model,
+            output_type=OcrResponseGemini,
+            headers=self.headers,
+            system_prompt=(
+                'You are an OCR (Optical Character Recognition) agent. Your task is to extract text from images. '
+                'Extract the text from the image and format it into markup format. '
+                'Also provide a confidence level (between 0.0 and 1.0) indicating how confident you are in the accuracy of the extracted text. '
+                'A confidence of 1.0 means you are completely certain, while 0.0 means completely uncertain.'
+            )
+        )
 
+        # Use run_async since we're in an async function
+        result = await agent.run(
+            [
+                'Extract the text from the image and format it into markup format. Provide a confidence level for your extraction.',
+                BinaryContent(data=image, media_type='image/png'),
+            ]
+        )
+        return result.output
