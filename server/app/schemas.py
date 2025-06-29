@@ -328,3 +328,7 @@ class RoleUpdateRequest(BaseModel):
     user_id: int
     new_role: UserRole
 
+class OcrResponseGemini(BaseModel):
+    """Response schema for OCR processing"""
+    text: str 
+    confidence: float

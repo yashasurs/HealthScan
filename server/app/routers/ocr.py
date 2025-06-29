@@ -1,11 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from ..schemas import RecordResponse
+from ..schemas import RecordResponse, OcrResponseGemini
 from ..models import Record
 from ..database import get_db
 from ..oauth2 import get_current_user
-from ..utils import MarkupAgent, merge_texts, process_single_image_tesseract
+from ..utils import MarkupAgent, merge_texts, process_single_image_tesseract, OcrAgent
 import asyncio
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 import multiprocessing
@@ -183,3 +183,33 @@ async def get_text(
         print("An unexpected error occurred:", e)
         raise HTTPException(status_code=500, detail=f"OCR processing failed: {str(e)}")
 
+@router.post("/image-to-text", response_model=OcrResponseGemini)
+async def image_to_text(
+    file: UploadFile = File(...),
+):
+    """
+    Convert an image to text using the OcrAgent from utils.py.
+    This endpoint does not save to the database, just returns the extracted text and confidence level.
+    
+    Supports common image formats (PNG, JPEG, etc).
+    """
+    try:
+        print(f"Processing file: {file.filename}, type: {file.content_type}")
+        
+        if file.content_type and not (file.content_type.startswith('image/') or file.content_type == 'application/octet-stream'):
+            raise HTTPException(status_code=400, detail=f"File {file.filename} is not an image")
+        
+        content = await file.read()
+        
+        if not content:
+            raise HTTPException(status_code=400, detail=f"File {file.filename} is empty")
+        
+        ocr_agent = OcrAgent()
+        
+        result = await ocr_agent.generate_text_from_image(content)
+        
+        return result
+        
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Image-to-text processing failed: {str(e)}")
