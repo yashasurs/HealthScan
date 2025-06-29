@@ -293,24 +293,27 @@ class OcrAgent:
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
 
-    async def generate_text_from_image(self, image: bytes):
+    async def generate_text_from_images(self, images: List[bytes]):
         agent = Agent(
             model=self.model,
-            output_type=OcrResponseGemini,
+            output_type=List[OcrResponseGemini],
             headers=self.headers,
             system_prompt=(
-                'You are an OCR (Optical Character Recognition) agent. Your task is to extract text from images. '
-                'Extract the text from the image and format it into markup format. '
-                'Also provide a confidence level (between 0.0 and 1.0) indicating how confident you are in the accuracy of the extracted text. '
-                'A confidence of 1.0 means you are completely certain, while 0.0 means completely uncertain.'
+                'You are an OCR (Optical Character Recognition) agent. You may receive one or more images. '
+                'For each image, extract the text and format it into markup format. '
+                'Also provide a confidence level (between 0.0 and 1.0) indicating how confident you are in the accuracy of the extracted text for each image. '
+                'A confidence of 1.0 means you are completely certain, while 0.0 means completely uncertain. '
+                'Return a list of objects, one for each image, each with fields: content (the extracted text as markup) and confidence (the confidence score).'
             )
         )
 
-        # Use run_async since we're in an async function
+        binaryimages = [
+            BinaryContent(data=image, media_type='image/png') for image in images
+        ]
         result = await agent.run(
             [
-                'Extract the text from the image and format it into markup format. Provide a confidence level for your extraction.',
-                BinaryContent(data=image, media_type='image/png'),
+                'Extract the text from each image and format it into markup format. Provide a confidence level for each extraction. Return a list of objects, one per image.',
+                *binaryimages
             ]
         )
         return result.output

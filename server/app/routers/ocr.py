@@ -143,10 +143,19 @@ async def get_text(
             merged_text = merge_texts(extracted_texts)
             
             # Pass the merged text to the Gemini agent
-            markup_responses = await agent.generate_markup(merged_text)
+            binaryimages = []
+            for file_info in file_info:
+                binaryimages.append(file_info['content'])
+            
+            result = await agent.run(
+                [
+                    'Extract the text from each image and format it into markup format. Provide a confidence level for each extraction. Return a list of objects, one per image.',
+                    *binaryimages
+                ]
+            )
             
             # Extract markup content from MarkupResponse objects
-            formatted_texts = [response.markup for response in markup_responses]
+            formatted_texts = [response.markup for response in result]
             
         except Exception as e:
             print(f"Error formatting content: {str(e)}")
@@ -183,33 +192,63 @@ async def get_text(
         print("An unexpected error occurred:", e)
         raise HTTPException(status_code=500, detail=f"OCR processing failed: {str(e)}")
 
-@router.post("/image-to-text", response_model=OcrResponseGemini)
+@router.post("/images-to-text", response_model=List[dict])
 async def image_to_text(
-    file: UploadFile = File(...),
+    files: List[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+    collection_id: Optional[str] = None
 ):
-    """
-    Convert an image to text using the OcrAgent from utils.py.
-    This endpoint does not save to the database, just returns the extracted text and confidence level.
-    
-    Supports common image formats (PNG, JPEG, etc).
-    """
     try:
-        print(f"Processing file: {file.filename}, type: {file.content_type}")
-        
-        if file.content_type and not (file.content_type.startswith('image/') or file.content_type == 'application/octet-stream'):
-            raise HTTPException(status_code=400, detail=f"File {file.filename} is not an image")
-        
-        content = await file.read()
-        
-        if not content:
-            raise HTTPException(status_code=400, detail=f"File {file.filename} is empty")
-        
+        # Validate and read all files
+        image_bytes = []
+        file_info = []
+        for file in files:
+            if file.content_type and not (file.content_type.startswith('image/') or file.content_type == 'application/octet-stream'):
+                raise HTTPException(status_code=400, detail=f"File {file.filename} is not an image")
+            content = await file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail=f"File {file.filename} is empty")
+            image_bytes.append(content)
+            file_info.append({
+                'filename': file.filename,
+                'file_size': len(content),
+                'file_type': file.content_type
+            })
+
         ocr_agent = OcrAgent()
-        
-        result = await ocr_agent.generate_text_from_image(content)
-        
-        return result
-        
+        gemini_results = await ocr_agent.generate_text_from_images(image_bytes)
+
+        response = []
+        records_to_add = []
+        for i, info in enumerate(file_info):
+            gemini = gemini_results[i] if i < len(gemini_results) else None
+            markup = gemini.content if gemini else ''
+            confidence = gemini.confidence if gemini else 0.0
+            record = Record(
+                filename=info['filename'],
+                content=markup,
+                file_size=info['file_size'],
+                file_type=info['file_type'],
+                user_id=current_user.id,
+                collection_id=collection_id
+            )
+            records_to_add.append(record)
+            response.append({
+                'filename': info['filename'],
+                'content': markup,
+                'file_size': info['file_size'],
+                'file_type': info['file_type'],
+                'user_id': current_user.id,
+                'collection_id': collection_id,
+                'confidence': confidence
+            })
+        db.add_all(records_to_add)
+        db.commit()
+        for record in records_to_add:
+            db.refresh(record)
+        return response
     except Exception as e:
-        print(f"Error processing image: {str(e)}")
+        db.rollback()
+        print(f"Error processing images: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Image-to-text processing failed: {str(e)}")
