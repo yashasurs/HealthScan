@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, ActivityIndicator, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Header } from '../components/common';
 import { ProfileHeader, ProfileInfo, ProfileActions } from '../components/profile';
 import { useAuth } from '../Contexts/Authcontext';
 import { useApiService } from '../services/apiService';
