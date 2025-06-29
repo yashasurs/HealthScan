@@ -79,7 +79,8 @@ def login(
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
-        "require_totp": False
+        "require_totp": False,
+        "user_id": user.id
     }
 
 @router.post("/login/verify-totp", response_model=schemas.Token)
