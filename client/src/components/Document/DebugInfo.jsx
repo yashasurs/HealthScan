@@ -9,7 +9,7 @@ const DebugInfo = ({ isAuthenticated, selectedCollection, records, files }) => {
           <p>User authenticated: {isAuthenticated ? 'Yes' : 'No'}</p>
           <p>Selected collection: {selectedCollection || 'None'}</p>          <p>Records count: {records.length}</p>
           <p>Files selected for upload: {files.length}</p>
-          <p>API base URL: https://healthscan-e868bea9b278.herokuapp.com</p>
+          <p>API base URL: http://localhost:8000</p>
           <p>Authentication token present: {localStorage.getItem('token') ? 'Yes' : 'No'}</p>
           <hr className="my-2" />
           <p>If uploads are not showing in records:</p>

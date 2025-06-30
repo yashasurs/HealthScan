@@ -2,7 +2,7 @@
 export const API_BASE_URL = 'https://healthscan-e868bea9b278.herokuapp.com';
 
 export const STORAGE_KEYS = {
-  TOKEN: 'token',
+  TOKEN: 'access_token',
   REFRESH_TOKEN: 'refresh_token',
   USER: 'user',
 };

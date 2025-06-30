@@ -12,9 +12,7 @@ const refreshAccessToken = async () => {
     throw new Error('No refresh token available');
   }
   try {
-    const response = await axios.post(`${API_BASE_URL}/refresh`, null, {
-      params: { refresh_token: refreshToken }
-    });
+    const response = await axios.post(`${API_BASE_URL}/refresh`, { refresh_token: refreshToken });
 
     const { access_token, refresh_token: new_refresh_token } = response.data;
     localStorage.setItem(STORAGE_KEYS.TOKEN, access_token);
@@ -139,6 +137,136 @@ export const userAPI = {
   deleteUser: async () => {
     const api = createApiService();
     return api.delete('/user');
+  }
+};
+
+// OCR API
+export const ocrAPI = {
+  processImages: async (files, collectionId = null) => {
+    const api = createApiService();
+    const formData = new FormData();
+    
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    
+    let url = '/ocr/get-text';
+    if (collectionId) {
+      url += `?collection_id=${collectionId}`;
+    }
+    
+    return api.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+
+  processImagesAdvanced: async (files, collectionId = null) => {
+    const api = createApiService();
+    const formData = new FormData();
+    
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    
+    let url = '/ocr/images-to-text';
+    if (collectionId) {
+      url += `?collection_id=${collectionId}`;
+    }
+    
+    return api.post(url, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+};
+
+// Authentication and 2FA API
+export const authAPI = {
+  login: async (username, password) => {
+    const api = createApiService();
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
+    return api.post('/login', formData);
+  },
+
+  verifyTOTP: async (totpCode, userId) => {
+    const api = createApiService();
+    return api.post(`/login/verify-totp?user_id=${userId}`, {
+      totp_code: totpCode
+    });
+  },
+
+  setup2FA: async () => {
+    const api = createApiService();
+    return api.post('/totp/setup');
+  },
+
+  activate2FA: async (totpCode) => {
+    const api = createApiService();
+    return api.post('/totp/activate', {
+      totp_code: totpCode
+    });
+  },
+
+  disable2FA: async (totpCode) => {
+    const api = createApiService();
+    return api.post('/totp/disable', {
+      totp_code: totpCode
+    });
+  },
+
+  get2FAQRCode: async () => {
+    const api = createApiService();
+    return api.post('/totp/setup?response_format=qrcode', {}, {
+      responseType: 'blob'
+    });
+  }
+};
+
+// QR Code API
+export const qrAPI = {
+  generateQR: async (link) => {
+    const api = createApiService();
+    return api.post('/qr/get-qr', { link }, {
+      responseType: 'blob'
+    });
+  },
+
+  generateCollectionQR: async (collectionId) => {
+    const api = createApiService();
+    return api.post(`/qr/collection/${collectionId}`, {}, {
+      responseType: 'blob'
+    });
+  },
+
+  generateRecordQR: async (recordId) => {
+    const api = createApiService();
+    return api.post(`/qr/record/${recordId}`, {}, {
+      responseType: 'blob'
+    });
+  }
+};
+
+// Records API
+export const recordsAPI = {
+  getAll: async () => {
+    const api = createApiService();
+    return api.get('/records/');
+  },
+
+  getById: async (recordId) => {
+    const api = createApiService();
+    return api.get(`/records/${recordId}`);
+  },
+
+  delete: async (recordId) => {
+    const api = createApiService();
+    return api.delete(`/records/${recordId}`);
+  },
+
+  update: async (recordId, recordData) => {
+    const api = createApiService();
+    return api.put(`/records/${recordId}`, recordData);
   }
 };
 
