@@ -14,6 +14,12 @@ import Records from './pages/RecordPages/Records.jsx'
 import RecordDetail from './pages/RecordPages/RecordDetail.jsx'
 import SharedRecord from './pages/RecordPages/SharedRecord.jsx'
 import Profile from './pages/Profile.jsx'
+import AdminDashboard from './pages/AdminPages/AdminDashboard.jsx'
+import AdminUsers from './pages/AdminPages/AdminUsers.jsx'
+import AdminCollections from './pages/AdminPages/AdminCollections.jsx'
+import AdminRecords from './pages/AdminPages/AdminRecords.jsx'
+import AdminReports from './pages/AdminPages/AdminReports.jsx'
+import AdminRoute from './components/AdminRoute.jsx'
 
 
 
@@ -62,6 +68,31 @@ function App() {
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
+            } />
+            <Route path='/admin' element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            } />
+            <Route path='/admin/users' element={
+              <AdminRoute>
+                <AdminUsers />
+              </AdminRoute>
+            } />
+            <Route path='/admin/collections' element={
+              <AdminRoute>
+                <AdminCollections />
+              </AdminRoute>
+            } />
+            <Route path='/admin/records' element={
+              <AdminRoute>
+                <AdminRecords />
+              </AdminRoute>
+            } />
+            <Route path='/admin/reports' element={
+              <AdminRoute>
+                <AdminReports />
+              </AdminRoute>
             } />
           </Routes>
         </div>

@@ -50,7 +50,8 @@ const Navbar = () => {
         { name: 'Home', path: '/' },
         { name: 'Records', path: '/records' },
         { name: 'Collections', path: '/collections' },
-        { name: 'Upload', path: '/upload' }
+        { name: 'Upload', path: '/upload' },
+        ...(user?.role === 'admin' ? [{ name: 'Admin', path: '/admin' }] : [])
       ]
     : [
         { name: 'Home', path: '/' }

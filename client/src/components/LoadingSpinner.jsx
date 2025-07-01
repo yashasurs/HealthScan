@@ -1,6 +1,6 @@
 import { SpinnerIcon } from './Icons';
 
-const LoadingSpinner = ({ size = 'md', color = 'blue', fullScreen = false }) => {
+const LoadingSpinner = ({ size = 'md', color = 'blue', fullScreen = false, centered = true, text = "Loading..." }) => {
   // Size classes
   const sizeClasses = {
     sm: 'h-4 w-4',
@@ -20,11 +20,30 @@ const LoadingSpinner = ({ size = 'md', color = 'blue', fullScreen = false }) => 
   
   const spinnerClass = `animate-spin ${sizeClasses[size]} ${colorClasses[color]}`;
   
-  const spinner = <SpinnerIcon className={spinnerClass} />;
+  const spinner = (
+    <div className="flex flex-col items-center space-y-3">
+      <SpinnerIcon className={spinnerClass} />
+      {text && (
+        <p className={`text-sm font-medium ${colorClasses[color]}`}>
+          {text}
+        </p>
+      )}
+    </div>
+  );
   
   if (fullScreen) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+        <div className="bg-white rounded-2xl p-8 shadow-xl">
+          {spinner}
+        </div>
+      </div>
+    );
+  }
+  
+  if (centered) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
         {spinner}
       </div>
     );
