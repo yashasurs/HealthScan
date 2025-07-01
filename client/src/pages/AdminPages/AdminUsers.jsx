@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { API_BASE_URL } from '../../utils/constants';
+import { createApiService } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 
@@ -18,13 +17,14 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      const api = createApiService();
       const params = {
         limit: userLimit,
         skip: (currentPage - 1) * userLimit,
         ...(searchTerm && { search: searchTerm }),
         ...(selectedRole && { role: selectedRole })
       };
-      const response = await axios.get(`${API_BASE_URL}/admin/users`, { params });
+      const response = await api.get('/admin/users', { params });
       setUsers(response.data);
     } catch (err) {
       setError('Failed to fetch users');
@@ -39,19 +39,25 @@ const AdminUsers = () => {
 
   const handleRoleUpdate = async (userId, newRole) => {
     try {
-      await axios.put(`${API_BASE_URL}/admin/users/${userId}/role`, {
+      const api = createApiService();
+      console.log('Sending role update request:', { user_id: userId, new_role: newRole });
+      await api.put(`/admin/users/${userId}/role`, {
+        user_id: userId,
         new_role: newRole
       });
       await fetchUsers();
     } catch (err) {
-      setError('Failed to update user role');
+      console.error('Role update error:', err);
+      console.error('Error response:', err.response?.data);
+      setError(`Failed to update user role: ${err.response?.data?.detail || err.message}`);
     }
   };
 
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       try {
-        await axios.delete(`${API_BASE_URL}/admin/users/${userId}`);
+        const api = createApiService();
+        await api.delete(`/admin/users/${userId}`);
         await fetchUsers();
       } catch (err) {
         setError('Failed to delete user');
@@ -204,7 +210,11 @@ const UserRow = ({ user, currentUser, onRoleUpdate, onDeleteUser }) => {
   const isCurrentUser = user.id === currentUser?.id;
 
   const handleRoleChange = async (newRole) => {
-    if (newRole === user.role || isCurrentUser) return;
+    // Prevent changing to the same role
+    if (newRole === user.role) return;
+    
+    // Prevent changing own role
+    if (isCurrentUser) return;
     
     setIsUpdating(true);
     try {

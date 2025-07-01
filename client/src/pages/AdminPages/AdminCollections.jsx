@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { API_BASE_URL } from '../../utils/constants';
+import { createApiService } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const AdminCollections = () => {
@@ -12,7 +11,8 @@ const AdminCollections = () => {
   useEffect(() => {
     const fetchCollections = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/admin/collections`);
+        const api = createApiService();
+        const response = await api.get('/admin/collections');
         setCollections(response.data);
       } catch (err) {
         setError('Failed to fetch collections');

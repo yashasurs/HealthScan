@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { API_BASE_URL } from '../../utils/constants';
+import { createApiService } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const AdminRecords = () => {
@@ -12,7 +11,8 @@ const AdminRecords = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/admin/records`);
+        const api = createApiService();
+        const response = await api.get('/admin/records');
         setRecords(response.data);
       } catch (err) {
         setError('Failed to fetch records');
