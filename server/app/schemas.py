@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 
-from pydantic import Field, BaseModel, EmailStr
+from pydantic import Field, BaseModel, EmailStr, field_validator
 from .models import UserRole
 
 class Token(BaseModel):
@@ -31,6 +31,38 @@ class UserCreate(UserLogin):
     allergies: Optional[str] = None
     doctor_name: Optional[str] = None
     visit_date: Optional[datetime] = None
+
+    @field_validator('blood_group')
+    @classmethod
+    def validate_blood_group(cls, v):
+        valid_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+        if v.upper() not in valid_groups:
+            raise ValueError(f'Invalid blood group. Must be one of: {", ".join(valid_groups)}')
+        return v.upper()
+
+    @field_validator('phone_number')
+    @classmethod
+    def validate_phone_number(cls, v):
+        # Remove any spaces, dashes, or special characters for validation
+        cleaned = ''.join(filter(str.isdigit, v))
+        if len(cleaned) != 10:
+            raise ValueError('Phone number must be exactly 10 digits')
+        if not cleaned.isdigit():
+            raise ValueError('Phone number must contain only digits')
+        return cleaned  # Return cleaned version (digits only)
+
+    @field_validator('aadhar')
+    @classmethod
+    def validate_aadhar(cls, v):
+        if v is not None:  # Only validate if aadhar is provided (it's optional)
+            # Remove any spaces or dashes for validation
+            cleaned = ''.join(filter(str.isdigit, v))
+            if len(cleaned) != 12:
+                raise ValueError('Aadhar number must be exactly 12 digits')
+            if not cleaned.isdigit():
+                raise ValueError('Aadhar number must contain only digits')
+            return cleaned  # Return cleaned version (digits only)
+        return v
 
 # Add doctor registration schema
 class DoctorRegistration(BaseModel):
@@ -108,6 +140,42 @@ class UserUpdate(BaseModel):
     allergies: Optional[str] = None
     doctor_name: Optional[str] = None
     visit_date: Optional[datetime] = None
+
+    @field_validator('blood_group')
+    @classmethod
+    def validate_blood_group(cls, v):
+        if v is not None:  # Only validate if blood_group is provided
+            valid_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+            if v.upper() not in valid_groups:
+                raise ValueError(f'Invalid blood group. Must be one of: {", ".join(valid_groups)}')
+            return v.upper()
+        return v
+
+    @field_validator('phone_number')
+    @classmethod
+    def validate_phone_number(cls, v):
+        if v is not None:  # Only validate if phone_number is provided
+            # Remove any spaces, dashes, or special characters for validation
+            cleaned = ''.join(filter(str.isdigit, v))
+            if len(cleaned) != 10:
+                raise ValueError('Phone number must be exactly 10 digits')
+            if not cleaned.isdigit():
+                raise ValueError('Phone number must contain only digits')
+            return cleaned  # Return cleaned version (digits only)
+        return v
+
+    @field_validator('aadhar')
+    @classmethod
+    def validate_aadhar(cls, v):
+        if v is not None:  # Only validate if aadhar is provided
+            # Remove any spaces or dashes for validation
+            cleaned = ''.join(filter(str.isdigit, v))
+            if len(cleaned) != 12:
+                raise ValueError('Aadhar number must be exactly 12 digits')
+            if not cleaned.isdigit():
+                raise ValueError('Aadhar number must contain only digits')
+            return cleaned  # Return cleaned version (digits only)
+        return v
 
 class UserOut(BaseModel):
     id: int
@@ -274,6 +342,38 @@ class AdminUserCreate(BaseModel):
     hospital_affiliation: Optional[str] = None
     years_of_experience: Optional[int] = None
 
+    @field_validator('blood_group')
+    @classmethod
+    def validate_blood_group(cls, v):
+        valid_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+        if v.upper() not in valid_groups:
+            raise ValueError(f'Invalid blood group. Must be one of: {", ".join(valid_groups)}')
+        return v.upper()
+
+    @field_validator('phone_number')
+    @classmethod
+    def validate_phone_number(cls, v):
+        # Remove any spaces, dashes, or special characters for validation
+        cleaned = ''.join(filter(str.isdigit, v))
+        if len(cleaned) != 10:
+            raise ValueError('Phone number must be exactly 10 digits')
+        if not cleaned.isdigit():
+            raise ValueError('Phone number must contain only digits')
+        return cleaned  # Return cleaned version (digits only)
+
+    @field_validator('aadhar')
+    @classmethod
+    def validate_aadhar(cls, v):
+        if v is not None:  # Only validate if aadhar is provided (it's optional)
+            # Remove any spaces or dashes for validation
+            cleaned = ''.join(filter(str.isdigit, v))
+            if len(cleaned) != 12:
+                raise ValueError('Aadhar number must be exactly 12 digits')
+            if not cleaned.isdigit():
+                raise ValueError('Aadhar number must contain only digits')
+            return cleaned  # Return cleaned version (digits only)
+        return v
+
 class AdminUserUpdate(BaseModel):
     """Schema for admin to update users"""
     email: Optional[EmailStr] = None
@@ -292,6 +392,42 @@ class AdminUserUpdate(BaseModel):
     hospital_affiliation: Optional[str] = None
     years_of_experience: Optional[int] = None
     doctor_id: Optional[int] = None
+
+    @field_validator('blood_group')
+    @classmethod
+    def validate_blood_group(cls, v):
+        if v is not None:  # Only validate if blood_group is provided
+            valid_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+            if v.upper() not in valid_groups:
+                raise ValueError(f'Invalid blood group. Must be one of: {", ".join(valid_groups)}')
+            return v.upper()
+        return v
+
+    @field_validator('phone_number')
+    @classmethod
+    def validate_phone_number(cls, v):
+        if v is not None:  # Only validate if phone_number is provided
+            # Remove any spaces, dashes, or special characters for validation
+            cleaned = ''.join(filter(str.isdigit, v))
+            if len(cleaned) != 10:
+                raise ValueError('Phone number must be exactly 10 digits')
+            if not cleaned.isdigit():
+                raise ValueError('Phone number must contain only digits')
+            return cleaned  # Return cleaned version (digits only)
+        return v
+
+    @field_validator('aadhar')
+    @classmethod
+    def validate_aadhar(cls, v):
+        if v is not None:  # Only validate if aadhar is provided
+            # Remove any spaces or dashes for validation
+            cleaned = ''.join(filter(str.isdigit, v))
+            if len(cleaned) != 12:
+                raise ValueError('Aadhar number must be exactly 12 digits')
+            if not cleaned.isdigit():
+                raise ValueError('Aadhar number must contain only digits')
+            return cleaned  # Return cleaned version (digits only)
+        return v
 
 class AdminUserList(BaseModel):
     """Schema for admin user list view"""
