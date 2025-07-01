@@ -43,25 +43,31 @@ class UserCreate(UserLogin):
     @field_validator('phone_number')
     @classmethod
     def validate_phone_number(cls, v):
-        # Remove any spaces, dashes, or special characters for validation
+        # Extract only digits
         cleaned = ''.join(filter(str.isdigit, v))
+        # Check if original string has any invalid characters (anything other than digits, spaces, dashes, parentheses)
+        allowed_chars = set('0123456789 -()')
+        if not all(c in allowed_chars for c in v):
+            raise ValueError('Invalid phone number format')
+        # Check if we have exactly 10 digits
         if len(cleaned) != 10:
-            raise ValueError('Phone number must be exactly 10 digits')
-        if not cleaned.isdigit():
-            raise ValueError('Phone number must contain only digits')
-        return cleaned  # Return cleaned version (digits only)
+            raise ValueError('Phone number must contain exactly 10 digits')
+        return cleaned  # Return digits only
 
     @field_validator('aadhar')
     @classmethod
     def validate_aadhar(cls, v):
         if v is not None:  # Only validate if aadhar is provided (it's optional)
-            # Remove any spaces or dashes for validation
+            # Extract only digits
             cleaned = ''.join(filter(str.isdigit, v))
+            # Check if original string has any invalid characters (anything other than digits, spaces, dashes)
+            allowed_chars = set('0123456789 -')
+            if not all(c in allowed_chars for c in v):
+                raise ValueError('Invalid Aadhar number format')
+            # Check if we have exactly 12 digits
             if len(cleaned) != 12:
-                raise ValueError('Aadhar number must be exactly 12 digits')
-            if not cleaned.isdigit():
-                raise ValueError('Aadhar number must contain only digits')
-            return cleaned  # Return cleaned version (digits only)
+                raise ValueError('Aadhar number must contain exactly 12 digits')
+            return cleaned  # Return digits only
         return v
 
 # Add doctor registration schema
@@ -155,26 +161,32 @@ class UserUpdate(BaseModel):
     @classmethod
     def validate_phone_number(cls, v):
         if v is not None:  # Only validate if phone_number is provided
-            # Remove any spaces, dashes, or special characters for validation
+            # Extract only digits
             cleaned = ''.join(filter(str.isdigit, v))
+            # Check if original string has any invalid characters (anything other than digits, spaces, dashes, parentheses)
+            allowed_chars = set('0123456789 -()')
+            if not all(c in allowed_chars for c in v):
+                raise ValueError('Phone number can only contain digits, spaces, dashes, and parentheses')
+            # Check if we have exactly 10 digits
             if len(cleaned) != 10:
-                raise ValueError('Phone number must be exactly 10 digits')
-            if not cleaned.isdigit():
-                raise ValueError('Phone number must contain only digits')
-            return cleaned  # Return cleaned version (digits only)
+                raise ValueError('Phone number must contain exactly 10 digits')
+            return cleaned  # Return digits only
         return v
 
     @field_validator('aadhar')
     @classmethod
     def validate_aadhar(cls, v):
         if v is not None:  # Only validate if aadhar is provided
-            # Remove any spaces or dashes for validation
+            # Extract only digits
             cleaned = ''.join(filter(str.isdigit, v))
+            # Check if original string has any invalid characters (anything other than digits, spaces, dashes)
+            allowed_chars = set('0123456789 -')
+            if not all(c in allowed_chars for c in v):
+                raise ValueError('Aadhar number can only contain digits, spaces, and dashes')
+            # Check if we have exactly 12 digits
             if len(cleaned) != 12:
-                raise ValueError('Aadhar number must be exactly 12 digits')
-            if not cleaned.isdigit():
-                raise ValueError('Aadhar number must contain only digits')
-            return cleaned  # Return cleaned version (digits only)
+                raise ValueError('Aadhar number must contain exactly 12 digits')
+            return cleaned  # Return digits only
         return v
 
 class UserOut(BaseModel):
@@ -353,25 +365,31 @@ class AdminUserCreate(BaseModel):
     @field_validator('phone_number')
     @classmethod
     def validate_phone_number(cls, v):
-        # Remove any spaces, dashes, or special characters for validation
+        # Extract only digits
         cleaned = ''.join(filter(str.isdigit, v))
+        # Check if original string has any invalid characters (anything other than digits, spaces, dashes, parentheses)
+        allowed_chars = set('0123456789 -()')
+        if not all(c in allowed_chars for c in v):
+            raise ValueError('Phone number can only contain digits, spaces, dashes, and parentheses')
+        # Check if we have exactly 10 digits
         if len(cleaned) != 10:
-            raise ValueError('Phone number must be exactly 10 digits')
-        if not cleaned.isdigit():
-            raise ValueError('Phone number must contain only digits')
-        return cleaned  # Return cleaned version (digits only)
+            raise ValueError('Phone number must contain exactly 10 digits')
+        return cleaned  # Return digits only
 
     @field_validator('aadhar')
     @classmethod
     def validate_aadhar(cls, v):
         if v is not None:  # Only validate if aadhar is provided (it's optional)
-            # Remove any spaces or dashes for validation
+            # Extract only digits
             cleaned = ''.join(filter(str.isdigit, v))
+            # Check if original string has any invalid characters (anything other than digits, spaces, dashes)
+            allowed_chars = set('0123456789 -')
+            if not all(c in allowed_chars for c in v):
+                raise ValueError('Aadhar number can only contain digits, spaces, and dashes')
+            # Check if we have exactly 12 digits
             if len(cleaned) != 12:
-                raise ValueError('Aadhar number must be exactly 12 digits')
-            if not cleaned.isdigit():
-                raise ValueError('Aadhar number must contain only digits')
-            return cleaned  # Return cleaned version (digits only)
+                raise ValueError('Aadhar number must contain exactly 12 digits')
+            return cleaned  # Return digits only
         return v
 
 class AdminUserUpdate(BaseModel):
@@ -407,26 +425,32 @@ class AdminUserUpdate(BaseModel):
     @classmethod
     def validate_phone_number(cls, v):
         if v is not None:  # Only validate if phone_number is provided
-            # Remove any spaces, dashes, or special characters for validation
+            # Extract only digits
             cleaned = ''.join(filter(str.isdigit, v))
+            # Check if original string has any invalid characters (anything other than digits, spaces, dashes, parentheses)
+            allowed_chars = set('0123456789 -()')
+            if not all(c in allowed_chars for c in v):
+                raise ValueError('Phone number can only contain digits, spaces, dashes, and parentheses')
+            # Check if we have exactly 10 digits
             if len(cleaned) != 10:
-                raise ValueError('Phone number must be exactly 10 digits')
-            if not cleaned.isdigit():
-                raise ValueError('Phone number must contain only digits')
-            return cleaned  # Return cleaned version (digits only)
+                raise ValueError('Phone number must contain exactly 10 digits')
+            return cleaned  # Return digits only
         return v
 
     @field_validator('aadhar')
     @classmethod
     def validate_aadhar(cls, v):
         if v is not None:  # Only validate if aadhar is provided
-            # Remove any spaces or dashes for validation
+            # Extract only digits
             cleaned = ''.join(filter(str.isdigit, v))
+            # Check if original string has any invalid characters (anything other than digits, spaces, dashes)
+            allowed_chars = set('0123456789 -')
+            if not all(c in allowed_chars for c in v):
+                raise ValueError('Aadhar number can only contain digits, spaces, and dashes')
+            # Check if we have exactly 12 digits
             if len(cleaned) != 12:
-                raise ValueError('Aadhar number must be exactly 12 digits')
-            if not cleaned.isdigit():
-                raise ValueError('Aadhar number must contain only digits')
-            return cleaned  # Return cleaned version (digits only)
+                raise ValueError('Aadhar number must contain exactly 12 digits')
+            return cleaned  # Return digits only
         return v
 
 class AdminUserList(BaseModel):
