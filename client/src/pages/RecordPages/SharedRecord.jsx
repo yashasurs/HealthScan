@@ -33,7 +33,7 @@ const SharedRecord = () => {
       setIsLoading(true);
       setError(null);
         // Fetch from the shared record endpoint (no auth required)
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://healthscan-e868bea9b278.herokuapp.com'}/records/share/${token}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/records/share/${token}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const SharedRecord = () => {
     try {
       const searchParams = new URLSearchParams(location.search);
       const token = searchParams.get('token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'https://healthscan-e868bea9b278.herokuapp.com'}/records/share/${token}/pdf`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/records/share/${token}/pdf`, {
         method: 'GET',
       });
 

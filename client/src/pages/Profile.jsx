@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import createApiService from '../utils/apiService';
 import { formatDate } from '../utils/dateUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { TwoFactorSettings } from '../components/TwoFactor';
 
 // Icons
 const UserIcon = () => (
@@ -539,6 +540,11 @@ const Profile = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Two-Factor Authentication Settings */}
+        <div className="mt-6">
+          <TwoFactorSettings />
         </div>
       </div>
     </div>

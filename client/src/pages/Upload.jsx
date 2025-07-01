@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
-import axios from 'axios'
-import createApiService from '../utils/apiService'
+import { collectionsAPI, ocrAPI } from '../utils/apiService'
 import UploadTab from '../components/Document/UploadTab'
 import DebugInfo from '../components/Document/DebugInfo'
 
@@ -22,10 +21,10 @@ const Documents = () => {
   }, [isAuthenticated]);
   
   // Fetch collections from API
-  const fetchCollections = async () => {    try {
+  const fetchCollections = async () => {
+    try {
       setIsLoading(true);
-      const api = createApiService();
-      const response = await api.get('/collections/');
+      const response = await collectionsAPI.getAll();
       setCollections(response.data);
     } catch (error) {
       setUploadStatus('Error fetching collections. Please try again.');
@@ -98,7 +97,7 @@ const Documents = () => {
     e.preventDefault();
     e.stopPropagation();
   };
-    // Handle file upload and OCR processing
+  // Handle file upload and OCR processing
   const handleUpload = async (e) => {
     e.preventDefault();
     
@@ -108,33 +107,10 @@ const Documents = () => {
     }
     
     setIsUploading(true);
-    setUploadStatus('Uploading and processing images...');
+    setUploadStatus('Processing images with OCR...');
     
     try {
-      const formData = new FormData();
-        // Append all files to formData
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-        // If a collection is selected, add its ID to the request
-      // Records will still be created even without a collection
-      if (selectedCollection) {
-        // The collection_id should be sent as a query parameter, not in the form data
-      }
-      
-      // Create API service with auth token
-      const api = createApiService();
-      
-      // Make the OCR request
-      let url = `/ocr/get-text`;
-      // Add collection_id as a query parameter if selected
-      if (selectedCollection) {
-        url += `?collection_id=${selectedCollection}`;
-      }        const response = await api.post(url, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const response = await ocrAPI.processImages(files, selectedCollection || null);
       
       const recordsCreated = response.data.length;
       const collectionMessage = selectedCollection 
