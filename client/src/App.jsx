@@ -15,14 +15,7 @@ import RecordDetail from './pages/RecordPages/RecordDetail.jsx'
 import SharedRecord from './pages/RecordPages/SharedRecord.jsx'
 import Profile from './pages/Profile.jsx'
 
-// Doctor Pages
-import DoctorDashboard from './pages/DoctorPages/DoctorDashboard.jsx'
-import PatientManagement from './pages/DoctorPages/PatientManagement.jsx'
-import PatientDetail from './pages/DoctorPages/PatientDetail.jsx'
-import AppointmentManagement from './pages/DoctorPages/AppointmentManagement.jsx'
-import AddPatient from './pages/DoctorPages/AddPatient.jsx'
-import Analytics from './pages/DoctorPages/Analytics.jsx'
-import DoctorPortalHome from './pages/DoctorPages/DoctorPortalHome.jsx'
+
 
 function App() {
   
@@ -68,42 +61,6 @@ function App() {
             <Route path='/profile' element={
               <ProtectedRoute>
                 <Profile />
-              </ProtectedRoute>
-            } />
-            {/* Doctor Routes */}
-            <Route path='/doctor' element={
-              <ProtectedRoute>
-                <DoctorPortalHome />
-              </ProtectedRoute>
-            } />
-            <Route path='/doctor/dashboard' element={
-              <ProtectedRoute>
-                <DoctorDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path='/doctor/patients' element={
-              <ProtectedRoute>
-                <PatientManagement />
-              </ProtectedRoute>
-            } />
-            <Route path='/doctor/patients/:id' element={
-              <ProtectedRoute>
-                <PatientDetail />
-              </ProtectedRoute>
-            } />
-            <Route path='/doctor/appointments' element={
-              <ProtectedRoute>
-                <AppointmentManagement />
-              </ProtectedRoute>
-            } />
-            <Route path='/doctor/patients/new' element={
-              <ProtectedRoute>
-                <AddPatient />
-              </ProtectedRoute>
-            } />
-            <Route path='/doctor/analytics' element={
-              <ProtectedRoute>
-                <Analytics />
               </ProtectedRoute>
             } />
           </Routes>

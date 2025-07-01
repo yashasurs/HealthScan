@@ -1,4 +1,3 @@
-// filepath: c:\users\anees\OneDrive\Desktop\ProjectSunga\client\src\components\Navbar.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -45,15 +44,13 @@ const Navbar = () => {
 
   // Check if user is on profile page
   const isOnProfilePage = location.pathname === '/profile';
-  const isDoctorPage = location.pathname.startsWith('/doctor');
 
   const navigationLinks = isAuthenticated 
     ? [
         { name: 'Home', path: '/' },
         { name: 'Records', path: '/records' },
         { name: 'Collections', path: '/collections' },
-        { name: 'Upload', path: '/upload' },
-        { name: 'Doctor Portal', path: '/doctor', isDoctorLink: true }
+        { name: 'Upload', path: '/upload' }
       ]
     : [
         { name: 'Home', path: '/' }
@@ -75,11 +72,7 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className={`px-2 py-1 text-sm transition-all duration-200 relative group ${
-                    item.isDoctorLink 
-                      ? 'text-blue-600 font-medium hover:text-blue-700' 
-                      : 'text-gray-700 hover:text-blue-500'
-                  }`}
+                  className="px-2 py-1 text-sm transition-all duration-200 relative group text-gray-700 hover:text-blue-500"
                 >
                   {item.name}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-200 group-hover:w-full"></span>

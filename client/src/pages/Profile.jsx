@@ -72,7 +72,6 @@ const Profile = () => {
     blood_group: '',
     aadhar: '',
     allergies: '',
-    doctor_name: '',
     visit_date: ''
   });
 
@@ -89,7 +88,6 @@ const Profile = () => {
         blood_group: user.blood_group || '',
         aadhar: user.aadhar || '',
         allergies: user.allergies || '',
-        doctor_name: user.doctor_name || '',
         visit_date: user.visit_date ? user.visit_date.split('T')[0] : ''
       });
     }
@@ -122,7 +120,6 @@ const Profile = () => {
         blood_group: user.blood_group || '',
         aadhar: user.aadhar || '',
         allergies: user.allergies || '',
-        doctor_name: user.doctor_name || '',
         visit_date: user.visit_date ? user.visit_date.split('T')[0] : ''
       });
     }
@@ -145,7 +142,6 @@ const Profile = () => {
         blood_group: formData.blood_group || null,
         aadhar: formData.aadhar || null,
         allergies: formData.allergies || null,
-        doctor_name: formData.doctor_name || null,
         visit_date: formData.visit_date ? new Date(formData.visit_date).toISOString() : null
       };
 
@@ -264,6 +260,11 @@ const Profile = () => {
             </div>
           </div>
         )}
+
+        {/* Two-Factor Authentication Settings - Moved to top for visibility */}
+        <div className="mb-6">
+          <TwoFactorSettings />
+        </div>
 
         {/* Profile Information */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -456,60 +457,6 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Doctor Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Doctor Name
-                </label>
-                {isEditing ? (
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <UserIcon />
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.doctor_name}
-                      onChange={(e) => handleInputChange('doctor_name', e.target.value)}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                      placeholder="Enter doctor's name"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-3 py-2">
-                    <UserIcon />
-                    <span className="text-gray-900">{user.doctor_name || 'Not provided'}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Visit Date
-                </label>
-                {isEditing ? (
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <CalendarIcon />
-                    </div>
-                    <input
-                      type="date"
-                      value={formData.visit_date}
-                      onChange={(e) => handleInputChange('visit_date', e.target.value)}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-3 py-2">
-                    <CalendarIcon />
-                    <span className="text-gray-900">
-                      {user.visit_date ? formatDate(user.visit_date) : 'Not provided'}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Allergies */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -540,11 +487,6 @@ const Profile = () => {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Two-Factor Authentication Settings */}
-        <div className="mt-6">
-          <TwoFactorSettings />
         </div>
       </div>
     </div>

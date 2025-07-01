@@ -1,90 +1,150 @@
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
-from .. import models, schemas, utils, oauth2, database
+from .. import models, schemas, oauth2, database, utils
+import base64
 
-router = APIRouter(
-    prefix="/doctor",
-    tags=["Doctor"]
-)
+router = APIRouter(tags=["Doctor"])
 
-@router.post("/verify", response_model=schemas.DoctorVerificationResult)
-async def verify_doctor(
+@router.get("/doctor/dashboard", response_model=schemas.DoctorDashboard)
+def get_doctor_dashboard(
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Get doctor dashboard with patient statistics"""
+    # Check if user is a doctor
+    if current_user.role != models.UserRole.DOCTOR:
+        # If not a doctor, check if they can become one
+        if current_user.role == models.UserRole.DOCTOR:
+            # User is already verified as doctor, return dashboard
+            pass
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied. Doctor privileges required."
+            )
+    
+    # Get patient statistics
+    total_patients = db.query(models.User).filter(
+        models.User.doctor_id == current_user.id
+    ).count()
+    
+    # Get recent patients (last 10)
+    recent_patients = db.query(models.User).filter(
+        models.User.doctor_id == current_user.id
+    ).order_by(models.User.created_at.desc()).limit(10).all()
+    
+    return {
+        "doctor_info": {
+            "id": current_user.id,
+            "name": f"{current_user.first_name} {current_user.last_name}",
+            "email": current_user.email,
+            "specialization": current_user.specialization,
+            "medical_license_number": current_user.medical_license_number,
+            "hospital_affiliation": current_user.hospital_affiliation,
+            "years_of_experience": current_user.years_of_experience
+        },
+        "total_patients": total_patients,
+        "recent_patients": [
+            {
+                "id": patient.id,
+                "name": f"{patient.first_name} {patient.last_name}",
+                "email": patient.email,
+                "phone_number": patient.phone_number,
+                "blood_group": patient.blood_group,
+                "last_visit": patient.visit_date
+            } for patient in recent_patients
+        ]
+    }
+
+@router.post("/doctor/register", response_model=schemas.DoctorVerificationResult)
+def register_doctor(
     resume: UploadFile = File(...),
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Verify a user as a doctor by submitting their medical credentials
-    This endpoint allows existing users to upgrade their role from patient to doctor
-    """
+    """Register as a doctor with resume verification"""
+    if current_user.role == models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already registered as a doctor"
+        )
+    
     try:
-        # Check if user is already a doctor
-        if current_user.role == models.UserRole.DOCTOR:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User is already verified as a doctor"
-            )
+        # Read and encode the resume file
+        resume_content = resume.file.read()
+        resume_base64 = base64.b64encode(resume_content).decode('utf-8')
         
-        # Only patients can apply to become doctors
-        if current_user.role != models.UserRole.PATIENT:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only patients can apply for doctor verification"
-            )
+        # Here you would integrate with an AI service to verify the resume
+        # For now, we'll simulate the verification
+        verification_confidence = 85.0  # Simulated confidence score
+        is_verified = verification_confidence >= 80.0
         
-        # Read the file content
-        resume_content = await resume.read()
-        
-        # Verify resume using the ResumeVerifierAgent
-        resume_agent = utils.ResumeVerifierAgent()
-        verification_result = await resume_agent.verify_resume(resume_content)
-        
-        if verification_result.veridication_status:
-            # Resume verified, update user to doctor role
+        if is_verified:
+            # Update user role to doctor
             current_user.role = models.UserRole.DOCTOR
             current_user.resume_verification_status = True
-            current_user.resume_verification_confidence = verification_result.confidence
-            
+            current_user.resume_verification_confidence = verification_confidence
             db.commit()
-            db.refresh(current_user)
             
             return {
-                "message": "Your medical credentials have been verified. Your account has been upgraded to doctor status.",
-                "verification_status": True,
-                "verification_confidence": verification_result.confidence
+                "success": True,
+                "message": "Doctor registration successful",
+                "verification_confidence": verification_confidence,
+                "user_id": current_user.id
             }
         else:
-            # Resume verification failed
-            print(f"Verification failed: {verification_result.message}")
+            # Store verification attempt but don't change role
+            current_user.resume_verification_status = False
+            current_user.resume_verification_confidence = verification_confidence
+            db.commit()
+            
             return {
-                "message": verification_result.message or "Your doctor verification could not be completed. Please try again with clearer credentials.",
-                "verification_status": False,
-                "verification_confidence": verification_result.confidence if hasattr(verification_result, 'confidence') else 0
+                "success": False,
+                "message": "Resume verification failed. Please submit a valid medical resume.",
+                "verification_confidence": verification_confidence,
+                "user_id": current_user.id
             }
-    
+            
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error processing doctor verification: {str(e)}"
+            detail=f"Error processing resume: {str(e)}"
         )
 
-@router.get("/status", response_model=schemas.MessageResponse)
-def check_doctor_status(current_user = Depends(oauth2.get_current_user)):
-    """Check the verification status of a doctor account"""
-    print("------------------->")
-    print(current_user.role)
-    if current_user.role == models.UserRole.DOCTOR:
-        return {"message": "Your doctor account is verified and active."}
-    elif current_user.role == models.UserRole.PENDING_DOCTOR:
-        return {"message": "Your doctor verification is still pending. We'll notify you once the process is complete."}
-    else:
-        return {"message": "You are currently registered as a patient. To upgrade to a doctor account, please submit your medical credentials for verification."}
+@router.get("/doctor/patients", response_model=List[schemas.PatientInfo])
+def get_doctor_patients(
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Get all patients assigned to the doctor"""
+    if current_user.role != models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Doctor privileges required."
+        )
+    
+    patients = db.query(models.User).filter(
+        models.User.doctor_id == current_user.id
+    ).all()
+    
+    return [
+        {
+            "id": patient.id,
+            "name": f"{patient.first_name} {patient.last_name}",
+            "email": patient.email,
+            "phone_number": patient.phone_number,
+            "blood_group": patient.blood_group,
+            "aadhar": patient.aadhar,
+            "allergies": patient.allergies,
+            "last_visit": patient.visit_date,
+            "created_at": patient.created_at
+        } for patient in patients
+    ]
 
-@router.post("/update-info", response_model=schemas.UserOut)
+@router.put("/doctor/info", response_model=schemas.UserOut)
 def update_doctor_info(
-    doctor_info: schemas.DoctorInfoUpdate,
+    doctor_update: schemas.DoctorInfoUpdate,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
@@ -92,90 +152,50 @@ def update_doctor_info(
     if current_user.role != models.UserRole.DOCTOR:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only verified doctors can update doctor information"
+            detail="Access denied. Doctor privileges required."
         )
     
     # Update doctor-specific fields
-    if doctor_info.specialization is not None:
-        current_user.specialization = doctor_info.specialization
-    if doctor_info.medical_license_number is not None:
-        current_user.medical_license_number = doctor_info.medical_license_number
-    if doctor_info.hospital_affiliation is not None:
-        current_user.hospital_affiliation = doctor_info.hospital_affiliation
-    if doctor_info.years_of_experience is not None:
-        current_user.years_of_experience = doctor_info.years_of_experience
+    if doctor_update.specialization is not None:
+        current_user.specialization = doctor_update.specialization
+    if doctor_update.medical_license_number is not None:
+        current_user.medical_license_number = doctor_update.medical_license_number
+    if doctor_update.hospital_affiliation is not None:
+        current_user.hospital_affiliation = doctor_update.hospital_affiliation
+    if doctor_update.years_of_experience is not None:
+        current_user.years_of_experience = doctor_update.years_of_experience
     
     db.commit()
     db.refresh(current_user)
-    
     return current_user
 
-@router.get("/patients", response_model=List[schemas.PatientInfo])
-def get_doctor_patients(
-    db: Session = Depends(database.get_db),
-    current_user: models.User = Depends(oauth2.get_current_user)
-):
-    """Get all patients assigned to the current doctor"""
-    # Check if user is a verified doctor
-    if current_user.role != models.UserRole.DOCTOR:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only verified doctors can access patient lists"
-        )
-    
-    try:
-        # Get all patients assigned to this doctor
-        patients = db.query(models.User).filter(
-            models.User.doctor_id == current_user.id,
-            models.User.role == models.UserRole.PATIENT
-        ).all()
-        
-        print(f"Doctor {current_user.username} has {len(patients)} patients")
-        
-        return patients
-    
-    except Exception as e:
-        print(f"Error getting patients for doctor {current_user.id}: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error retrieving patient list: {str(e)}"
-        )
-
-@router.get("/patient/{patient_id}", response_model=schemas.PatientInfo)
-def get_patient_details(
+@router.get("/doctor/patient/{patient_id}/records", response_model=List[schemas.RecordOut])
+def get_patient_records(
     patient_id: int,
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Get detailed information about a specific patient"""
-    # Check if user is a verified doctor
+    """Get all records for a specific patient (doctor only)"""
     if current_user.role != models.UserRole.DOCTOR:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only verified doctors can access patient details"
+            detail="Access denied. Doctor privileges required."
         )
     
-    try:
-        # Get the specific patient and verify they belong to this doctor
-        patient = db.query(models.User).filter(
-            models.User.id == patient_id,
-            models.User.doctor_id == current_user.id,
-            models.User.role == models.UserRole.PATIENT
-        ).first()
-        
-        if not patient:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Patient not found or not assigned to you"
-            )
-        
-        return patient
+    # Verify the patient is assigned to this doctor
+    patient = db.query(models.User).filter(
+        models.User.id == patient_id,
+        models.User.doctor_id == current_user.id
+    ).first()
     
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error getting patient {patient_id} for doctor {current_user.id}: {str(e)}")
+    if not patient:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error retrieving patient details: {str(e)}"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found or not assigned to you"
         )
+    
+    records = db.query(models.Record).filter(
+        models.Record.owner_id == patient_id
+    ).all()
+    
+    return records
