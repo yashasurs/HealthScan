@@ -68,6 +68,7 @@ const Profile = () => {
   const [doctorVerificationFile, setDoctorVerificationFile] = useState(null);
   const [doctorVerificationResult, setDoctorVerificationResult] = useState(null);
   const [doctorVerificationError, setDoctorVerificationError] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -173,21 +174,56 @@ const Profile = () => {
   const handleDoctorVerificationFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Validate file type (PDF or common image formats)
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(file.type)) {
-        setDoctorVerificationError('Please upload a PDF or image file (JPEG, PNG)');
-        return;
-      }
-      
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        setDoctorVerificationError('File size must be less than 10MB');
-        return;
-      }
-      
-      setDoctorVerificationFile(file);
-      setDoctorVerificationError('');
+      processSelectedFile(file);
+    }
+  };
+
+  const processSelectedFile = (file) => {
+    // Validate file type (PDF or common image formats)
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      setDoctorVerificationError('Please upload a PDF or image file (JPEG, PNG)');
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setDoctorVerificationError('File size must be less than 10MB');
+      return;
+    }
+    
+    setDoctorVerificationFile(file);
+    setDoctorVerificationError('');
+    setDoctorVerificationResult(null);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragEnter = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragOver(false);
+    
+    const files = event.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      processSelectedFile(file);
     }
   };
 
@@ -339,125 +375,200 @@ const Profile = () => {
         </div>
 
         {/* Doctor Verification Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-medium text-gray-900">Doctor Verification</h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Upload your medical resume to get verified as a healthcare professional
-                </p>
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Doctor Verification</h2>
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    Get verified as a healthcare professional
+                  </p>
+                </div>
               </div>
               {user?.role === 'DOCTOR' && (
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-medium text-green-700">Verified Doctor</span>
+                <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-green-800">Verified</span>
                 </div>
               )}
             </div>
           </div>
           
-          <div className="px-6 py-4">
+          <div className="p-6">
             {user?.role === 'DOCTOR' ? (
               // Already verified doctor
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="text-center py-12">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">You're Verified!</h3>
-                <p className="text-gray-600">
-                  Your medical credentials have been verified. You now have access to doctor features.
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">You're Verified!</h3>
+                <p className="text-gray-600 mb-4 max-w-md mx-auto">
+                  Your medical credentials have been successfully verified. You now have access to all doctor features and can provide professional healthcare services.
                 </p>
                 {user?.resume_verification_confidence && (
-                  <p className="text-sm text-gray-500 mt-2">
-                    Verification confidence: {Math.round(user.resume_verification_confidence)}%
-                  </p>
+                  <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-50 text-green-700 border border-green-200">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Confidence: {Math.round(user.resume_verification_confidence)}%
+                  </div>
                 )}
               </div>
             ) : (
               // Not yet verified
-              <div className="space-y-4">
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-                  <div className="flex">
+              <div className="space-y-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      <svg className="h-5 w-5 text-blue-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-sm font-medium text-blue-800">Doctor Verification Requirements</h3>
-                      <div className="mt-2 text-sm text-blue-700">
-                        <ul className="list-disc pl-5 space-y-1">
-                          <li>Upload your medical resume (PDF or image format)</li>
-                          <li>Resume should include medical degrees (MD, MBBS, DO)</li>
-                          <li>Include hospital experience and medical specializations</li>
-                          <li>Medical licenses and certifications are helpful</li>
-                        </ul>
+                      <h3 className="text-sm font-medium text-blue-900 mb-2">Verification Requirements</h3>
+                      <div className="text-sm text-blue-800 space-y-1">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Medical degrees (MD, MBBS, DO)
+                        </div>
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Hospital experience & rotations
+                        </div>
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Medical licenses & certifications
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* File Upload Section */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Upload Medical Resume
-                  </label>
-                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
-                    <div className="space-y-1 text-center">
-                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <div className="flex text-sm text-gray-600">
-                        <label htmlFor="doctor-verification-file" className="relative cursor-pointer bg-white rounded-md font-medium text-black hover:text-gray-800 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-black">
-                          <span>Upload a file</span>
-                          <input
-                            id="doctor-verification-file"
-                            name="doctor-verification-file"
-                            type="file"
-                            className="sr-only"
-                            accept=".pdf,.jpg,.jpeg,.png"
-                            onChange={handleDoctorVerificationFileChange}
-                            disabled={isDoctorVerifying}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Upload Your Medical Resume</h4>
+                    <p className="text-sm text-gray-600">Choose a file or drag it here to begin verification</p>
+                  </div>
+                  
+                  {/* Drag and drop area */}
+                  <div 
+                    className={`relative group transition-all duration-200 ${
+                      isDragOver 
+                        ? 'scale-102' 
+                        : 'hover:scale-101'
+                    }`}
+                  >
+                    <div 
+                      className={`flex flex-col items-center justify-center px-6 py-12 border-2 border-dashed rounded-xl transition-all duration-200 cursor-pointer ${
+                        isDragOver 
+                          ? 'border-black bg-gray-50 shadow-lg' 
+                          : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragEnter={handleDragEnter}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => document.getElementById('doctor-verification-file').click()}
+                    >
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors ${
+                        isDragOver ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
+                      }`}>
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
                       </div>
-                      <p className="text-xs text-gray-500">PDF, PNG, JPG up to 10MB</p>
+                      
+                      <div className="text-center space-y-2">
+                        <p className="text-lg font-medium text-gray-900">
+                          {isDragOver ? 'Drop your file here' : 'Upload your resume'}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          PDF, PNG, or JPG • Up to 10MB
+                        </p>
+                        
+                        <div className="pt-2">
+                          <span className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                            Choose File
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
+                  {/* Hidden file input */}
+                  <input
+                    id="doctor-verification-file"
+                    name="doctor-verification-file"
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleDoctorVerificationFileChange}
+                    disabled={isDoctorVerifying}
+                  />
+                  
+                  {/* Selected file display */}
                   {doctorVerificationFile && (
-                    <div className="mt-3 flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
-                      <div className="flex items-center space-x-2">
-                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span className="text-sm text-gray-900">{doctorVerificationFile.name}</span>
-                        <span className="text-xs text-gray-500">
-                          ({(doctorVerificationFile.size / 1024 / 1024).toFixed(2)} MB)
-                        </span>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-shrink-0">
+                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {doctorVerificationFile.name}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {(doctorVerificationFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={clearDoctorVerification}
+                          className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"
+                          disabled={isDoctorVerifying}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
                       </div>
-                      <button
-                        onClick={clearDoctorVerification}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium"
-                        disabled={isDoctorVerifying}
-                      >
-                        Remove
-                      </button>
                     </div>
                   )}
                 </div>
 
                 {/* Error Display */}
                 {doctorVerificationError && (
-                  <div className="bg-red-50 border-l-4 border-red-400 p-4">
-                    <div className="flex">
-                      <ExclamationIcon />
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-red-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </div>
                       <div className="ml-3">
-                        <p className="text-sm text-red-700">{doctorVerificationError}</p>
+                        <p className="text-sm font-medium text-red-800">{doctorVerificationError}</p>
                       </div>
                     </div>
                   </div>
@@ -465,24 +576,49 @@ const Profile = () => {
 
                 {/* Verification Result */}
                 {doctorVerificationResult && (
-                  <div className={`border-l-4 p-4 ${
+                  <div className={`border rounded-lg p-4 ${
                     doctorVerificationResult.success 
-                      ? 'bg-green-50 border-green-400' 
-                      : 'bg-red-50 border-red-400'
+                      ? 'bg-green-50 border-green-200' 
+                      : 'bg-red-50 border-red-200'
                   }`}>
-                    <div className="flex">
-                      <div className="ml-3">
-                        <p className={`text-sm ${
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        {doctorVerificationResult.success ? (
+                          <svg className="h-5 w-5 text-green-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <svg className="h-5 w-5 text-red-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="ml-3 flex-1">
+                        <p className={`text-sm font-medium ${
                           doctorVerificationResult.success 
-                            ? 'text-green-700' 
-                            : 'text-red-700'
+                            ? 'text-green-800' 
+                            : 'text-red-800'
                         }`}>
                           {doctorVerificationResult.message}
                         </p>
                         {doctorVerificationResult.verification_confidence && (
-                          <p className="text-xs text-gray-600 mt-1">
-                            Confidence: {Math.round(doctorVerificationResult.verification_confidence)}%
-                          </p>
+                          <div className="mt-2 flex items-center">
+                            <div className="flex-1 bg-gray-200 rounded-full h-2 mr-3">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  doctorVerificationResult.verification_confidence >= 80 
+                                    ? 'bg-green-500' 
+                                    : doctorVerificationResult.verification_confidence >= 60 
+                                      ? 'bg-yellow-500' 
+                                      : 'bg-red-500'
+                                }`}
+                                style={{ width: `${doctorVerificationResult.verification_confidence}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-xs font-medium text-gray-600">
+                              {Math.round(doctorVerificationResult.verification_confidence)}%
+                            </span>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -490,19 +626,27 @@ const Profile = () => {
                 )}
 
                 {/* Submit Button */}
-                <div className="flex justify-end">
+                <div className="flex justify-center pt-2">
                   <button
                     onClick={handleSubmitDoctorVerification}
                     disabled={!doctorVerificationFile || isDoctorVerifying}
-                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-8 py-3 border border-transparent rounded-lg text-base font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                   >
                     {isDoctorVerifying ? (
                       <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                         Verifying...
                       </>
                     ) : (
-                      'Submit for Verification'
+                      <>
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Submit for Verification
+                      </>
                     )}
                   </button>
                 </div>
@@ -731,54 +875,6 @@ const Profile = () => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Doctor Verification Section - New */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Doctor Verification</h2>
-          </div>
-          
-          <div className="px-6 py-4 space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Verification Document
-              </label>
-              <div className="flex items-center">
-                <input
-                  id="doctor-verification-file"
-                  type="file"
-                  accept=".jpg,.jpeg,.png,.pdf"
-                  onChange={handleDoctorVerificationFileChange}
-                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
-                />
-              </div>
-              {doctorVerificationError && (
-                <p className="mt-2 text-sm text-red-600">{doctorVerificationError}</p>
-              )}
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={handleSubmitDoctorVerification}
-                disabled={isDoctorVerifying}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
-              >
-                {isDoctorVerifying ? 'Verifying...' : 'Verify Doctor'}
-              </button>
-            </div>
-
-            {doctorVerificationResult && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-sm text-green-700">
-                  Doctor verification successful! Details:
-                </p>
-                <pre className="mt-2 text-sm text-green-800 bg-white p-3 rounded-md">
-                  {JSON.stringify(doctorVerificationResult, null, 2)}
-                </pre>
-              </div>
-            )}
           </div>
         </div>
       </div>
