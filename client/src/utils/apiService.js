@@ -270,4 +270,29 @@ export const recordsAPI = {
   }
 };
 
+// Doctor Verification API
+export const doctorAPI = {
+  registerDoctor: async (resumeFile) => {
+    const api = createApiService();
+    const formData = new FormData();
+    formData.append('resume', resumeFile);
+    
+    return api.post('/doctor/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+
+  getDoctorDashboard: async () => {
+    const api = createApiService();
+    return api.get('/doctor/dashboard');
+  },
+
+  getDoctorPatients: async () => {
+    const api = createApiService();
+    return api.get('/doctor/patients');
+  }
+};
+
 export default createApiService;

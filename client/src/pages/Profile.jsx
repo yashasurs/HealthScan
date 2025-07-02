@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import createApiService from '../utils/apiService';
+import createApiService, { doctorAPI } from '../utils/apiService';
 import { formatDate } from '../utils/dateUtils';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { TwoFactorSettings } from '../components/TwoFactor';
@@ -62,6 +62,13 @@ const Profile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Doctor verification state
+  const [isDoctorVerifying, setIsDoctorVerifying] = useState(false);
+  const [doctorVerificationFile, setDoctorVerificationFile] = useState(null);
+  const [doctorVerificationResult, setDoctorVerificationResult] = useState(null);
+  const [doctorVerificationError, setDoctorVerificationError] = useState('');
+  
   // Form state
   const [formData, setFormData] = useState({
     username: '',
@@ -160,6 +167,71 @@ const Profile = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Doctor verification functions
+  const handleDoctorVerificationFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type (PDF or common image formats)
+      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+      if (!allowedTypes.includes(file.type)) {
+        setDoctorVerificationError('Please upload a PDF or image file (JPEG, PNG)');
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setDoctorVerificationError('File size must be less than 10MB');
+        return;
+      }
+      
+      setDoctorVerificationFile(file);
+      setDoctorVerificationError('');
+    }
+  };
+
+  const handleSubmitDoctorVerification = async () => {
+    if (!doctorVerificationFile) {
+      setDoctorVerificationError('Please select a resume file to upload');
+      return;
+    }
+
+    setIsDoctorVerifying(true);
+    setDoctorVerificationError('');
+    setDoctorVerificationResult(null);
+
+    try {
+      const response = await doctorAPI.registerDoctor(doctorVerificationFile);
+
+      setDoctorVerificationResult(response.data);
+      
+      // Refresh user data to update role if verification was successful
+      if (response.data.success) {
+        await getCurrentUser();
+        setSuccessMessage('Doctor verification submitted successfully!');
+        setDoctorVerificationFile(null);
+        // Clear file input
+        const fileInput = document.getElementById('doctor-verification-file');
+        if (fileInput) fileInput.value = '';
+      }
+      
+    } catch (err) {
+      console.error('Error submitting doctor verification:', err);
+      setDoctorVerificationError(
+        err.response?.data?.detail || 'Failed to submit verification. Please try again.'
+      );
+    } finally {
+      setIsDoctorVerifying(false);
+    }
+  };
+
+  const clearDoctorVerification = () => {
+    setDoctorVerificationFile(null);
+    setDoctorVerificationResult(null);
+    setDoctorVerificationError('');
+    const fileInput = document.getElementById('doctor-verification-file');
+    if (fileInput) fileInput.value = '';
   };
 
   if (!isAuthenticated) {
@@ -264,6 +336,179 @@ const Profile = () => {
         {/* Two-Factor Authentication Settings - Moved to top for visibility */}
         <div className="mb-6">
           <TwoFactorSettings />
+        </div>
+
+        {/* Doctor Verification Section */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">Doctor Verification</h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Upload your medical resume to get verified as a healthcare professional
+                </p>
+              </div>
+              {user?.role === 'DOCTOR' && (
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-green-700">Verified Doctor</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="px-6 py-4">
+            {user?.role === 'DOCTOR' ? (
+              // Already verified doctor
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">You're Verified!</h3>
+                <p className="text-gray-600">
+                  Your medical credentials have been verified. You now have access to doctor features.
+                </p>
+                {user?.resume_verification_confidence && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    Verification confidence: {Math.round(user.resume_verification_confidence)}%
+                  </p>
+                )}
+              </div>
+            ) : (
+              // Not yet verified
+              <div className="space-y-4">
+                <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-blue-800">Doctor Verification Requirements</h3>
+                      <div className="mt-2 text-sm text-blue-700">
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li>Upload your medical resume (PDF or image format)</li>
+                          <li>Resume should include medical degrees (MD, MBBS, DO)</li>
+                          <li>Include hospital experience and medical specializations</li>
+                          <li>Medical licenses and certifications are helpful</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* File Upload Section */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Upload Medical Resume
+                  </label>
+                  <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+                    <div className="space-y-1 text-center">
+                      <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <div className="flex text-sm text-gray-600">
+                        <label htmlFor="doctor-verification-file" className="relative cursor-pointer bg-white rounded-md font-medium text-black hover:text-gray-800 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-black">
+                          <span>Upload a file</span>
+                          <input
+                            id="doctor-verification-file"
+                            name="doctor-verification-file"
+                            type="file"
+                            className="sr-only"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={handleDoctorVerificationFileChange}
+                            disabled={isDoctorVerifying}
+                          />
+                        </label>
+                        <p className="pl-1">or drag and drop</p>
+                      </div>
+                      <p className="text-xs text-gray-500">PDF, PNG, JPG up to 10MB</p>
+                    </div>
+                  </div>
+                  
+                  {doctorVerificationFile && (
+                    <div className="mt-3 flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md">
+                      <div className="flex items-center space-x-2">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span className="text-sm text-gray-900">{doctorVerificationFile.name}</span>
+                        <span className="text-xs text-gray-500">
+                          ({(doctorVerificationFile.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                      </div>
+                      <button
+                        onClick={clearDoctorVerification}
+                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        disabled={isDoctorVerifying}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Error Display */}
+                {doctorVerificationError && (
+                  <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                    <div className="flex">
+                      <ExclamationIcon />
+                      <div className="ml-3">
+                        <p className="text-sm text-red-700">{doctorVerificationError}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Verification Result */}
+                {doctorVerificationResult && (
+                  <div className={`border-l-4 p-4 ${
+                    doctorVerificationResult.success 
+                      ? 'bg-green-50 border-green-400' 
+                      : 'bg-red-50 border-red-400'
+                  }`}>
+                    <div className="flex">
+                      <div className="ml-3">
+                        <p className={`text-sm ${
+                          doctorVerificationResult.success 
+                            ? 'text-green-700' 
+                            : 'text-red-700'
+                        }`}>
+                          {doctorVerificationResult.message}
+                        </p>
+                        {doctorVerificationResult.verification_confidence && (
+                          <p className="text-xs text-gray-600 mt-1">
+                            Confidence: {Math.round(doctorVerificationResult.verification_confidence)}%
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleSubmitDoctorVerification}
+                    disabled={!doctorVerificationFile || isDoctorVerifying}
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isDoctorVerifying ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Verifying...
+                      </>
+                    ) : (
+                      'Submit for Verification'
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Profile Information */}
@@ -486,6 +731,54 @@ const Profile = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Doctor Verification Section - New */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h2 className="text-lg font-medium text-gray-900">Doctor Verification</h2>
+          </div>
+          
+          <div className="px-6 py-4 space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Upload Verification Document
+              </label>
+              <div className="flex items-center">
+                <input
+                  id="doctor-verification-file"
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  onChange={handleDoctorVerificationFileChange}
+                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+                />
+              </div>
+              {doctorVerificationError && (
+                <p className="mt-2 text-sm text-red-600">{doctorVerificationError}</p>
+              )}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={handleSubmitDoctorVerification}
+                disabled={isDoctorVerifying}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50"
+              >
+                {isDoctorVerifying ? 'Verifying...' : 'Verify Doctor'}
+              </button>
+            </div>
+
+            {doctorVerificationResult && (
+              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-sm text-green-700">
+                  Doctor verification successful! Details:
+                </p>
+                <pre className="mt-2 text-sm text-green-800 bg-white p-3 rounded-md">
+                  {JSON.stringify(doctorVerificationResult, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         </div>
       </div>
