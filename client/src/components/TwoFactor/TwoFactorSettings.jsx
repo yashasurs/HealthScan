@@ -113,172 +113,247 @@ const TwoFactorSettings = () => {
   );
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       {/* Status Messages */}
-      {error && (
-        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {(error || success) && (
+        <div className="p-4 border-b border-gray-100">
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-      {success && (
-        <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700">
-          {success}
+          {success && (
+            <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
+              {success}
+            </div>
+          )}
         </div>
       )}
 
       {/* Current Status */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <ShieldIcon className="w-5 h-5 text-gray-600" />
-          <div>
-            <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
-            <p className={`text-xs ${user?.totp_enabled ? 'text-green-600' : 'text-gray-500'}`}>
-              {user?.totp_enabled ? 'Security enhanced' : 'Not enabled'}
-            </p>
-          </div>
-        </div>
-        <div className={`w-2 h-2 rounded-full ${user?.totp_enabled ? 'bg-green-500' : 'bg-gray-300'}`} />
-      </div>
-
-      {/* Information about 2FA */}
-      {!user?.totp_enabled && !isSettingUp && (
-        <div className="mb-4">
-          <p className="text-xs text-gray-600 mb-3">
-            Add an extra layer of security with 2FA. You'll need an authenticator app like Google Authenticator, 
-            Authy, or Microsoft Authenticator to generate time-based codes for login.
-          </p>
-        </div>
-      )}
-
-      {/* Enable 2FA */}
-      {!user?.totp_enabled && !isSettingUp && (
-        <button
-          onClick={handleEnable2FA}
-          className="w-full py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Enable 2FA
-        </button>
-      )}
-
-      {/* QR Code Setup - Side by side layout */}
-      {isSettingUp && (
-        <div className="space-y-4">
-          <div className="mb-3">
-            <p className="text-xs text-gray-600 mb-2">
-              <strong>Setup Instructions:</strong> Choose one method below to add your account to an authenticator app.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* QR Code Column */}
-            {qrCodeUrl && (
-              <div className="text-center">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Scan QR Code</h4>
-                <img src={qrCodeUrl} alt="2FA QR Code" className="w-32 h-32 mx-auto border rounded mb-2" />
-                <p className="text-xs text-gray-600">
-                  Open your authenticator app and scan this QR code
-                </p>
-              </div>
-            )}
-            
-            {/* Manual Entry Column */}
-            <div className={qrCodeUrl ? '' : 'md:col-span-2'}>
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Manual Entry</h4>
-              <p className="text-xs text-gray-600 mb-2">
-                Or manually enter this secret key in your app:
-              </p>
-              <div className="flex items-center space-x-2">
-                <code className="flex-1 p-2 bg-gray-50 rounded text-xs font-mono break-all">
-                  {secretKey}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(secretKey)}
-                  className="p-2 text-gray-500 hover:text-gray-700"
-                  title="Copy secret key"
-                >
-                  <CopyIcon className="w-3 h-3" />
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Account: {user?.email || user?.username}
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <ShieldIcon className="w-5 h-5 text-gray-600" />
+            <div>
+              <h3 className="font-medium text-gray-900">Two-Factor Authentication</h3>
+              <p className={`text-xs ${user?.totp_enabled ? 'text-green-600' : 'text-gray-500'}`}>
+                {user?.totp_enabled ? 'Security enhanced' : 'Not enabled'}
               </p>
             </div>
           </div>
-          
-          <div className="pt-2">
+          <div className={`w-2 h-2 rounded-full ${user?.totp_enabled ? 'bg-green-500' : 'bg-gray-300'}`} />
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="p-4">
+        {/* Information about 2FA */}
+        {!user?.totp_enabled && !isSettingUp && (
+          <div className="mb-4">
             <p className="text-xs text-gray-600 mb-3">
-              After adding the account, enter the 6-digit code from your app:
+              Add an extra layer of security with 2FA. You'll need an authenticator app like Google Authenticator, 
+              Authy, or Microsoft Authenticator to generate time-based codes for login.
             </p>
-            <TOTPInput
-              onComplete={handleVerifyAndActivate}
-              disabled={isVerifying}
-              error={!!error}
-            />
           </div>
-          
-          <button
-            onClick={() => {
-              setIsSettingUp(false);
-              setQrCodeUrl('');
-              setError('');
-            }}
-            disabled={isVerifying}
-            className="w-full py-2 text-gray-600 border border-gray-300 rounded text-sm hover:bg-gray-50"
-          >
-            Cancel Setup
-          </button>
-        </div>
-      )}
+        )}
 
-      {/* Disable 2FA */}
-      {user?.totp_enabled && !showDisableForm && (
-        <div>
-          <div className="mb-3">
-            <p className="text-xs text-gray-600">
-              2FA is currently protecting your account. You'll need a current authentication code to disable it.
-            </p>
-          </div>
+        {/* Enable 2FA */}
+        {!user?.totp_enabled && !isSettingUp && (
           <button
-            onClick={() => setShowDisableForm(true)}
-            className="w-full py-2 text-red-600 border border-red-300 text-sm rounded hover:bg-red-50"
+            onClick={handleEnable2FA}
+            className="w-full py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            Disable 2FA
+            Enable 2FA
           </button>
-        </div>
-      )}
+        )}
 
-      {/* Disable Form - With more context */}
-      {showDisableForm && (
-        <div className="space-y-3">
-          <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
-            <p className="text-xs text-yellow-800">
-              <strong>Warning:</strong> Disabling 2FA will reduce your account security and make it easier for unauthorized users to access your account.
-            </p>
+        {/* QR Code Setup - Side by side layout */}
+        {isSettingUp && (
+          <div className="space-y-6">
+            {/* Setup Instructions */}
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <p className="text-sm text-blue-800 font-medium mb-1">
+                <strong>Setup Instructions:</strong>
+              </p>
+              <p className="text-xs text-blue-600">
+                Choose one method below to add your account to an authenticator app.
+              </p>
+            </div>
+            
+            {/* Visual Separator */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-white text-gray-500 font-medium">SETUP METHODS</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* QR Code Column */}
+              {qrCodeUrl && (
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                    <QRIcon className="w-4 h-4 mr-2" />
+                    Scan QR Code
+                  </h4>
+                  <div className="text-center">
+                    <img src={qrCodeUrl} alt="2FA QR Code" className="w-32 h-32 mx-auto border rounded-lg mb-2 shadow-sm" />
+                    <p className="text-xs text-gray-600">
+                      Open your authenticator app and scan this QR code
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Manual Entry Column */}
+              <div className={`bg-gray-50 p-4 rounded-lg border border-gray-200 ${qrCodeUrl ? '' : 'md:col-span-2'}`}>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center">
+                  <CopyIcon className="w-4 h-4 mr-2" />
+                  Manual Entry
+                </h4>
+                <p className="text-xs text-gray-600 mb-2">
+                  Or manually enter this secret key in your app:
+                </p>
+                <div className="flex items-center space-x-2 mb-2">
+                  <code className="flex-1 p-2 bg-white rounded text-xs font-mono break-all border">
+                    {secretKey}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(secretKey)}
+                    className="p-2 text-gray-500 hover:text-gray-700 bg-white rounded border"
+                    title="Copy secret key"
+                  >
+                    <CopyIcon className="w-3 h-3" />
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Account: {user?.email || user?.username}
+                </p>
+              </div>
+            </div>
+            
+            {/* Visual Separator */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-white text-gray-500 font-medium">VERIFICATION</span>
+              </div>
+            </div>
+            
+            {/* Verification Section */}
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <p className="text-sm text-green-800 font-medium mb-2">
+                Verify Setup
+              </p>
+              <p className="text-xs text-green-600 mb-3">
+                After adding the account, enter the 6-digit code from your app:
+              </p>
+              <TOTPInput
+                onComplete={handleVerifyAndActivate}
+                disabled={isVerifying}
+                error={!!error}
+              />
+            </div>
+            
+            <div className="pt-2 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setIsSettingUp(false);
+                  setQrCodeUrl('');
+                  setError('');
+                }}
+                disabled={isVerifying}
+                className="w-full py-2 text-gray-600 border border-gray-300 rounded text-sm hover:bg-gray-50"
+              >
+                Cancel Setup
+              </button>
+            </div>
           </div>
-          
-          <p className="text-xs text-gray-600">
-            Enter your current 6-digit authentication code to confirm:
-          </p>
-          
-          <TOTPInput
-            onComplete={handleDisable2FA}
-            disabled={isVerifying}
-            error={!!error}
-          />
-          
-          <button
-            onClick={() => {
-              setShowDisableForm(false);
-              setError('');
-            }}
-            disabled={isVerifying}
-            className="w-full py-2 text-gray-600 border border-gray-300 rounded text-sm hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+        )}
+
+        {/* Disable 2FA */}
+        {user?.totp_enabled && !showDisableForm && (
+          <div className="space-y-4">
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <p className="text-sm text-green-800 font-medium mb-1">
+                2FA Protection Active
+              </p>
+              <p className="text-xs text-green-600">
+                2FA is currently protecting your account. You'll need a current authentication code to disable it.
+              </p>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4">
+              <button
+                onClick={() => setShowDisableForm(true)}
+                className="w-full py-2 text-red-600 border border-red-300 text-sm rounded hover:bg-red-50"
+              >
+                Disable 2FA
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Disable Form - With more context */}
+        {showDisableForm && (
+          <div className="space-y-4">
+            {/* Warning Section */}
+            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-800 font-medium mb-1">
+                <strong>⚠️ Security Warning</strong>
+              </p>
+              <p className="text-xs text-yellow-700">
+                Disabling 2FA will reduce your account security and make it easier for unauthorized users to access your account.
+              </p>
+            </div>
+            
+            {/* Visual Separator */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-3 bg-white text-gray-500 font-medium">CONFIRMATION REQUIRED</span>
+              </div>
+            </div>
+            
+            {/* Verification Section */}
+            <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+              <p className="text-sm text-red-800 font-medium mb-2">
+                Verify Current Code
+              </p>
+              <p className="text-xs text-red-600 mb-3">
+                Enter your current 6-digit authentication code to confirm:
+              </p>
+              
+              <TOTPInput
+                onComplete={handleDisable2FA}
+                disabled={isVerifying}
+                error={!!error}
+              />
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4">
+              <button
+                onClick={() => {
+                  setShowDisableForm(false);
+                  setError('');
+                }}
+                disabled={isVerifying}
+                className="w-full py-2 text-gray-600 border border-gray-300 rounded text-sm hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
