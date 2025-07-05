@@ -5,6 +5,7 @@ from .. import schemas, models, database, oauth2, utils
 from fastapi.responses import StreamingResponse
 import io
 from ..utils import markdown_to_pdf_bytes, MarkupAgent
+from datetime import datetime
 
 
 router = APIRouter(
@@ -249,4 +250,51 @@ async def save_shared_record(
     db.refresh(new_record)
     
     return new_record
+
+@router.post("/create", response_model=schemas.RecordResponse)
+def create_manual_record(
+    record_data: schemas.ManualRecordCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Create a manual record for the current user (works for both patients and doctors)"""
+    try:
+        # Validate collection exists if provided and belongs to the user
+        if record_data.collection_id:
+            collection = db.query(models.Collection).filter(
+                models.Collection.id == record_data.collection_id,
+                models.Collection.user_id == current_user.id
+            ).first()
+            
+            if not collection:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Collection not found or not owned by you"
+                )
+        
+        # Create the record
+        new_record = models.Record(
+            filename=record_data.filename,
+            content=record_data.content,
+            file_size=len(record_data.content.encode('utf-8')),
+            file_type=record_data.file_type or "text/plain",
+            user_id=current_user.id,
+            collection_id=record_data.collection_id
+        )
+        
+        db.add(new_record)
+        db.commit()
+        db.refresh(new_record)
+        
+        return new_record
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"Error creating manual record for user {current_user.id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error creating record: {str(e)}"
+        )
 
