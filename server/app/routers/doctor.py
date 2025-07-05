@@ -14,15 +14,10 @@ def get_doctor_dashboard(
     """Get doctor dashboard with patient statistics"""
     # Check if user is a doctor
     if current_user.role != models.UserRole.DOCTOR:
-        # If not a doctor, check if they can become one
-        if current_user.role == models.UserRole.DOCTOR:
-            # User is already verified as doctor, return dashboard
-            pass
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied. Doctor privileges required."
-            )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Doctor privileges required."
+        )
     
     # Get patient statistics
     total_patients = db.query(models.User).filter(

@@ -1,4 +1,12 @@
 from typing import List
+import sys
+import bcrypt as _bcrypt
+
+# Workaround for bcrypt version compatibility issue
+if not hasattr(_bcrypt, '__about__'):
+    _bcrypt.__about__ = type('ModuleAbout', (), {'__version__': getattr(_bcrypt, '__version__', '4.0.1')})
+    sys.modules['bcrypt.__about__'] = _bcrypt.__about__
+
 from passlib.context import CryptContext
 from pydantic_ai.models.gemini import GeminiModel
 from pydantic_ai import BinaryContent

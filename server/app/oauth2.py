@@ -43,6 +43,10 @@ def verify_totp(secret: str, code: str):
 def create_access_token(data: dict):
     to_encode = data.copy()
     
+    # Convert UserRole enum to string if present
+    if "role" in to_encode and hasattr(to_encode["role"], "value"):
+        to_encode["role"] = to_encode["role"].value
+    
     # Add token type for validation
     to_encode.update({"token_type": "access"})
     
@@ -56,6 +60,10 @@ def create_access_token(data: dict):
 
 def create_refresh_token(data: dict):
     to_encode = data.copy()
+    
+    # Convert UserRole enum to string if present
+    if "role" in to_encode and hasattr(to_encode["role"], "value"):
+        to_encode["role"] = to_encode["role"].value
     
     # Add token type for validation
     to_encode.update({"token_type": "refresh"})
@@ -72,8 +80,10 @@ def verify_token(token: str, credentials_exception, expected_token_type=None):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         
-        # Extract user ID
+        # Extract user ID and role
         id = payload.get("user_id")
+        role = payload.get("role")
+
         if id is None:
             raise credentials_exception
         
@@ -82,7 +92,7 @@ def verify_token(token: str, credentials_exception, expected_token_type=None):
         if expected_token_type and token_type != expected_token_type:
             raise credentials_exception
             
-        token_data = schemas.TokenData(id=int(id), token_type=token_type)
+        token_data = schemas.TokenData(id=int(id), role=role, token_type=token_type)
     except jwt.ExpiredSignatureError:
         raise credentials_exception
     except jwt.InvalidTokenError:
