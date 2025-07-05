@@ -2,11 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 from .. import models, schemas, oauth2, database, utils
-import base64
 
-router = APIRouter(tags=["Doctor"])
+router = APIRouter(
+    tags=["Doctor"],
+    prefix='/doctor'
 
-@router.get("/doctor/dashboard", response_model=schemas.DoctorDashboard)
+)
+
+@router.get("/dashboard", response_model=schemas.DoctorDashboard)
 def get_doctor_dashboard(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
@@ -52,8 +55,8 @@ def get_doctor_dashboard(
         ]
     }
 
-@router.post("/doctor/register", response_model=schemas.DoctorVerificationResult)
-def register_doctor(
+@router.post("/register", response_model=schemas.DoctorVerificationResult)
+async def register_doctor(
     resume: UploadFile = File(...),
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
@@ -66,48 +69,58 @@ def register_doctor(
         )
     
     try:
-        # Read and encode the resume file
-        resume_content = resume.file.read()
-        resume_base64 = base64.b64encode(resume_content).decode('utf-8')
+        # Read the resume file content
+        resume_content = await resume.read()
         
-        # Here you would integrate with an AI service to verify the resume
-        # For now, we'll simulate the verification
-        verification_confidence = 85.0  # Simulated confidence score
-        is_verified = verification_confidence >= 80.0
+        # Create and use the ResumeVerifierAgent
+        resume_verification_agent = utils.ResumeVerifierAgent()
         
-        if is_verified:
+        # Get verification result from the agent
+        verification_result = await resume_verification_agent.verify_resume(resume_content)
+        
+        # Check if verification was successful
+        if verification_result.veridication_status:
             # Update user role to doctor
             current_user.role = models.UserRole.DOCTOR
             current_user.resume_verification_status = True
-            current_user.resume_verification_confidence = verification_confidence
+            current_user.resume_verification_confidence = verification_result.confidence
             db.commit()
+            db.refresh(current_user)
             
             return {
                 "success": True,
-                "message": "Doctor registration successful",
-                "verification_confidence": verification_confidence,
-                "user_id": current_user.id
+                "message": verification_result.message or "Doctor registration successful - your medical credentials have been verified.",
+                "verification_confidence": verification_result.confidence,
+                "user_id": current_user.id,
+                "verification_status": True
             }
         else:
             # Store verification attempt but don't change role
             current_user.resume_verification_status = False
-            current_user.resume_verification_confidence = verification_confidence
+            current_user.resume_verification_confidence = verification_result.confidence
             db.commit()
+            db.refresh(current_user)
             
             return {
                 "success": False,
-                "message": "Resume verification failed. Please submit a valid medical resume.",
-                "verification_confidence": verification_confidence,
-                "user_id": current_user.id
+                "message": verification_result.message or "Resume verification failed. Please submit a valid medical resume with clear medical credentials.",
+                "verification_confidence": verification_result.confidence,
+                "user_id": current_user.id,
+                "verification_status": False
             }
             
     except Exception as e:
+        # Log the error for debugging
+        print(f"Error in doctor registration: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing resume: {str(e)}"
         )
 
-@router.get("/doctor/patients", response_model=List[schemas.PatientInfo])
+@router.get("/patients", response_model=List[schemas.PatientInfo])
 def get_doctor_patients(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
@@ -123,21 +136,10 @@ def get_doctor_patients(
         models.User.doctor_id == current_user.id
     ).all()
     
-    return [
-        {
-            "id": patient.id,
-            "name": f"{patient.first_name} {patient.last_name}",
-            "email": patient.email,
-            "phone_number": patient.phone_number,
-            "blood_group": patient.blood_group,
-            "aadhar": patient.aadhar,
-            "allergies": patient.allergies,
-            "last_visit": patient.visit_date,
-            "created_at": patient.created_at
-        } for patient in patients
-    ]
+    # Return the actual patient objects, not manually constructed dictionaries
+    return patients
 
-@router.put("/doctor/info", response_model=schemas.UserOut)
+@router.put("/info", response_model=schemas.UserOut)
 def update_doctor_info(
     doctor_update: schemas.DoctorInfoUpdate,
     db: Session = Depends(database.get_db),
@@ -164,7 +166,7 @@ def update_doctor_info(
     db.refresh(current_user)
     return current_user
 
-@router.get("/doctor/patient/{patient_id}/records", response_model=List[schemas.RecordOut])
+@router.get("/patient/{patient_id}/records", response_model=List[schemas.RecordOut])
 def get_patient_records(
     patient_id: int,
     db: Session = Depends(database.get_db),
@@ -190,7 +192,7 @@ def get_patient_records(
         )
     
     records = db.query(models.Record).filter(
-        models.Record.owner_id == patient_id
+        models.Record.user_id == patient_id
     ).all()
     
     return records
