@@ -6,7 +6,6 @@ from pydantic_ai.agent import Agent
 from pydantic_ai.providers.google_gla import GoogleGLAProvider
 import os
 import qrcode
-import asyncio
 import io
 from dotenv import load_dotenv
 from PIL import Image
@@ -17,9 +16,6 @@ import pytesseract
 import cv2
 from pypdf import PdfReader
 from . import schemas
-from fastapi import UploadFile, File, HTTPException, status, Depends
-from sqlalchemy.orm import Session
-from app import database, models, oauth2
 
 load_dotenv()
 

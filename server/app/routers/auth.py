@@ -72,8 +72,8 @@ def login(
         }
     
     # If 2FA is not enabled, proceed with normal login
-    access_token = oauth2.create_access_token(data={"user_id": user.id})
-    refresh_token = oauth2.create_refresh_token(data={"user_id": user.id})
+    access_token = oauth2.create_access_token(data={"user_id": user.id, "role": user.role})
+    refresh_token = oauth2.create_refresh_token(data={"user_id": user.id, "role": user.role})
     
     return {
         "access_token": access_token,

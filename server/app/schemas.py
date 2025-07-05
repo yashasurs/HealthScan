@@ -14,6 +14,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: int | None = None
     token_type: str | None = None
+    role: str 
 
 
 class UserLogin(BaseModel):
@@ -74,6 +75,46 @@ class UserCreate(UserLogin):
 class DoctorRegistration(BaseModel):
     user: UserCreate
     resume: str = Field(..., description="Base64 encoded image of doctor's resume")
+
+class DoctorDashboardInfo(BaseModel):
+    """Doctor information for dashboard"""
+    id: int
+    name: str
+    email: str
+    specialization: Optional[str] = None
+    medical_license_number: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+    years_of_experience: Optional[int] = None
+
+class RecentPatientInfo(BaseModel):
+    """Recent patient information for dashboard"""
+    id: int
+    name: str
+    email: str
+    phone_number: str
+    blood_group: str
+    last_visit: Optional[datetime] = None
+
+class DoctorDashboard(BaseModel):
+    """Schema for doctor dashboard data"""
+    doctor_info: DoctorDashboardInfo
+    total_patients: int
+    recent_patients: List[RecentPatientInfo]
+
+class RecordOut(BaseModel):
+    """Schema for record output"""
+    id: str
+    filename: str
+    content: str
+    file_size: Optional[int] = None
+    file_type: Optional[str] = None
+    owner_id: int
+    collection_id: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class UserDelete(BaseModel):
     user_id: int
@@ -325,6 +366,23 @@ class DoctorInfo(BaseModel):
     class Config:
         from_attributes = True
 
+class DoctorInfo(BaseModel):
+    """Public doctor information"""
+    id: int
+    first_name: str
+    last_name: str
+    email: str
+    phone_number: str
+    specialization: Optional[str] = None
+    medical_license_number: Optional[str] = None
+    hospital_affiliation: Optional[str] = None
+    years_of_experience: Optional[int] = None
+    resume_verification_status: Optional[bool] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 class AssignDoctorRequest(BaseModel):
     """Request to assign a doctor to a patient"""
     doctor_id: int
@@ -492,3 +550,27 @@ class OcrResponseGemini(BaseModel):
     """Response schema for OCR processing"""
     content: str 
     confidence: float
+
+class ManualRecordCreate(BaseModel):
+    """Schema for manually creating a record"""
+    filename: str
+    content: str
+    collection_id: Optional[str] = None
+    file_type: Optional[str] = "text/plain"
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "filename": "Medical Report - 2024-01-15.txt",
+                "content": "Patient visited today with symptoms of...",
+                "collection_id": "optional-collection-id",
+                "file_type": "text/plain"
+            }
+        }
+
+class ManualRecordUpdate(BaseModel):
+    """Schema for updating a manual record"""
+    filename: Optional[str] = None
+    content: Optional[str] = None
+    collection_id: Optional[str] = None
+    file_type: Optional[str] = None
