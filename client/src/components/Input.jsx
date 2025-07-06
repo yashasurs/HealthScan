@@ -6,6 +6,7 @@ const Input = ({
   value,
   onChange,
   error,
+  helpText,
   required = false,
   disabled = false,
   className = '',
@@ -36,6 +37,9 @@ const Input = ({
       />
       {error && (
         <p className="text-sm text-red-600 mt-1">{error}</p>
+      )}
+      {helpText && !error && (
+        <p className="text-sm text-gray-500 mt-1">{helpText}</p>
       )}
     </div>
   );

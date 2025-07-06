@@ -14,7 +14,7 @@ const DoctorRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role !== 'DOCTOR') {
+  if (user.role !== 'doctor') {
     return <Navigate to="/doctor/register" replace />;
   }
 

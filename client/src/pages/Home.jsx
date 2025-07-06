@@ -260,7 +260,7 @@ const Home = () => {
           </div>
         </div>
       </section>      {/* Doctor Registration Section - Only show for authenticated users who aren't doctors yet */}
-      {isAuthenticated && user?.role !== 'DOCTOR' && (
+      {isAuthenticated && user?.role !== 'doctor' && (
         <section className="py-16 bg-gradient-to-br from-green-50 via-blue-50 to-indigo-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
