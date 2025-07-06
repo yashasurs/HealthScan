@@ -65,7 +65,6 @@ const Navbar = () => {
         { name: 'Collections', path: '/collections' },
         { name: 'Upload', path: '/upload' },
         { name: 'Find Doctors', path: '/find-doctors' },
-        ...(user?.role === 'doctor' ? [{ name: 'Doctor Portal', path: '/doctor' }] : []),
         ...(shouldShowBecomeDoctor() ? [{ name: 'Become a Doctor', path: '/doctor/register' }] : []),
         ...(user?.role === 'admin' ? [{ name: 'Admin', path: '/admin' }] : [])
       ]
