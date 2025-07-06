@@ -165,6 +165,10 @@ export default function AuthProvider({ children }) {
     }
   };
 
+  const refreshUser = async () => {
+    return await getCurrentUser();
+  };
+
   const value = {
     isAuthenticated,
     user,
@@ -177,7 +181,8 @@ export default function AuthProvider({ children }) {
     activate2FA,
     disable2FA,
     logout,
-    getCurrentUser
+    getCurrentUser,
+    refreshUser
   };
 
   return (

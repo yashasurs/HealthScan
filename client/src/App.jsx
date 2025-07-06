@@ -20,6 +20,14 @@ import AdminCollections from './pages/AdminPages/AdminCollections.jsx'
 import AdminRecords from './pages/AdminPages/AdminRecords.jsx'
 import AdminReports from './pages/AdminPages/AdminReports.jsx'
 import AdminRoute from './components/AdminRoute.jsx'
+// Doctor imports
+import DoctorRoute from './components/DoctorRoute.jsx'
+import DoctorDashboard from './pages/DoctorPages/DoctorDashboard.jsx'
+import DoctorRegistration from './pages/DoctorPages/DoctorRegistration.jsx'
+import DoctorPatients from './pages/DoctorPages/DoctorPatients.jsx'
+import DoctorPatientDetail from './pages/DoctorPages/DoctorPatientDetail.jsx'
+import DoctorProfile from './pages/DoctorPages/DoctorProfile.jsx'
+import PublicDoctors from './pages/PublicDoctorsSimplified.jsx'
 
 
 
@@ -33,6 +41,8 @@ function App() {
           <Routes>
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
+            <Route path='/find-doctors' element={<PublicDoctors />} />
+            <Route path='/doctors' element={<PublicDoctors />} />
             <Route path='/records/share' element={<SharedRecord />} />
             <Route path='/collections/share' element={<SharedCollection />} />            <Route path='/' element={
               <ProtectedRoute>
@@ -93,6 +103,37 @@ function App() {
               <AdminRoute>
                 <AdminReports />
               </AdminRoute>
+            } />
+            {/* Doctor Routes */}
+            <Route path='/doctor/register' element={
+              <ProtectedRoute>
+                <DoctorRegistration />
+              </ProtectedRoute>
+            } />
+            <Route path='/doctor' element={
+              <DoctorRoute>
+                <DoctorDashboard />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/dashboard' element={
+              <DoctorRoute>
+                <DoctorDashboard />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/patients' element={
+              <DoctorRoute>
+                <DoctorPatients />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/patients/:patientId' element={
+              <DoctorRoute>
+                <DoctorPatientDetail />
+              </DoctorRoute>
+            } />
+            <Route path='/doctor/profile' element={
+              <DoctorRoute>
+                <DoctorProfile />
+              </DoctorRoute>
             } />
           </Routes>
         </div>
