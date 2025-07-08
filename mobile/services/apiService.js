@@ -212,7 +212,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-        let url = '/ocr/get-text';
+        let url = '/ocr/images-to-text';
         
         return api.post(url, formData, {
           headers: {
@@ -235,7 +235,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-        let url = `/ocr/get-text?collection_id=${collectionId}`;
+        let url = `/ocr/images-to-text?collection_id=${collectionId}`;
         
         return api.post(url, formData, {
           headers: {

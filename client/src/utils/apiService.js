@@ -150,24 +150,6 @@ export const ocrAPI = {
       formData.append('files', file);
     });
     
-    let url = '/ocr/get-text';
-    if (collectionId) {
-      url += `?collection_id=${collectionId}`;
-    }
-    
-    return api.post(url, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-  },
-
-  processImagesAdvanced: async (files, collectionId = null) => {
-    const api = createApiService();
-    const formData = new FormData();
-    
-    files.forEach(file => {
-      formData.append('files', file);
-    });
-    
     let url = '/ocr/images-to-text';
     if (collectionId) {
       url += `?collection_id=${collectionId}`;
