@@ -393,7 +393,7 @@ const Profile = () => {
                   </p>
                 </div>
               </div>
-              {user?.role === 'DOCTOR' && (
+              {user?.role === 'doctor' && (
                 <div className="flex items-center space-x-2 bg-green-100 px-3 py-1.5 rounded-full">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm font-medium text-green-800">Verified</span>
@@ -403,7 +403,7 @@ const Profile = () => {
           </div>
           
           <div className="p-6">
-            {user?.role === 'DOCTOR' ? (
+            {user?.role === 'doctor' ? (
               // Already verified doctor
               <div className="text-center py-12">
                 <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">

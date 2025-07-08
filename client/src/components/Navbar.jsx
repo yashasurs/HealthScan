@@ -45,16 +45,33 @@ const Navbar = () => {
   // Check if user is on profile page
   const isOnProfilePage = location.pathname === '/profile';
 
+  // Helper function to determine if user should see "Become a Doctor" option
+  const shouldShowBecomeDoctor = () => {
+    if (!user) return false;
+    // Hide for admins and doctors
+    if (user.role === 'admin' || user.role === 'doctor') return false;
+    // Hide for verified users (assuming they've already applied)
+    if (user.resume_verification_status === true) return false;
+    return true;
+  };
+
+  // Debug user role
+  console.log('User role:', user?.role, 'Type:', typeof user?.role);
+
   const navigationLinks = isAuthenticated 
     ? [
         { name: 'Home', path: '/' },
         { name: 'Records', path: '/records' },
         { name: 'Collections', path: '/collections' },
         { name: 'Upload', path: '/upload' },
+        { name: 'Find Doctors', path: '/find-doctors' },
+        ...(user?.role === 'doctor' ? [{ name: 'Dashboard', path: '/doctor' }] : []),
+        ...(shouldShowBecomeDoctor() ? [{ name: 'Become a Doctor', path: '/doctor/register' }] : []),
         ...(user?.role === 'admin' ? [{ name: 'Admin', path: '/admin' }] : [])
       ]
     : [
-        { name: 'Home', path: '/' }
+        { name: 'Home', path: '/' },
+        { name: 'Find Doctors', path: '/find-doctors' }
       ];return (
     <nav 
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100"
