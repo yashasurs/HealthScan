@@ -1,53 +1,42 @@
 {
   "expo": {
-    "name": "HealthScan",
+    "name": "healthscan",
     "slug": "healthscan",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/health-scan.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/health-scan.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
+    "icon": "./assets/images/icon.png",
+    "scheme": "healthscan",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "NSCameraUsageDescription": "This app uses the camera to scan QR codes for medical records.",
-        "NSMicrophoneUsageDescription": "This app may use the microphone when recording videos."
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/health-scan.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.healthscan",
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ]
+      "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/health-scan.png"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
     },
-    "primaryColor": "#000000",
     "plugins": [
+      "expo-router",
       [
-        "expo-camera",
+        "expo-splash-screen",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan QR codes.",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone when recording videos.",
-          "recordAudioAndroid": true
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
         }
       ]
     ],
-    "extra": {
-      "eas": {
-        "projectId": "59ea3c2d-0e51-4275-844e-9229bd3e9333"
-      }
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
