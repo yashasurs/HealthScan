@@ -234,11 +234,48 @@ class OcrAgent:
             output_type=List[OcrResponseGemini],
             headers=self.headers,
             system_prompt=(
-                'You are an OCR (Optical Character Recognition) agent. You may receive one or more images. '
-                'For each image, extract the text and format it into markup format. '
-                'Also provide a confidence level (between 0.0 and 1.0) indicating how confident you are in the accuracy of the extracted text for each image. '
-                'A confidence of 1.0 means you are completely certain, while 0.0 means completely uncertain. '
-                'Return a list of objects, one for each image, each with fields: content (the extracted text as markup) and confidence (the confidence score).'
+                'You are an OCR agent that extracts text from images and formats it for react-markdown rendering. '
+                'Your output MUST be 100% valid react-markdown compatible syntax. '
+                
+                'TEXT EXTRACTION RULES: '
+                '1. Analyze the entire image carefully, including handwritten text '
+                '2. For unclear handwriting, use context clues or mark as [unclear] '
+                '3. Organize content logically with proper markdown structure '
+                '4. Group related information under appropriate headings '
+                
+                'REACT-MARKDOWN FORMATTING REQUIREMENTS: '
+                '- Headers: # ## ### (with space after #) '
+                '- Bold: **text** (no spaces inside asterisks) '
+                '- Italic: *text* (no spaces inside asterisks) '
+                '- Lists: Use - or * with space after, or 1. 2. 3. for numbered '
+                '- Code: `inline code` or ```language\\ncode block\\n``` '
+                '- Blockquotes: > text (for handwritten notes) '
+                '- Tables: | Header | Header |\\n|--------|--------|\\n| Cell | Cell | '
+                '- Line breaks: Use double newlines for paragraphs '
+                '- Horizontal rules: --- (on its own line) '
+                
+                'REACT-MARKDOWN COMPATIBILITY: '
+                '- NO HTML tags (use markdown syntax only) '
+                '- NO unclosed markdown syntax '
+                '- NO trailing spaces in headers '
+                '- NO malformed table syntax '
+                '- Escape special characters: \\*, \\_, \\#, \\`, \\| when not formatting '
+                '- Use proper newlines between sections '
+                
+                'STRUCTURE TEMPLATE: '
+                '```markdown '
+                '# Document Title '
+                '## Section Name '
+                '- **Field:** Value '
+                '- **Field:** Value '
+                '> *Handwritten note or annotation* '
+                '## Additional Notes '
+                '- Note 1 '
+                '- Note 2 '
+                '``` '
+                
+                'Return confidence score: 0.9+ for clear text, 0.7+ for mixed, 0.5+ for difficult handwriting. '
+                'CRITICAL: Test your markdown output mentally - it must render perfectly in react-markdown.'
             )
         )
 
@@ -247,7 +284,12 @@ class OcrAgent:
         ]
         result = await agent.run(
             [
-                'Extract the text from each image and format it into markup format. Provide a confidence level for each extraction. Return a list of objects, one per image.',
+                'Extract text from each image and format it into VALID MARKDOWN. '
+                'SPECIAL ATTENTION: If the image contains handwritten text or random layout, '
+                'carefully analyze the entire image, use context clues for unclear writing, '
+                'and organize the content logically with proper markdown structure. '
+                'Group related information together even if scattered in the image. '
+                'Provide confidence level based on text clarity and layout complexity.',
                 *binaryimages
             ]
         )

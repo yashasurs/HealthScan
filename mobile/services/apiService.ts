@@ -274,7 +274,11 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
+<<<<<<< HEAD:mobile/services/apiService.ts
         const url = '/ocr/get-text';
+=======
+        let url = '/ocr/images-to-text';
+>>>>>>> 08589725dcfbd4f34fcff5d682b74e2d569141d2:mobile/services/apiService.js
         
         return api.post(url, formData, {
           headers: {
@@ -297,7 +301,11 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
+<<<<<<< HEAD:mobile/services/apiService.ts
         const url = `/ocr/get-text?collection_id=${collectionId}`;
+=======
+        let url = `/ocr/images-to-text?collection_id=${collectionId}`;
+>>>>>>> 08589725dcfbd4f34fcff5d682b74e2d569141d2:mobile/services/apiService.js
         
         return api.post(url, formData, {
           headers: {

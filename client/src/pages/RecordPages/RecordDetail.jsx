@@ -1,10 +1,182 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import createApiService from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { formatDateTime } from '../../utils/dateUtils';
+
+// Custom styles for better table rendering
+const tableStyles = `
+  .markdown-content {
+    overflow-x: auto;
+    color: #374151;
+    line-height: 1.6;
+  }
+  
+  .markdown-content h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+  }
+  
+  .markdown-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .markdown-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .markdown-content ul {
+    margin: 1rem 0;
+    padding-left: 0;
+    list-style: none;
+  }
+  
+  .markdown-content li {
+    margin: 0.5rem 0;
+    padding: 0.25rem 0;
+  }
+  
+  .markdown-content strong {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .markdown-content table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 2rem 0 !important;
+    background-color: white !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 0.75rem !important;
+    overflow: hidden !important;
+    border: 1px solid #e5e7eb !important;
+  }
+  
+  .markdown-content thead {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  }
+  
+  .markdown-content th {
+    background: transparent !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 16px 20px !important;
+    text-align: left !important;
+    font-size: 0.875rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    border-bottom: none !important;
+  }
+  
+  .markdown-content td {
+    padding: 14px 20px !important;
+    border-bottom: 1px solid #f3f4f6 !important;
+    font-size: 0.875rem !important;
+    color: #374151 !important;
+    vertical-align: top !important;
+  }
+  
+  .markdown-content tbody tr:hover {
+    background-color: #f8fafc !important;
+    transition: background-color 0.2s ease !important;
+  }
+  
+  .markdown-content tbody tr:nth-child(even) {
+    background-color: #fafbfc !important;
+  }
+  
+  .markdown-content tbody tr:nth-child(odd) {
+    background-color: white !important;
+  }
+  
+  /* Enhanced styling for specific columns */
+  .markdown-content td:nth-child(1) {
+    font-weight: 600 !important;
+    color: #1f2937 !important;
+    min-width: 250px !important;
+  }
+  
+  .markdown-content td:nth-child(2) {
+    font-weight: 700 !important;
+    color: #059669 !important;
+    text-align: center !important;
+    min-width: 80px !important;
+  }
+  
+  .markdown-content td:nth-child(3) {
+    color: #6b7280 !important;
+    text-align: center !important;
+    font-style: italic !important;
+    min-width: 80px !important;
+  }
+  
+  .markdown-content td:nth-child(4) {
+    color: #7c3aed !important;
+    text-align: center !important;
+    font-weight: 500 !important;
+    min-width: 150px !important;
+  }
+  
+  .markdown-content td:nth-child(5) {
+    color: #6b7280 !important;
+    font-size: 0.8rem !important;
+    min-width: 180px !important;
+  }
+  
+  /* Styling for bold test names in table */
+  .markdown-content td strong {
+    color: #1f2937 !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+  }
+  
+  /* Horizontal rule styling */
+  .markdown-content hr {
+    margin: 2rem 0 !important;
+    border: none !important;
+    border-top: 2px solid #e5e7eb !important;
+  }
+  
+  @media (max-width: 768px) {
+    .markdown-content table {
+      font-size: 0.75rem !important;
+    }
+    
+    .markdown-content th,
+    .markdown-content td {
+      padding: 10px 12px !important;
+    }
+    
+    .markdown-content td:nth-child(1) {
+      min-width: 200px !important;
+    }
+    
+    .markdown-content td:nth-child(2),
+    .markdown-content td:nth-child(3),
+    .markdown-content td:nth-child(4) {
+      min-width: 60px !important;
+    }
+    
+    .markdown-content td:nth-child(5) {
+      min-width: 140px !important;
+    }
+  }
+`;
 
 const RecordDetail = () => {
   const { id } = useParams();
@@ -25,6 +197,26 @@ const RecordDetail = () => {
     if (isAuthenticated && id) {
       fetchRecord();
     }
+    
+    // Inject custom styles with higher specificity
+    const styleId = 'record-detail-table-styles';
+    let styleElement = document.getElementById(styleId);
+    
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+    
+    styleElement.textContent = tableStyles;
+    
+    return () => {
+      // Cleanup: remove the style element when component unmounts
+      const element = document.getElementById(styleId);
+      if (element && element.parentNode) {
+        element.parentNode.removeChild(element);
+      }
+    };
   }, [isAuthenticated, id]);
 
   const fetchRecord = async () => {
@@ -395,8 +587,10 @@ const RecordDetail = () => {
               </div>            </div>
           ) : (
             <div className="bg-gray-50 p-3 sm:p-4 lg:p-6 rounded-lg border border-gray-200 min-h-[300px] sm:min-h-[400px]">
-              <div className="markdown-content text-sm sm:text-base">
-                <ReactMarkdown>{record.content}</ReactMarkdown>
+              <div className="markdown-content prose prose-sm sm:prose-base max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {record.content}
+                </ReactMarkdown>
               </div>
             </div>
           )}
