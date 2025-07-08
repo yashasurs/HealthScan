@@ -1,1 +1,0 @@
-export { default as RecordOrganizer } from './RecordOrganizer';
