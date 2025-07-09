@@ -304,40 +304,36 @@ const RecordDetail = () => {
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!record) return;
     
-    const api = createApiService();
-    const downloadUrl = `${api.defaults.baseURL}/records/${record.id}/pdf`;
-    
-    // Create a temporary anchor element to trigger download
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', `record_${record.id}.pdf`);
-    link.setAttribute('target', '_blank');
-    
-    // Add auth header for the download
-    const token = localStorage.getItem('token');
-    if (token) {
-      // For downloads, we need to handle auth differently
-      fetch(downloadUrl, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      .then(response => response.blob())
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch(err => {
-        console.error('Error downloading PDF:', err);
-        setError('Failed to download PDF. Please try again.');
+    try {
+      setIsLoading(true);
+      const api = createApiService();
+      const response = await api.get(`/records/${record.id}/pdf`, {
+        responseType: 'blob'
       });
+
+      if (!response.data) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${record.filename}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showSuccessMessage('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      setError('Failed to download PDF. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -345,19 +341,17 @@ const RecordDetail = () => {
     if (!record) return;
     
     try {
+      setIsLoading(true);
       const api = createApiService();
-      const response = await fetch(`${api.defaults.baseURL}/qr/record/${record.id}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+      const response = await api.post(`/qr/record/${record.id}`, {}, {
+        responseType: 'blob'
       });
       
-      if (!response.ok) {
+      if (!response.data) {
         throw new Error('Failed to generate QR code');
       }
       
-      const blob = await response.blob();
+      const blob = new Blob([response.data], { type: 'image/png' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -371,6 +365,8 @@ const RecordDetail = () => {
     } catch (error) {
       console.error('Error downloading QR code:', error);
       setError('Failed to generate QR code. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };  const showSuccessMessage = (message) => {
     setSuccessMessage(message);
