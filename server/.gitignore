@@ -7,5 +7,6 @@ sql_app.db
 .env
 *.sqlite
 *.sqlite3
+.python-version
 
 
