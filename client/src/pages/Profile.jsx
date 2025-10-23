@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import createApiService, { doctorAPI } from '../utils/apiService';
 import { formatDate } from '../utils/dateUtils';
@@ -69,6 +69,7 @@ const Profile = () => {
   const [doctorVerificationResult, setDoctorVerificationResult] = useState(null);
   const [doctorVerificationError, setDoctorVerificationError] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
+  const lastSubmissionTime = React.useRef(0);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -172,6 +173,7 @@ const Profile = () => {
 
   // Doctor verification functions
   const handleDoctorVerificationFileChange = (event) => {
+    event.preventDefault();
     const file = event.target.files[0];
     if (file) {
       processSelectedFile(file);
@@ -179,6 +181,11 @@ const Profile = () => {
   };
 
   const processSelectedFile = (file) => {
+    // Don't process file if verification is in progress
+    if (isDoctorVerifying) {
+      return;
+    }
+
     // Validate file type (PDF or common image formats)
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
     if (!allowedTypes.includes(file.type)) {
@@ -227,7 +234,20 @@ const Profile = () => {
     }
   };
 
-  const handleSubmitDoctorVerification = async () => {
+  const handleSubmitDoctorVerification = useCallback(async (event) => {
+    // Prevent event bubbling and default behavior
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // Prevent double submission with debounce (minimum 2 seconds between submissions)
+    const now = Date.now();
+    if (isDoctorVerifying || (now - lastSubmissionTime.current < 2000)) {
+      return;
+    }
+    lastSubmissionTime.current = now;
+
     if (!doctorVerificationFile) {
       setDoctorVerificationError('Please select a resume file to upload');
       return;
@@ -246,10 +266,15 @@ const Profile = () => {
       if (response.data.success) {
         await getCurrentUser();
         setSuccessMessage('Doctor verification submitted successfully!');
-        setDoctorVerificationFile(null);
-        // Clear file input
-        const fileInput = document.getElementById('doctor-verification-file');
-        if (fileInput) fileInput.value = '';
+        
+        // Clear the file and reset file input after a brief delay to ensure state updates
+        setTimeout(() => {
+          setDoctorVerificationFile(null);
+          const fileInput = document.getElementById('doctor-verification-file');
+          if (fileInput) {
+            fileInput.value = '';
+          }
+        }, 100);
       }
       
     } catch (err) {
@@ -260,15 +285,30 @@ const Profile = () => {
     } finally {
       setIsDoctorVerifying(false);
     }
-  };
+  }, [isDoctorVerifying, doctorVerificationFile, getCurrentUser, setSuccessMessage]);
 
-  const clearDoctorVerification = () => {
+  const clearDoctorVerification = useCallback((event) => {
+    // Prevent event bubbling if called from a click event
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // Don't allow clearing while verification is in progress
+    if (isDoctorVerifying) {
+      return;
+    }
+
     setDoctorVerificationFile(null);
     setDoctorVerificationResult(null);
     setDoctorVerificationError('');
+    
+    // Clear file input
     const fileInput = document.getElementById('doctor-verification-file');
-    if (fileInput) fileInput.value = '';
-  };
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }, [isDoctorVerifying]);
 
   if (!isAuthenticated) {
     return (
@@ -485,7 +525,13 @@ const Profile = () => {
                       onDragEnter={handleDragEnter}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      onClick={() => document.getElementById('doctor-verification-file').click()}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (!isDoctorVerifying) {
+                          document.getElementById('doctor-verification-file').click();
+                        }
+                      }}
                     >
                       <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-colors ${
                         isDragOver ? 'bg-black text-white' : 'bg-gray-100 text-gray-500 group-hover:bg-gray-200'
@@ -627,10 +673,17 @@ const Profile = () => {
 
                 {/* Submit Button */}
                 <div className="flex justify-center pt-2">
+                  <div className="relative group">
                   <button
+                    type="button"
                     onClick={handleSubmitDoctorVerification}
                     disabled={!doctorVerificationFile || isDoctorVerifying}
-                    className="inline-flex items-center px-8 py-3 border border-transparent rounded-lg text-base font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                    className={`inline-flex items-center px-8 py-3 border border-transparent rounded-lg text-base font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      !doctorVerificationFile || isDoctorVerifying
+                        ? 'text-gray-400 bg-gray-300 cursor-not-allowed' 
+                        : 'text-white bg-black hover:bg-gray-800 focus:ring-black hover:shadow-lg transform hover:scale-105'
+                    }`}
+                    style={{ pointerEvents: isDoctorVerifying ? 'none' : 'auto' }}
                   >
                     {isDoctorVerifying ? (
                       <>
@@ -649,6 +702,15 @@ const Profile = () => {
                       </>
                     )}
                   </button>
+                  
+                  {/* Tooltip for disabled button */}
+                  {(!doctorVerificationFile && !isDoctorVerifying) && (
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                      Please upload a file first
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  )}
+                  </div>
                 </div>
               </div>
             )}
