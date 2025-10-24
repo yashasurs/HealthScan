@@ -160,7 +160,7 @@ class ResumeVerifierAgent:
                     # If PDF reading fails, try OCR
                     pdf_file.seek(0)  # Reset file pointer
 
-                    result = process_single_image_tesseract(
+                    result = process_single_image_tesseract( #type: ignore
                         resume, "resume.jpg", len(resume), "application/octet-stream"
                     )
                     resume_content = result.get("extracted_text", "")
@@ -219,9 +219,9 @@ class ResumeVerifierAgent:
 class OcrAgent:
     def __init__(self):
         self.model = GeminiModel(
-            "gemini-2.5-flash",
+            "gemini-2.0-flash",
             provider=GoogleGLAProvider(
-                api_key='AIzaSyBGwKu1NHBWvXSfCK_Q83i0eX3aQBc1eQM',
+                api_key=str(os.getenv("GEMINI_API_KEY")),
             ),
         )
         self.headers = {
