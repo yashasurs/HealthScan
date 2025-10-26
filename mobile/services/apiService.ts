@@ -4,7 +4,7 @@ import { DeviceEventEmitter } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, UserRole } from '@/types';
 
-const API_BASE_URL = 'https://healthscan-e868bea9b278.herokuapp.com';
+const API_BASE_URL = 'http://10.0.2.2:8000';
 
 // Helper function to convert API response to proper User type
 const convertApiUserToUser = (apiUser: any): User => {
@@ -274,11 +274,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-<<<<<<< HEAD:mobile/services/apiService.ts
         const url = '/ocr/get-text';
-=======
-        let url = '/ocr/images-to-text';
->>>>>>> 08589725dcfbd4f34fcff5d682b74e2d569141d2:mobile/services/apiService.js
         
         return api.post(url, formData, {
           headers: {
@@ -301,11 +297,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-<<<<<<< HEAD:mobile/services/apiService.ts
         const url = `/ocr/get-text?collection_id=${collectionId}`;
-=======
-        let url = `/ocr/images-to-text?collection_id=${collectionId}`;
->>>>>>> 08589725dcfbd4f34fcff5d682b74e2d569141d2:mobile/services/apiService.js
         
         return api.post(url, formData, {
           headers: {

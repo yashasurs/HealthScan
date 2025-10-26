@@ -4,7 +4,7 @@ import axios from 'axios';
 import { UserRole } from '../types';
 import { decodeJwtPayload, getUserRoleFromToken, isTokenExpired } from '../utils/tokenUtils';
 
-const API_URL = 'https://healthscan-e868bea9b278.herokuapp.com';
+const API_URL = 'http://10.0.2.2:8000';
 
 interface User {
   id: number;
@@ -55,6 +55,7 @@ interface AuthContextType {
   loading: boolean;
   error: string | null;
   isFirstLaunch: boolean;
+  pendingUserId: number | null;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string; requireTotp?: boolean; userId?: number }>;
   verifyTotp: (userId: number, totpCode: string) => Promise<{ success: boolean; error?: string }>;
   register: (userData: UserData) => Promise<{ success: boolean; error?: string }>;
@@ -77,11 +78,18 @@ interface AuthProviderProps {
 }
 
 interface LoginResponse {
+  access_token?: string;
+  refresh_token?: string;
+  token_type?: string;
+  require_totp: boolean;
+  user_id?: number;
+}
+
+interface TokenResponse {
   access_token: string;
   refresh_token: string;
   token_type: string;
-  require_totp?: boolean;
-  user_id?: number;
+  require_totp: boolean;
 }
 
 
@@ -96,6 +104,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isFirstLaunch, setIsFirstLaunch] = useState<boolean>(true);
+  const [pendingUserId, setPendingUserId] = useState<number | null>(null);
 
   const isAuthenticated = !!token;
 
@@ -105,6 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setRefreshToken(null);
       setUser(null);
       setError(null);
+      setPendingUserId(null);
       await Promise.all([
         AsyncStorage.removeItem("token"),
         AsyncStorage.removeItem("refresh_token"),
@@ -194,13 +204,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         last_name: userData.last_name,
         phone_number: userData.phone_number,
         blood_group: userData.blood_group, // Must be provided (validated in UI)
+        role: UserRole.PATIENT, // Always set role to patient for user registration
         ...(userData.aadhar && { aadhar: userData.aadhar }),
         ...(userData.allergies && { allergies: userData.allergies }),
         ...(userData.doctor_name && { doctor_name: userData.doctor_name }),
         ...(userData.visit_date && { visit_date: new Date(userData.visit_date).toISOString() })
       };
 
-      const response = await axios.post<LoginResponse>(`${API_URL}/register`, registrationData);
+      const response = await axios.post<TokenResponse>(`${API_URL}/register`, registrationData);
 
       const { access_token, refresh_token } = response.data;
       
@@ -214,6 +225,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(access_token);
       setRefreshToken(refresh_token);
       setUser(userResponse.data);
+      setPendingUserId(null); // Clear any pending TOTP state
       
       await Promise.all([
         AsyncStorage.setItem("token", access_token),
@@ -257,37 +269,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
       });
 
-      const { access_token, refresh_token, require_totp, user_id } = response.data;
+      const loginResult = response.data;
       
       // Check if TOTP is required
-      if (require_totp && user_id) {
+      if (loginResult.require_totp && loginResult.user_id) {
+        setPendingUserId(loginResult.user_id);
         return { 
           success: false, 
           requireTotp: true, 
-          userId: user_id,
+          userId: loginResult.user_id,
           error: 'TOTP verification required' 
         };
       }
 
-      if (!access_token) {
-        throw new Error('Server response missing access token');
+      // For successful login without TOTP
+      if (!loginResult.access_token || !loginResult.refresh_token) {
+        throw new Error('Server response missing tokens');
       }
 
       // Get user profile data after successful login
       const userResponse = await axios.get<User>(`${API_URL}/me`, {
-        headers: { Authorization: `Bearer ${access_token}` }
+        headers: { Authorization: `Bearer ${loginResult.access_token}` }
       });
 
-      setToken(access_token);
-      setRefreshToken(refresh_token);
+      setToken(loginResult.access_token);
+      setRefreshToken(loginResult.refresh_token);
       setUser(userResponse.data);
+      setPendingUserId(null); // Clear any pending TOTP state on successful login
       
-      console.log('Login: Token set to:', access_token ? 'TOKEN_EXISTS' : 'NO_TOKEN');
-      console.log('Login: isAuthenticated should be:', !!access_token);
+      console.log('Login: Token set to:', loginResult.access_token ? 'TOKEN_EXISTS' : 'NO_TOKEN');
+      console.log('Login: isAuthenticated should be:', !!loginResult.access_token);
       
       await Promise.all([
-        AsyncStorage.setItem("token", access_token),
-        AsyncStorage.setItem("refresh_token", refresh_token),
+        AsyncStorage.setItem("token", loginResult.access_token),
+        AsyncStorage.setItem("refresh_token", loginResult.refresh_token),
         AsyncStorage.setItem("user", JSON.stringify(userResponse.data))
       ]);
       
@@ -319,17 +334,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setError(null);
       
-      const response = await axios.post<LoginResponse>(`${API_URL}/login/verify-totp?user_id=${userId}`, {
+      const response = await axios.post<TokenResponse>(`${API_URL}/login/verify-totp`, {
         totp_code: totpCode
       }, {
+        params: { user_id: userId },
         headers: { 'Content-Type': 'application/json' }
       });
 
       const { access_token, refresh_token } = response.data;
-      
-      if (!access_token) {
-        throw new Error('Server response missing access token');
-      }
 
       // Get user profile data after successful TOTP verification
       const userResponse = await axios.get<User>(`${API_URL}/me`, {
@@ -339,6 +351,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setToken(access_token);
       setRefreshToken(refresh_token);
       setUser(userResponse.data);
+      setPendingUserId(null); // Clear pending user ID after successful verification
       
       await Promise.all([
         AsyncStorage.setItem("token", access_token),
@@ -360,6 +373,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setRefreshToken(null);
       setUser(null);
       setError(null);
+      setPendingUserId(null);
       setIsFirstLaunch(true); // Reset to first launch when logging out due to auth error
       await Promise.all([
         AsyncStorage.removeItem("token"),
@@ -378,7 +392,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('No refresh token available');
       }
 
-      const response = await axios.post<LoginResponse>(`${API_URL}/refresh`, 
+      const response = await axios.post<TokenResponse>(`${API_URL}/refresh`, 
         refreshToken, // Send the refresh token as a string in the body
         {
           headers: { 'Content-Type': 'text/plain' }
@@ -514,6 +528,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       loading,
       error,
       isFirstLaunch,
+      pendingUserId,
       markLaunchComplete,
       getToken,
       getValidToken, 

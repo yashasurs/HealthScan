@@ -63,10 +63,9 @@ export default function LoginScreen() {
         showToast.success('Login Successful', 'Welcome back!');
         console.log('Login successful, auth state will trigger navigation');
         // Navigation will happen automatically via useEffect when isAuthenticated changes
-      } else if (result.requireTotp) {
+      } else if (result.requireTotp && result.userId) {
         showToast.info('2FA Required', 'Please complete two-factor authentication');
-        // TODO: Navigate to TOTP verification screen
-        // router.push(`/verify-totp?userId=${result.userId}`);
+        router.push('/verify_totp' as any);
       } else {
         showToast.error('Login Failed', result.error || 'Please check your credentials');
       }
