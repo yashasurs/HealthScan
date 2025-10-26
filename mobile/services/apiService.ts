@@ -119,7 +119,7 @@ const createApiService = (getValidToken: () => Promise<string | null>, refreshAc
  * Hook to get authenticated API service
  */
 export const useApiService = () => {
-  const { getValidToken, refreshAccessToken } = useAuth();
+  const { getValidToken, refreshAccessToken, updateUser } = useAuth();
 
   const getAuthenticatedApi = async (): Promise<AxiosInstance> => {
     return createApiService(getValidToken, refreshAccessToken);
@@ -141,9 +141,14 @@ export const useApiService = () => {
       updateUser: async (userData: Partial<User>): Promise<AxiosResponse<User>> => {
         const api = await getAuthenticatedApi();
         const response = await api.put('/user', userData);
+        const updatedUser = convertApiUserToUser(response.data);
+        
+        // Update the user data in AuthContext to avoid unnecessary /me calls
+        await updateUser(updatedUser);
+        
         return {
           ...response,
-          data: convertApiUserToUser(response.data)
+          data: updatedUser
         };
       }
     },
@@ -274,7 +279,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-        const url = '/ocr/get-text';
+        const url = '/ocr/images-to-text';
         
         return api.post(url, formData, {
           headers: {
@@ -297,7 +302,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-        const url = `/ocr/get-text?collection_id=${collectionId}`;
+        const url = `/ocr/images-to-text?collection_id=${collectionId}`;
         
         return api.post(url, formData, {
           headers: {

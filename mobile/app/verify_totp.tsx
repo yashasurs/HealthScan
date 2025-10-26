@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,31 +10,44 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { showToast } from '@/utils/toast';
 
 export default function VerifyTotpScreen() {
   const [totpCode, setTotpCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
+  const [hasNavigated, setHasNavigated] = useState(false);
+  const isMountedRef = useRef(true);
   const { verifyTotp, isAuthenticated, pendingUserId } = useAuth();
   const router = useRouter();
 
-  // Get userId from auth context if available
+  // Cleanup on unmount
   useEffect(() => {
-    if (pendingUserId) {
-      setUserId(pendingUserId);
-    }
-  }, [pendingUserId]);
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
-  // Navigate to tabs if user becomes authenticated
+  // Navigate to tabs if user becomes authenticated - stable approach
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !hasNavigated && isMountedRef.current) {
       console.log('User is authenticated after TOTP, navigating to tabs');
-      router.replace('/(tabs)');
+      setHasNavigated(true);
+      
+      // Use a small delay and requestAnimationFrame for maximum stability
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          requestAnimationFrame(() => {
+            if (isMountedRef.current) {
+              router.replace('/(tabs)' as any);
+            }
+          });
+        }
+      }, 50);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, hasNavigated, router]);
 
   const handleVerifyTotp = async () => {
     if (!totpCode.trim()) {
@@ -47,33 +60,73 @@ export default function VerifyTotpScreen() {
       return;
     }
 
-    if (!userId) {
+    if (!pendingUserId) {
       showToast.error('Error', 'Missing user ID. Please try logging in again.');
       router.replace('/login');
       return;
     }
 
+    if (isLoading) return; // Prevent double submission
+
     setIsLoading(true);
 
     try {
-      const result = await verifyTotp(userId, totpCode);
+      const result = await verifyTotp(pendingUserId, totpCode);
       if (result.success) {
-        showToast.success('Verification Successful', 'Welcome back!');
+        // Don't show toast during navigation to prevent conflicts
+        console.log('TOTP verification successful');
         // Navigation will happen automatically via useEffect when isAuthenticated changes
       } else {
         showToast.error('Verification Failed', result.error || 'Invalid authentication code');
+        if (isMountedRef.current) setIsLoading(false);
       }
     } catch (error: any) {
       showToast.error('Verification Failed', error.message || 'Invalid authentication code');
       console.error('TOTP verification error:', error);
-    } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) setIsLoading(false);
     }
+    // Don't set loading to false on success - let the navigation effect handle it
   };
 
   const handleBackToLogin = () => {
-    router.replace('/login');
+    if (isMountedRef.current && !hasNavigated) {
+      setHasNavigated(true);
+      setIsLoading(false);
+      requestAnimationFrame(() => {
+        if (isMountedRef.current) {
+          router.replace('/login' as any);
+        }
+      });
+    }
   };
+
+  // If user is already authenticated, don't render the form
+  if (isAuthenticated) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#3498DB" />
+        <Text style={{ marginTop: 16, color: '#7F8C8D' }}>Redirecting...</Text>
+      </View>
+    );
+  }
+
+  // If no pending user ID, redirect to login
+  if (!pendingUserId) {
+    if (!hasNavigated) {
+      setHasNavigated(true);
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          router.replace('/login' as any);
+        }
+      }, 100);
+    }
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#3498DB" />
+        <Text style={{ marginTop: 16, color: '#7F8C8D' }}>Redirecting to login...</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 

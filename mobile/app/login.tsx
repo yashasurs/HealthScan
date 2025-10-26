@@ -28,21 +28,13 @@ export default function LoginScreen() {
     }
   }, [markLaunchComplete]);
 
-  // Navigate to tabs if user becomes authenticated
+  // Navigate to tabs if user becomes authenticated (including on mount check)
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User is authenticated, navigating to tabs from login screen');
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, router]);
-
-  // Also check on mount if user is already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User already authenticated on login screen mount, redirecting');
-      router.replace('/(tabs)');
-    }
-  }, []);
   
   const handleLogin = async () => {
     if (!username.trim()) {

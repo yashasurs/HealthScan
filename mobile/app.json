@@ -4,10 +4,10 @@
     "slug": "healthscan",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/heath-scan.png",
+    "icon": "./assets/images/health-scan.png",
     "scheme": "healthscan",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },

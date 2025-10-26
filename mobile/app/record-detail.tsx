@@ -365,7 +365,7 @@ export default function RecordDetailScreen() {
   };
 
   const handleDownload = async () => {
-    if (!record) return;
+    if (!record || !record.file_url) return;
     
     try {
       const supported = await Linking.canOpenURL(record.file_url);

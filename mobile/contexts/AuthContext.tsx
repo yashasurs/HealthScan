@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from 'axios';
 import { UserRole } from '../types';
@@ -65,6 +65,7 @@ interface AuthContextType {
   getToken: () => Promise<string | null>;
   getValidToken: () => Promise<string>;
   refreshAccessToken: () => Promise<string>;
+  updateUser: (userData: User) => Promise<void>;
   // Role-based access helpers
   isPatient: () => boolean;
   isDoctor: () => boolean;
@@ -424,19 +425,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw new Error('No access token available');
       }
 
-      // Check if token is still valid by making a simple request
-      try {
-        await axios.get(`${API_URL}/me`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        return token;
-      } catch (error: any) {
-        if (error.response?.status === 401) {
-          // Token expired, try to refresh
-          return await refreshAccessToken();
-        }
-        throw error;
-      }
+      // Return the token directly - let the API request handle 401 errors
+      // This avoids unnecessary /me calls for token validation
+      return token;
     } catch (error) {
       console.error("Failed to get valid token:", error);
       await logoutAndResetLaunch();
@@ -445,7 +436,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   // Role-based access helpers
-  const isPatient = (): boolean => {
+  const isPatient = useCallback((): boolean => {
     // Check user object first, then token as fallback
     if (user?.role) {
       return user.role === UserRole.PATIENT;
@@ -458,9 +449,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     return false;
-  };
+  }, [user?.role, token]);
 
-  const isDoctor = (): boolean => {
+  const isDoctor = useCallback((): boolean => {
     // Check user object first, then token as fallback
     if (user?.role) {
       return user.role === UserRole.DOCTOR;
@@ -473,9 +464,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     return false;
-  };
+  }, [user?.role, token]);
 
-  const isAdmin = (): boolean => {
+  const isAdmin = useCallback((): boolean => {
     // Check user object first, then token as fallback
     if (user?.role) {
       return user.role === UserRole.ADMIN;
@@ -488,9 +479,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     return false;
-  };
+  }, [user?.role, token]);
 
-  const hasRole = (role: UserRole): boolean => {
+  const hasRole = useCallback((role: UserRole): boolean => {
     // Check user object first, then token as fallback
     if (user?.role) {
       return user.role === role;
@@ -503,9 +494,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     return false;
-  };
+  }, [user?.role, token]);
 
-  const getUserRole = (): UserRole | null => {
+  const getUserRole = useCallback((): UserRole | null => {
     // Check user object first, then token as fallback
     if (user?.role) {
       return user.role;
@@ -517,6 +508,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     return null;
+  }, [user?.role, token]);
+
+  const updateUser = async (updatedUserData: Partial<User>): Promise<void> => {
+    try {
+      if (user) {
+        const updatedUser = { ...user, ...updatedUserData };
+        setUser(updatedUser);
+        // Update the stored user data in AsyncStorage
+        await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error("Failed to update user data:", error);
+    }
   };
 
   return (
@@ -538,6 +542,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logoutAndResetLaunch,
       register,
       refreshAccessToken,
+      updateUser,
       // Role-based access helpers
       isPatient,
       isDoctor,
