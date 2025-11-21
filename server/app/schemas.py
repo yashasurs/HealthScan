@@ -135,12 +135,24 @@ class RecordUpdate(BaseModel):
     filename: Optional[str] = None
     content: Optional[str] = None
 
+class CreatorInfo(BaseModel):
+    """Information about who created a collection or record"""
+    id: int
+    first_name: str
+    last_name: str
+    role: UserRole
+    
+    class Config:
+        from_attributes = True
+
 class RecordResponse(RecordBase):
     id: str
     user_id: int
+    created_by_id: Optional[int] = None
     collection_id: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+    creator: Optional[CreatorInfo] = None  # Who created this record
     
     class Config:
         from_attributes = True
@@ -159,9 +171,11 @@ class CollectionUpdate(BaseModel):
 class CollectionResponse(CollectionBase):
     id: str
     user_id: int
+    created_by_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime
     records: List[RecordResponse] = []
+    creator: Optional[CreatorInfo] = None  # Who created this collection
     
     class Config:
         from_attributes = True
@@ -574,3 +588,48 @@ class ManualRecordUpdate(BaseModel):
     content: Optional[str] = None
     collection_id: Optional[str] = None
     file_type: Optional[str] = None
+
+
+# Hospital Schemas
+class HospitalBase(BaseModel):
+    name: str
+    address: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+
+class HospitalCreate(HospitalBase):
+    pass
+
+
+class HospitalUpdate(BaseModel):
+    name: Optional[str] = None
+    address: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+
+class HospitalResponse(HospitalBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class AddDoctorToHospitalRequest(BaseModel):
+    doctor_id: int
+
+class DoctorCollectionCreate(BaseModel):
+    """Schema for doctor creating a collection for a patient"""
+    patient_id: int
+    name: str
+    description: Optional[str] = None
+
+class DoctorRecordCreate(BaseModel):
+    """Schema for doctor creating a record for a patient"""
+    patient_id: int
+    filename: str
+    content: str
+    collection_id: Optional[str] = None
+    file_type: Optional[str] = "text/plain"
