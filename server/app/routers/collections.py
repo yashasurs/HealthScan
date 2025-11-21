@@ -21,7 +21,8 @@ async def create_collection(
     db_collection = Collection(
         name=collection.name,
         description=collection.description,
-        user_id=current_user.id
+        user_id=current_user.id,
+        created_by_id=current_user.id  # Track who created it
     )
     db.add(db_collection)
     db.commit()
@@ -33,7 +34,7 @@ async def get_all_collections(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Get all collections under a user"""
+    """Get all collections - owned by user OR created for them by their doctor"""
     collections = db.query(Collection).filter(Collection.user_id == current_user.id).all()
     return collections
 

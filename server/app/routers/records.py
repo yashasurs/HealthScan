@@ -279,6 +279,7 @@ def create_manual_record(
             file_size=len(record_data.content.encode('utf-8')),
             file_type=record_data.file_type or "text/plain",
             user_id=current_user.id,
+            created_by_id=current_user.id,  # Track who created it
             collection_id=record_data.collection_id
         )
         

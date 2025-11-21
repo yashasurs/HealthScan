@@ -59,6 +59,7 @@ async def image_to_text(
                 file_size=info['file_size'],
                 file_type=info['file_type'],
                 user_id=current_user.id,
+                created_by_id=current_user.id,
                 collection_id=collection_id
             )
             records_to_add.append(record)
