@@ -27,7 +27,8 @@ const AdminRecords = () => {
   const handleDeleteRecord = async (recordId) => {
     if (window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
       try {
-        await axios.delete(`${API_BASE_URL}/admin/records/${recordId}`);
+        const api = createApiService();
+        await api.delete(`/admin/records/${recordId}`);
         setRecords(records.filter(r => r.id !== recordId));
       } catch (err) {
         setError('Failed to delete record');

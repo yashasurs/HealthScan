@@ -31,7 +31,7 @@ const LoginForm = () => {
         setError('');
         setIsLoading(true);
           try {
-            const result = await login(username, password);
+            const result = await login(username.trim(), password);
             
             if (result.require_totp) {
               setRequireTOTP(true);
