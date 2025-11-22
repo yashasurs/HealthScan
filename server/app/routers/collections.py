@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from ..database import get_db
-from ..models import Collection, Record, Share
+from ..models import Collection, Record, Share, User
 from ..schemas import CollectionCreate, CollectionResponse, RecordResponse, CollectionUpdate, MessageResponse, SharedCollectionResponse
 from ..oauth2 import get_current_user
+from ..utils.family_auth import get_accessible_user_ids, can_access_user_records, can_modify_user_record
 
 router = APIRouter(
     prefix='/collections',
@@ -21,7 +22,8 @@ async def create_collection(
     db_collection = Collection(
         name=collection.name,
         description=collection.description,
-        user_id=current_user.id
+        user_id=current_user.id,
+        created_by_id=current_user.id  # Track who created it
     )
     db.add(db_collection)
     db.commit()
@@ -33,8 +35,19 @@ async def get_all_collections(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Get all collections under a user"""
-    collections = db.query(Collection).filter(Collection.user_id == current_user.id).all()
+    """
+    Get all collections accessible to the current user.
+    - Regular users: see only their own collections
+    - Family admins: see all family members' collections
+    - Doctors: see their patients' collections
+    - Admins: see all collections
+    """
+    accessible_user_ids = get_accessible_user_ids(current_user, db)
+    
+    collections = db.query(Collection).filter(
+        Collection.user_id.in_(accessible_user_ids)
+    ).all()
+    
     return collections
 
 @router.get("/{collection_id}", response_model=CollectionResponse)
@@ -43,14 +56,25 @@ async def get_collection(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Get a specific collection by ID"""
+    """Get a specific collection by ID if user has access"""
     collection = db.query(Collection).filter(
-        Collection.id == collection_id,
-        Collection.user_id == current_user.id
+        Collection.id == collection_id
     ).first()
     
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Get the owner of the collection
+    collection_owner = db.query(User).filter(
+        User.id == collection.user_id
+    ).first()
+    
+    # Check if current user can access this collection
+    if not can_access_user_records(current_user, collection_owner):
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to access this collection"
+        )
     
     return collection
 
@@ -61,14 +85,25 @@ async def update_collection(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Update a collection"""
+    """Update a collection if user has permission"""
     db_collection = db.query(Collection).filter(
-        Collection.id == collection_id,
-        Collection.user_id == current_user.id
+        Collection.id == collection_id
     ).first()
     
     if not db_collection:
         raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Get the owner of the collection
+    collection_owner = db.query(User).filter(
+        User.id == db_collection.user_id
+    ).first()
+    
+    # Check if current user can modify this collection
+    if not can_modify_user_record(current_user, collection_owner):
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to modify this collection"
+        )
     
     db_collection.name = collection.name
     db_collection.description = collection.description
@@ -83,14 +118,25 @@ async def update_collection_partial(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Partially update a collection"""
+    """Partially update a collection if user has permission"""
     db_collection = db.query(Collection).filter(
-        Collection.id == collection_id,
-        Collection.user_id == current_user.id
+        Collection.id == collection_id
     ).first()
     
     if not db_collection:
         raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Get the owner of the collection
+    collection_owner = db.query(User).filter(
+        User.id == db_collection.user_id
+    ).first()
+    
+    # Check if current user can modify this collection
+    if not can_modify_user_record(current_user, collection_owner):
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to modify this collection"
+        )
     
     # Update only the fields that are provided
     if collection_update.name is not None:
@@ -190,14 +236,25 @@ async def delete_collection(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    """Delete a collection"""
+    """Delete a collection if user has permission"""
     collection = db.query(Collection).filter(
-        Collection.id == collection_id,
-        Collection.user_id == current_user.id
+        Collection.id == collection_id
     ).first()
     
     if not collection:
         raise HTTPException(status_code=404, detail="Collection not found")
+    
+    # Get the owner of the collection
+    collection_owner = db.query(User).filter(
+        User.id == collection.user_id
+    ).first()
+    
+    # Check if current user can delete this collection
+    if not can_modify_user_record(current_user, collection_owner):
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to delete this collection"
+        )
     
     # Remove collection_id from all records in this collection
     db.query(Record).filter(Record.collection_id == collection_id).update(

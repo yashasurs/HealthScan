@@ -2,13 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import sys
-from . import models
-from .database import engine
-from .routers import ocr, auth, collections, records, qr, doctor, patient, admin, public
+from . import models  # This imports all models from models/__init__.py
+from .database import engine, Base
+from .routers import ocr, auth, collections, records, qr, doctor, patient, admin, public, hospitals, family
 
 # Initialize database tables
 try:
-    models.Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
     print("Database tables created/verified successfully")
 except Exception as e:
     print(f"ERROR creating database tables: {e}")
@@ -37,6 +37,8 @@ app.include_router(doctor.router)
 app.include_router(patient.router)
 app.include_router(admin.router)
 app.include_router(public.router)
+app.include_router(hospitals.router)
+app.include_router(family.router)
 
 @app.get("/")
 def root():

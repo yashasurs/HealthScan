@@ -196,3 +196,131 @@ def get_patient_records(
     ).all()
     
     return records
+
+
+@router.post("/patient/collection", response_model=schemas.CollectionResponse, status_code=status.HTTP_201_CREATED)
+def create_collection_for_patient(
+    collection_data: schemas.DoctorCollectionCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Create a collection for a patient (doctor only)"""
+    if current_user.role != models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Doctor privileges required."
+        )
+    
+    # Verify the patient is assigned to this doctor
+    patient = db.query(models.User).filter(
+        models.User.id == collection_data.patient_id,
+        models.User.doctor_id == current_user.id
+    ).first()
+    
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found or not assigned to you"
+        )
+    
+    # Create collection for patient
+    new_collection = models.Collection(
+        name=collection_data.name,
+        description=collection_data.description,
+        user_id=patient.id,  # Collection belongs to patient
+        created_by_id=current_user.id  # But created by doctor
+    )
+    
+    db.add(new_collection)
+    db.commit()
+    db.refresh(new_collection)
+    
+    return new_collection
+
+
+@router.post("/patient/record", response_model=schemas.RecordResponse, status_code=status.HTTP_201_CREATED)
+def create_record_for_patient(
+    record_data: schemas.DoctorRecordCreate,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Create a record for a patient (doctor only)"""
+    if current_user.role != models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Doctor privileges required."
+        )
+    
+    # Verify the patient is assigned to this doctor
+    patient = db.query(models.User).filter(
+        models.User.id == record_data.patient_id,
+        models.User.doctor_id == current_user.id
+    ).first()
+    
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found or not assigned to you"
+        )
+    
+    # Validate collection exists if provided and belongs to the patient
+    if record_data.collection_id:
+        collection = db.query(models.Collection).filter(
+            models.Collection.id == record_data.collection_id,
+            models.Collection.user_id == patient.id
+        ).first()
+        
+        if not collection:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Collection not found or not owned by this patient"
+            )
+    
+    # Create record for patient
+    new_record = models.Record(
+        filename=record_data.filename,
+        content=record_data.content,
+        file_size=len(record_data.content.encode('utf-8')),
+        file_type=record_data.file_type,
+        user_id=patient.id,  # Record belongs to patient
+        created_by_id=current_user.id,  # But created by doctor
+        collection_id=record_data.collection_id
+    )
+    
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    
+    return new_record
+
+
+@router.get("/patient/{patient_id}/collections", response_model=List[schemas.CollectionResponse])
+def get_patient_collections(
+    patient_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """Get all collections for a specific patient (doctor only)"""
+    if current_user.role != models.UserRole.DOCTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Doctor privileges required."
+        )
+    
+    # Verify the patient is assigned to this doctor
+    patient = db.query(models.User).filter(
+        models.User.id == patient_id,
+        models.User.doctor_id == current_user.id
+    ).first()
+    
+    if not patient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Patient not found or not assigned to you"
+        )
+    
+    collections = db.query(models.Collection).filter(
+        models.Collection.user_id == patient_id
+    ).all()
+    
+    return collections

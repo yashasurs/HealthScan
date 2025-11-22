@@ -5,6 +5,7 @@ from .. import schemas, models, database, oauth2, utils
 from fastapi.responses import StreamingResponse
 import io
 from ..utils import markdown_to_pdf_bytes, MarkupAgent
+from ..utils.family_auth import get_accessible_user_ids, can_access_user_records, can_modify_user_record
 from datetime import datetime
 
 
@@ -18,8 +19,19 @@ def get_user_records(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Get all records under the current user"""
-    records = db.query(models.Record).filter(models.Record.user_id == current_user.id).all()
+    """
+    Get all records accessible to the current user.
+    - Regular users: see only their own records
+    - Family admins: see all family members' records
+    - Doctors: see their patients' records
+    - Admins: see all records
+    """
+    accessible_user_ids = get_accessible_user_ids(current_user, db)
+    
+    records = db.query(models.Record).filter(
+        models.Record.user_id.in_(accessible_user_ids)
+    ).all()
+    
     return records
 
 
@@ -29,16 +41,27 @@ def get_record(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Get a specific record by ID"""
+    """Get a specific record by ID if user has access"""
     record = db.query(models.Record).filter(
-        models.Record.id == record_id,
-        models.Record.user_id == current_user.id
+        models.Record.id == record_id
     ).first()
     
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Record not found"
+        )
+    
+    # Get the owner of the record
+    record_owner = db.query(models.User).filter(
+        models.User.id == record.user_id
+    ).first()
+    
+    # Check if current user can access this record
+    if not can_access_user_records(current_user, record_owner):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this record"
         )
     
     return record
@@ -50,16 +73,27 @@ def update_record(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Update a record's fields"""
+    """Update a record's fields if user has permission"""
     record = db.query(models.Record).filter(
-        models.Record.id == record_id,
-        models.Record.user_id == current_user.id
+        models.Record.id == record_id
     ).first()
     
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Record not found"
+        )
+    
+    # Get the owner of the record
+    record_owner = db.query(models.User).filter(
+        models.User.id == record.user_id
+    ).first()
+    
+    # Check if current user can modify this record
+    if not can_modify_user_record(current_user, record_owner):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to modify this record"
         )
     
     # Update only the fields that are provided
@@ -102,16 +136,27 @@ def delete_record(
     db: Session = Depends(database.get_db),
     current_user: models.User = Depends(oauth2.get_current_user)
 ):
-    """Delete a record"""
+    """Delete a record if user has permission"""
     record = db.query(models.Record).filter(
-        models.Record.id == record_id,
-        models.Record.user_id == current_user.id
+        models.Record.id == record_id
     ).first()
     
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Record not found"
+        )
+    
+    # Get the owner of the record
+    record_owner = db.query(models.User).filter(
+        models.User.id == record.user_id
+    ).first()
+    
+    # Check if current user can delete this record
+    if not can_modify_user_record(current_user, record_owner):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to delete this record"
         )
     
     db.delete(record)
@@ -127,14 +172,27 @@ def get_record_pdf(
 ):
     """Get a PDF file generated from the record's content (assumed Markdown)."""
     record = db.query(models.Record).filter(
-        models.Record.id == record_id,
-        models.Record.user_id == current_user.id
+        models.Record.id == record_id
     ).first()
+    
     if not record:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Record not found"
         )
+    
+    # Get the owner of the record
+    record_owner = db.query(models.User).filter(
+        models.User.id == record.user_id
+    ).first()
+    
+    # Check if current user can access this record
+    if not can_access_user_records(current_user, record_owner):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this record"
+        )
+    
     pdf_bytes = markdown_to_pdf_bytes(record.content)
     return StreamingResponse(io.BytesIO(pdf_bytes), media_type="application/pdf", headers={
         "Content-Disposition": f"attachment; filename=record_{record_id}.pdf"
@@ -279,6 +337,7 @@ def create_manual_record(
             file_size=len(record_data.content.encode('utf-8')),
             file_type=record_data.file_type or "text/plain",
             user_id=current_user.id,
+            created_by_id=current_user.id,  # Track who created it
             collection_id=record_data.collection_id
         )
         
