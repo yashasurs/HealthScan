@@ -30,7 +30,7 @@ const Modal = ({
           &#8203;
         </span>
         
-        <div className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-full ${sizeClasses[size]}`}>
+        <div className={`relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-full ${sizeClasses[size]}`}>
           {/* Header */}
           {(title || showCloseButton) && (
             <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-between items-center">

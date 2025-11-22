@@ -19,6 +19,7 @@ import AdminUsers from './pages/AdminPages/AdminUsers.jsx'
 import AdminCollections from './pages/AdminPages/AdminCollections.jsx'
 import AdminRecords from './pages/AdminPages/AdminRecords.jsx'
 import AdminReports from './pages/AdminPages/AdminReports.jsx'
+import AdminHospitals from './pages/AdminPages/AdminHospitals.jsx'
 import AdminRoute from './components/AdminRoute.jsx'
 // Doctor imports
 import DoctorRoute from './components/DoctorRoute.jsx'
@@ -102,6 +103,11 @@ function App() {
             <Route path='/admin/reports' element={
               <AdminRoute>
                 <AdminReports />
+              </AdminRoute>
+            } />
+            <Route path='/admin/hospitals' element={
+              <AdminRoute>
+                <AdminHospitals />
               </AdminRoute>
             } />
             {/* Doctor Routes */}

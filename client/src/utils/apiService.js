@@ -279,4 +279,47 @@ export const doctorAPI = {
   }
 };
 
+// Hospitals API
+export const hospitalsAPI = {
+  getAll: async () => {
+    const api = createApiService();
+    return api.get('/hospitals/');
+  },
+
+  getById: async (hospitalId) => {
+    const api = createApiService();
+    return api.get(`/hospitals/${hospitalId}`);
+  },
+
+  create: async (hospitalData) => {
+    const api = createApiService();
+    return api.post('/hospitals/', hospitalData);
+  },
+
+  update: async (hospitalId, hospitalData) => {
+    const api = createApiService();
+    return api.put(`/hospitals/${hospitalId}`, hospitalData);
+  },
+
+  delete: async (hospitalId) => {
+    const api = createApiService();
+    return api.delete(`/hospitals/${hospitalId}`);
+  },
+
+  getDoctors: async (hospitalId) => {
+    const api = createApiService();
+    return api.get(`/hospitals/${hospitalId}/doctors`);
+  },
+
+  addDoctor: async (hospitalId, doctorId) => {
+    const api = createApiService();
+    return api.post(`/hospitals/${hospitalId}/doctors`, { doctor_id: doctorId });
+  },
+
+  removeDoctor: async (hospitalId, doctorId) => {
+    const api = createApiService();
+    return api.delete(`/hospitals/${hospitalId}/doctors/${doctorId}`);
+  }
+};
+
 export default createApiService;

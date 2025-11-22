@@ -141,6 +141,11 @@ const AdminDashboard = () => {
               description="View and manage all users"
             />
             <ActionButton
+              to="/admin/hospitals"
+              title="Manage Hospitals"
+              description="Manage hospitals and doctors"
+            />
+            <ActionButton
               to="/admin/collections"
               title="View Collections"
               description="Browse all collections"
