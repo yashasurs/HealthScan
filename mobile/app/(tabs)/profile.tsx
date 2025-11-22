@@ -9,30 +9,20 @@ import { User } from '@/types';
 
 const ProfileScreen = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Changed from true since we get data from AuthContext
   const [isEditing, setIsEditing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, user, loading: authLoading } = useAuth(); // Get user from AuthContext
   const apiService = useApiService();
 
-  const loadUserData = async () => {
-    try {
-      const response = await apiService.auth.getCurrentUser();
-      setUserData(response.data);
-      setErrorMessage('');
-    } catch (error) {
-      setErrorMessage('Failed to load user data');
-      console.error('Error loading user data:', error);
-    } finally {
+  // No need for loadUserData function - use user from AuthContext
+  // Only set loading to false when auth loading is complete
+  useEffect(() => {
+    if (!authLoading) {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadUserData();
-  }, []);
+  }, [authLoading]);
   
   const handleLogout = async () => {
     showConfirmToast(
@@ -55,7 +45,8 @@ const ProfileScreen = () => {
     try {
       setIsLoading(true);
       const response = await apiService.auth.updateUser(updatedData);
-      setUserData(response.data);
+      // Note: The updated user data should be reflected in AuthContext automatically
+      // after the API call. If not, we may need to trigger a user data refresh in AuthContext
       setIsEditing(false);
       showToast.success('Success', 'Profile updated successfully');
     } catch (error: any) {
@@ -95,16 +86,16 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
-        {userData && (
+        {user && (
           <>
             <ProfileHeader 
-              user={userData}
+              user={user}
               isEditing={isEditing}
               onUpdate={handleUpdateProfile}
             />
             
             <ProfileInfo 
-              user={userData}
+              user={user}
               isEditing={isEditing}
               onUpdate={handleUpdateProfile}
             />

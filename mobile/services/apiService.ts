@@ -4,7 +4,7 @@ import { DeviceEventEmitter } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, UserRole } from '@/types';
 
-const API_BASE_URL = 'https://healthscan-e868bea9b278.herokuapp.com';
+const API_BASE_URL = 'http://10.0.2.2:8000';
 
 // Helper function to convert API response to proper User type
 const convertApiUserToUser = (apiUser: any): User => {
@@ -119,7 +119,7 @@ const createApiService = (getValidToken: () => Promise<string | null>, refreshAc
  * Hook to get authenticated API service
  */
 export const useApiService = () => {
-  const { getValidToken, refreshAccessToken } = useAuth();
+  const { getValidToken, refreshAccessToken, updateUser } = useAuth();
 
   const getAuthenticatedApi = async (): Promise<AxiosInstance> => {
     return createApiService(getValidToken, refreshAccessToken);
@@ -141,9 +141,14 @@ export const useApiService = () => {
       updateUser: async (userData: Partial<User>): Promise<AxiosResponse<User>> => {
         const api = await getAuthenticatedApi();
         const response = await api.put('/user', userData);
+        const updatedUser = convertApiUserToUser(response.data);
+        
+        // Update the user data in AuthContext to avoid unnecessary /me calls
+        await updateUser(updatedUser);
+        
         return {
           ...response,
-          data: convertApiUserToUser(response.data)
+          data: updatedUser
         };
       }
     },
@@ -274,11 +279,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-<<<<<<< HEAD:mobile/services/apiService.ts
-        const url = '/ocr/get-text';
-=======
-        let url = '/ocr/images-to-text';
->>>>>>> 08589725dcfbd4f34fcff5d682b74e2d569141d2:mobile/services/apiService.js
+        const url = '/ocr/images-to-text';
         
         return api.post(url, formData, {
           headers: {
@@ -301,11 +302,7 @@ export const useApiService = () => {
           formData.append('files', fileObject);
         });
 
-<<<<<<< HEAD:mobile/services/apiService.ts
-        const url = `/ocr/get-text?collection_id=${collectionId}`;
-=======
-        let url = `/ocr/images-to-text?collection_id=${collectionId}`;
->>>>>>> 08589725dcfbd4f34fcff5d682b74e2d569141d2:mobile/services/apiService.js
+        const url = `/ocr/images-to-text?collection_id=${collectionId}`;
         
         return api.post(url, formData, {
           headers: {

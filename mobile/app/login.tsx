@@ -28,21 +28,13 @@ export default function LoginScreen() {
     }
   }, [markLaunchComplete]);
 
-  // Navigate to tabs if user becomes authenticated
+  // Navigate to tabs if user becomes authenticated (including on mount check)
   useEffect(() => {
     if (isAuthenticated) {
       console.log('User is authenticated, navigating to tabs from login screen');
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, router]);
-
-  // Also check on mount if user is already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User already authenticated on login screen mount, redirecting');
-      router.replace('/(tabs)');
-    }
-  }, []);
   
   const handleLogin = async () => {
     if (!username.trim()) {
@@ -63,10 +55,9 @@ export default function LoginScreen() {
         showToast.success('Login Successful', 'Welcome back!');
         console.log('Login successful, auth state will trigger navigation');
         // Navigation will happen automatically via useEffect when isAuthenticated changes
-      } else if (result.requireTotp) {
+      } else if (result.requireTotp && result.userId) {
         showToast.info('2FA Required', 'Please complete two-factor authentication');
-        // TODO: Navigate to TOTP verification screen
-        // router.push(`/verify-totp?userId=${result.userId}`);
+        router.push('/verify_totp' as any);
       } else {
         showToast.error('Login Failed', result.error || 'Please check your credentials');
       }
