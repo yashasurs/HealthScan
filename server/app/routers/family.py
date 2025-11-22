@@ -233,7 +233,7 @@ def transfer_admin_role(
         )
     
     # Get the new admin
-    new_admin = db.query(models.User).filter(models.User.id == request.new_admin_id).first()
+    new_admin = db.query(models.User).filter(models.User.id == request.new_admin_user_id).first()
     if not new_admin:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
