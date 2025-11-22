@@ -1,67 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, SafeAreaView, TouchableOpacity, View, Text, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { DeviceEventEmitter } from 'react-native';
 import { useAuth } from '@/contexts/AuthContext';
-import { useApiService } from '@/services/apiService';
-
-interface PatientData {
-  id: number;
-  email: string;
-  username: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
-  blood_group?: string;
-  aadhar?: string;
-  allergies?: string;
-  doctor_name?: string;
-  visit_date?: string;
-  totp_enabled?: boolean;
-  role?: string;
-  created_at: string;
-  updated_at: string;
-}
 
 const DashboardScreen: React.FC = () => {
-  const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [initialLoad, setInitialLoad] = useState<boolean>(true);
-  const { user } = useAuth();
-  const apiService = useApiService();
+  const { user, loading: authLoading } = useAuth();
 
-  const loadData = useCallback(async () => {
-    try {
-      if (initialLoad) {
-        setLoading(true);
-      }
-      
-      const response = await apiService.auth.getCurrentUser();
-      setPatientData(response.data);
-    } catch (error: any) {
-      console.error('Error fetching user data:', error);
-      
-      // Check if it's a 401 error (authentication failure)
-      if (error.response?.status === 401) {
-        console.log('Authentication failed, will be handled by auth error listener');
-        // The DeviceEventEmitter in the apiService will handle the redirect
-        return;
-      }
-      
-      // For other errors, show a user-friendly message
-      setPatientData(null);
-    } finally {
-      if (initialLoad) {
-        setLoading(false);
-        setInitialLoad(false);
-      }
-    }
-  }, [apiService, initialLoad]);
-
+  // Use user data from AuthContext instead of making API calls
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    // Wait for auth loading to complete, then set our loading state
+    if (!authLoading) {
+      setLoading(false);
+    }
+  }, [authLoading]);
 
   const handleAddRecord = () => {
     router.push('/upload');
@@ -83,7 +36,7 @@ const DashboardScreen: React.FC = () => {
       );
     }
 
-    if (!patientData) {
+    if (!user) {
       return (
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateText}>Failed to load patient information</Text>
@@ -107,16 +60,16 @@ const DashboardScreen: React.FC = () => {
           <View style={styles.patientInfoContainer}>
             <View style={styles.infoSection}>
               <Text style={styles.sectionTitle}>Basic Information</Text>
-              {renderField('Full Name', `${patientData.first_name || ''} ${patientData.last_name || ''}`.trim())}
-              {renderField('Username', patientData.username)}
+              {renderField('Full Name', `${user.first_name || ''} ${user.last_name || ''}`.trim())}
+              {renderField('Username', user.username)}
             </View>
 
             <View style={styles.infoSection}>
               <Text style={styles.sectionTitle}>Medical Information</Text>
-              {renderField('Blood Group', patientData.blood_group)}
-              {renderField('Allergies', patientData.allergies)}
-              {renderField('Doctor Name', patientData.doctor_name)}
-              {renderField('Last Visit', patientData.visit_date)}
+              {renderField('Blood Group', user.blood_group)}
+              {renderField('Allergies', user.allergies)}
+              {renderField('Doctor Name', user.doctor_name)}
+              {renderField('Last Visit', user.visit_date)}
             </View>
           </View>
         </View>

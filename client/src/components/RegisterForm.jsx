@@ -104,16 +104,16 @@ const RegisterForm = () => {
         
         try {
             const userData = {
-                username: username,
-                email: email,
-                first_name: firstName,
-                last_name: lastName,
-                phone_number: phoneNumber,
+                username: username.trim(),
+                email: email.trim(),
+                first_name: firstName.trim(),
+                last_name: lastName.trim(),
+                phone_number: phoneNumber.trim(),
                 password: password,
                 blood_group: bloodGroup,
-                aadhar: aadhar || null,
-                allergies: allergies || null,
-                doctor_name: doctorName || null,
+                aadhar: aadhar.trim() || null,
+                allergies: allergies.trim() || null,
+                doctor_name: doctorName.trim() || null,
                 visit_date: visitDate ? new Date(visitDate).toISOString() : null
             };
               await register(userData);

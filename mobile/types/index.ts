@@ -38,9 +38,10 @@ export interface PatientData extends User {}
 export interface Record {
   id: string;
   filename: string;
+  content?: string; // Make optional since list responses might not include content
   file_type: string;
   file_size: number;
-  file_url: string;
+  file_url?: string;
   created_at: string;
   updated_at: string;
   collection_id?: string;

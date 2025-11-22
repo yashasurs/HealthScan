@@ -66,16 +66,16 @@ const SimpleRegister = () => {
     
     try {
       const userData = {
-        username: formData.username,
-        email: formData.email,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        phone_number: formData.phone_number,
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        phone_number: formData.phone_number.trim(),
         password: formData.password,
         blood_group: formData.blood_group,
-        aadhar: formData.aadhar || null,
-        allergies: formData.allergies || null,
-        doctor_name: formData.doctor_name || null,
+        aadhar: formData.aadhar.trim() || null,
+        allergies: formData.allergies.trim() || null,
+        doctor_name: formData.doctor_name.trim() || null,
         visit_date: formData.visit_date ? new Date(formData.visit_date).toISOString() : null
       };
       

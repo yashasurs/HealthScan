@@ -1,6 +1,8 @@
 // A centralized API service with authentication
 import axios from 'axios';
-import { API_BASE_URL, STORAGE_KEYS } from './constants';
+import { STORAGE_KEYS } from './constants';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 /**
  * Refresh the access token using the refresh token
