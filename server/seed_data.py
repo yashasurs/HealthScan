@@ -9,9 +9,16 @@ WARNING: This will add data to your database. Use only in development!
 """
 
 from app.database import SessionLocal, Base, engine
-from app.models import User, Family, UserRole
-from app.utils import hash
+from app.models import User, Family, UserRole, Record, Collection
+from passlib.context import CryptContext
 from datetime import datetime, timedelta
+import uuid
+
+# Hash function
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash(password: str):
+    return pwd_context.hash(password)
 
 
 def create_dummy_data():
@@ -371,6 +378,376 @@ def create_dummy_data():
         
         print("✅ Assigned doctors to family members")
         
+        # Flush to get user IDs before creating collections
+        db.flush()
+        
+        # ============================================
+        # CREATE COLLECTIONS
+        # ============================================
+        print("\n📁 Creating Collections...")
+        
+        collections = []
+        
+        # Collections for John Smith (family admin)
+        john_collections = [
+            Collection(
+                name="Heart Health Records",
+                description="Cardiology checkups and treatments",
+                user_id=patients[0].id,
+                created_by_id=patients[0].id
+            ),
+            Collection(
+                name="Annual Checkups",
+                description="Yearly physical examinations",
+                user_id=patients[0].id,
+                created_by_id=patients[0].id
+            )
+        ]
+        for col in john_collections:
+            db.add(col)
+            collections.append(col)
+        
+        # Collections for Jane Smith
+        jane_collection = Collection(
+            name="Pregnancy Records",
+            description="Prenatal and postnatal care",
+            user_id=patients[1].id,
+            created_by_id=patients[1].id
+        )
+        db.add(jane_collection)
+        collections.append(jane_collection)
+        
+        # Collections for Jimmy Smith
+        jimmy_collection = Collection(
+            name="Allergy Reports",
+            description="Peanut allergy tests and treatments",
+            user_id=patients[2].id,
+            created_by_id=patients[2].id
+        )
+        db.add(jimmy_collection)
+        collections.append(jimmy_collection)
+        
+        # Collections for Mike Johnson (family admin)
+        mike_collection = Collection(
+            name="Blood Pressure Monitoring",
+            description="BP readings and medication records",
+            user_id=patients[4].id,
+            created_by_id=patients[4].id
+        )
+        db.add(mike_collection)
+        collections.append(mike_collection)
+        
+        db.flush()  # Get collection IDs
+        print(f"✅ Created {len(collections)} collections")
+        
+        # ============================================
+        # CREATE MEDICAL RECORDS
+        # ============================================
+        print("\n📄 Creating Medical Records...")
+        
+        records = []
+        
+        # Records for John Smith
+        john_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Cardiology_Checkup_2024.txt",
+                content="""# Cardiology Checkup Report
+**Patient:** John Smith
+**Date:** November 15, 2024
+**Doctor:** Dr. Sarah Wilson
+
+## Vital Signs
+- Blood Pressure: 125/82 mmHg
+- Heart Rate: 72 bpm
+- Temperature: 98.6°F
+
+## Assessment
+Patient shows good cardiovascular health. Minor elevation in blood pressure noted.
+
+## Recommendations
+- Continue current medication
+- Monitor BP weekly
+- Follow up in 3 months
+
+## Medications
+- Lisinopril 10mg daily
+- Aspirin 81mg daily
+""",
+                file_size=450,
+                file_type="text/markdown",
+                user_id=patients[0].id,
+                collection_id=john_collections[0].id,
+                created_by_id=patients[0].id
+            ),
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Annual_Physical_2024.txt",
+                content="""# Annual Physical Examination
+**Patient:** John Smith
+**Date:** October 10, 2024
+**Doctor:** Dr. Sarah Wilson
+
+## General Health
+Overall health status: Good
+
+## Lab Results
+- Cholesterol: 185 mg/dL (Normal)
+- Blood Sugar: 95 mg/dL (Normal)
+- Hemoglobin: 14.5 g/dL (Normal)
+
+## Notes
+Patient is in good health. Continue current lifestyle and medications.
+""",
+                file_size=320,
+                file_type="text/markdown",
+                user_id=patients[0].id,
+                collection_id=john_collections[1].id,
+                created_by_id=patients[0].id
+            )
+        ]
+        
+        # Records for Jane Smith
+        jane_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Prenatal_Visit_Week_20.txt",
+                content="""# Prenatal Checkup - Week 20
+**Patient:** Jane Smith
+**Date:** November 10, 2024
+**Doctor:** Dr. Sarah Wilson
+
+## Ultrasound Results
+Baby is developing normally. All measurements within expected range.
+
+## Mother's Health
+- Blood Pressure: 118/75 mmHg
+- Weight: +12 lbs from pre-pregnancy
+- Fetal Heart Rate: 145 bpm
+
+## Next Steps
+- Continue prenatal vitamins
+- Schedule anatomy scan
+- Next visit in 4 weeks
+""",
+                file_size=380,
+                file_type="text/markdown",
+                user_id=patients[1].id,
+                collection_id=jane_collection.id,
+                created_by_id=patients[1].id
+            )
+        ]
+        
+        # Records for Jimmy Smith
+        jimmy_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Allergy_Test_Results.txt",
+                content="""# Allergy Test Report
+**Patient:** Jimmy Smith
+**Date:** September 5, 2024
+**Doctor:** Dr. James Miller
+
+## Test Results
+Confirmed severe peanut allergy (IgE level: 95 kU/L)
+
+## Recommendations
+- Strict peanut avoidance
+- Carry EpiPen at all times
+- Educate family and school
+- Follow-up in 6 months
+
+## Emergency Protocol
+Administer epinephrine immediately if exposed and symptoms develop.
+""",
+                file_size=290,
+                file_type="text/markdown",
+                user_id=patients[2].id,
+                collection_id=jimmy_collection.id,
+                created_by_id=patients[2].id
+            ),
+            Record(
+                id=str(uuid.uuid4()),
+                filename="School_Physical_2024.txt",
+                content="""# School Physical Examination
+**Patient:** Jimmy Smith
+**Date:** August 20, 2024
+**Doctor:** Dr. James Miller
+
+## Physical Exam
+Height: 4'8", Weight: 68 lbs
+Vision: 20/20, Hearing: Normal
+
+## Cleared for Activities
+Student is cleared for all school activities with peanut allergy precautions in place.
+
+## Notes
+EpiPen on file with school nurse.
+""",
+                file_size=250,
+                file_type="text/markdown",
+                user_id=patients[2].id,
+                collection_id=None,
+                created_by_id=patients[2].id
+            )
+        ]
+        
+        # Records for Julia Smith
+        julia_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Dental_Checkup_2024.txt",
+                content="""# Dental Examination
+**Patient:** Julia Smith
+**Date:** November 1, 2024
+
+## Findings
+No cavities detected. Mild plaque buildup noted.
+
+## Treatment
+Cleaning performed. Fluoride treatment applied.
+
+## Recommendations
+- Brush twice daily
+- Floss regularly
+- Next checkup in 6 months
+""",
+                file_size=220,
+                file_type="text/markdown",
+                user_id=patients[3].id,
+                collection_id=None,
+                created_by_id=patients[3].id
+            )
+        ]
+        
+        # Records for Mike Johnson (family admin)
+        mike_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="BP_Monitoring_Log.txt",
+                content="""# Blood Pressure Monitoring Log
+**Patient:** Mike Johnson
+**Period:** October 2024
+
+## Weekly Readings
+- Week 1: 138/88 mmHg
+- Week 2: 135/85 mmHg
+- Week 3: 132/84 mmHg
+- Week 4: 130/82 mmHg
+
+## Medication
+Amlodipine 5mg daily
+
+## Notes
+Blood pressure improving with medication. Continue current treatment.
+""",
+                file_size=310,
+                file_type="text/markdown",
+                user_id=patients[4].id,
+                collection_id=mike_collection.id,
+                created_by_id=patients[4].id
+            )
+        ]
+        
+        # Records for Mary Johnson
+        mary_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Lactose_Intolerance_Diet_Plan.txt",
+                content="""# Lactose Intolerance Management
+**Patient:** Mary Johnson
+**Date:** October 15, 2024
+
+## Diagnosis
+Confirmed lactose intolerance via hydrogen breath test
+
+## Dietary Recommendations
+- Avoid milk, cheese, ice cream
+- Use lactose-free alternatives
+- Consider lactase supplements
+
+## Allowed Foods
+- Lactose-free milk
+- Hard cheeses (limited lactose)
+- Yogurt with active cultures
+""",
+                file_size=280,
+                file_type="text/markdown",
+                user_id=patients[5].id,
+                collection_id=None,
+                created_by_id=patients[5].id
+            )
+        ]
+        
+        # Records for Robert Williams (family admin)
+        robert_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Dust_Allergy_Treatment.txt",
+                content="""# Allergy Treatment Plan
+**Patient:** Robert Williams
+**Date:** September 20, 2024
+**Doctor:** Dr. Emily Taylor
+
+## Diagnosis
+Moderate dust mite allergy
+
+## Treatment
+- Antihistamine: Cetirizine 10mg daily
+- Nasal spray: Fluticasone
+- Environmental controls
+
+## Home Recommendations
+- Use allergen-proof bedding
+- HEPA air filters
+- Regular cleaning
+""",
+                file_size=300,
+                file_type="text/markdown",
+                user_id=patients[7].id,
+                collection_id=None,
+                created_by_id=patients[7].id
+            )
+        ]
+        
+        # Records for Alice Brown (no family)
+        alice_records = [
+            Record(
+                id=str(uuid.uuid4()),
+                filename="Wellness_Checkup_2024.txt",
+                content="""# Wellness Examination
+**Patient:** Alice Brown
+**Date:** November 5, 2024
+
+## Health Status
+Excellent overall health
+
+## Vital Signs
+- BP: 115/75 mmHg
+- Heart Rate: 68 bpm
+- BMI: 22.5 (Normal)
+
+## Recommendations
+Continue current healthy lifestyle. No concerns noted.
+""",
+                file_size=240,
+                file_type="text/markdown",
+                user_id=patients[9].id,
+                collection_id=None,
+                created_by_id=patients[9].id
+            )
+        ]
+        
+        # Add all records
+        all_records = (john_records + jane_records + jimmy_records + julia_records + 
+                      mike_records + mary_records + robert_records + alice_records)
+        
+        for record in all_records:
+            db.add(record)
+            records.append(record)
+        
+        print(f"✅ Created {len(records)} medical records")
+        
         # ============================================
         # COMMIT ALL CHANGES
         # ============================================
@@ -384,13 +761,15 @@ def create_dummy_data():
         print(f"   • Patients: {len(patients)} (9 in families, 2 without)")
         print(f"   • Doctors: {len(doctors)}")
         print(f"   • Admins: 1")
+        print(f"   • Collections: {len(collections)}")
+        print(f"   • Medical Records: {len(records)}")
         print(f"   • Total Users: {len(patients) + len(doctors) + 1}")
         print("\n🔐 Login Credentials:")
         print("   Password for all users: password123")
-        print("\n👥 Family Admins:")
-        print("   • john_smith (Smith Family)")
-        print("   • mike_johnson (Johnson Family)")
-        print("   • robert_williams (Williams Family)")
+        print("\n👥 Family Admins (can view ALL family member records):")
+        print("   • john_smith (Smith Family - 4 members, 5 records total)")
+        print("   • mike_johnson (Johnson Family - 3 members, 2 records total)")
+        print("   • robert_williams (Williams Family - 2 members, 1 record total)")
         print("\n👨‍⚕️ Sample Doctors:")
         print("   • dr_sarah_wilson (Cardiology)")
         print("   • dr_james_miller (Pediatrics)")

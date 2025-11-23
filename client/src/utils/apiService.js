@@ -322,4 +322,51 @@ export const hospitalsAPI = {
   }
 };
 
+// Family API
+export const familyAPI = {
+  create: async (familyData) => {
+    const api = createApiService();
+    return api.post('/family/create', familyData);
+  },
+
+  getMyFamily: async () => {
+    const api = createApiService();
+    return api.get('/family/my-family');
+  },
+
+  update: async (familyId, familyData) => {
+    const api = createApiService();
+    return api.put(`/family/${familyId}`, familyData);
+  },
+
+  delete: async () => {
+    const api = createApiService();
+    return api.delete('/family/');
+  },
+
+  addMember: async (userId) => {
+    const api = createApiService();
+    return api.post('/family/add-member', {
+      user_id: userId
+    });
+  },
+
+  removeMember: async (userId) => {
+    const api = createApiService();
+    return api.post('/family/remove-member', {
+      user_id: userId
+    });
+  },
+
+  getMemberRecords: async (userId) => {
+    const api = createApiService();
+    return api.get(`/family/members/${userId}/records`);
+  },
+
+  getMemberCollections: async (userId) => {
+    const api = createApiService();
+    return api.get(`/family/members/${userId}/collections`);
+  }
+};
+
 export default createApiService;

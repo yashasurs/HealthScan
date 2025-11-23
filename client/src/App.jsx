@@ -29,6 +29,8 @@ import DoctorPatients from './pages/DoctorPages/DoctorPatients.jsx'
 import DoctorPatientDetail from './pages/DoctorPages/DoctorPatientDetail.jsx'
 import DoctorProfile from './pages/DoctorPages/DoctorProfile.jsx'
 import PublicDoctors from './pages/PublicDoctorsSimplified.jsx'
+import CreateFamily from './pages/CreateFamily.jsx'
+import FamilyManagement from './pages/FamilyManagement.jsx'
 
 
 
@@ -78,6 +80,16 @@ function App() {
             <Route path='/profile' element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } />
+            <Route path='/create-family' element={
+              <ProtectedRoute>
+                <CreateFamily />
+              </ProtectedRoute>
+            } />
+            <Route path='/family' element={
+              <ProtectedRoute>
+                <FamilyManagement />
               </ProtectedRoute>
             } />
             <Route path='/admin' element={
