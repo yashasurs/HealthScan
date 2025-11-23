@@ -39,8 +39,8 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db.refresh(new_user)
     
     # Generate tokens
-    access_token = oauth2.create_access_token(data={"user_id": new_user.id})
-    refresh_token = oauth2.create_refresh_token(data={"user_id": new_user.id})
+    access_token = oauth2.create_access_token(data={"user_id": new_user.id, "role": new_user.role})
+    refresh_token = oauth2.create_refresh_token(data={"user_id": new_user.id, "role": new_user.role})
     
     return {
         "access_token": access_token, 
@@ -111,8 +111,8 @@ def verify_totp(
         )
     
     # Code is valid, generate tokens
-    access_token = oauth2.create_access_token(data={"user_id": user.id})
-    refresh_token = oauth2.create_refresh_token(data={"user_id": user.id})
+    access_token = oauth2.create_access_token(data={"user_id": user.id, "role": user.role})
+    refresh_token = oauth2.create_refresh_token(data={"user_id": user.id, "role": user.role})
     
     return {
         "access_token": access_token,
