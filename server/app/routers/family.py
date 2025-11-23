@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from .. import models, schemas, oauth2, database
+from ..utils.family_auth import can_access_user_records
 
 router = APIRouter(
     prefix="/family",
@@ -10,6 +11,7 @@ router = APIRouter(
 
 
 @router.post("/", response_model=schemas.FamilyResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=schemas.FamilyResponse, status_code=status.HTTP_201_CREATED)
 def create_family(
     family: schemas.FamilyCreate,
     db: Session = Depends(database.get_db),
@@ -294,3 +296,86 @@ def delete_family(
     db.commit()
     
     return {"message": "Family has been deleted and all members have been removed"}
+
+
+@router.get("/members/{member_id}/records", response_model=List[schemas.RecordResponse])
+def get_family_member_records(
+    member_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """
+    Get all medical records for a specific family member.
+    Only accessible by family admins or the member themselves.
+    """
+    # Get the target user to verify they exist
+    target_user = db.query(models.User).filter(models.User.id == member_id).first()
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Check if current user can access the target user's records
+    if not can_access_user_records(current_user, target_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to view this member's records"
+        )
+    
+    # Verify the target user is in the same family (for family admins)
+    if current_user.is_family_admin and current_user.id != member_id:
+        if target_user.family_id != current_user.family_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This user is not in your family"
+            )
+    
+    # Get all records for the member
+    records = db.query(models.Record).filter(
+        models.Record.user_id == member_id
+    ).order_by(models.Record.created_at.desc()).all()
+    
+    return records
+
+
+@router.get("/members/{member_id}/collections", response_model=List[schemas.CollectionResponse])
+def get_family_member_collections(
+    member_id: int,
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(oauth2.get_current_user)
+):
+    """
+    Get all collections for a specific family member.
+    Only accessible by family admins or the member themselves.
+    """
+    # Get the target user to verify they exist
+    target_user = db.query(models.User).filter(models.User.id == member_id).first()
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Check if current user can access the target user's records
+    if not can_access_user_records(current_user, target_user):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You don't have permission to view this member's collections"
+        )
+    
+    # Verify the target user is in the same family (for family admins)
+    if current_user.is_family_admin and current_user.id != member_id:
+        if target_user.family_id != current_user.family_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="This user is not in your family"
+            )
+    
+    # Get all collections for the member
+    collections = db.query(models.Collection).filter(
+        models.Collection.user_id == member_id
+    ).order_by(models.Collection.created_at.desc()).all()
+    
+    return collections
+
