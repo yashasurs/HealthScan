@@ -369,4 +369,118 @@ export const familyAPI = {
   }
 };
 
+// Patient API
+export const patientAPI = {
+  assignDoctor: async (doctorId) => {
+    const api = createApiService();
+    return api.post('/patient/assign-doctor', {
+      doctor_id: doctorId
+    });
+  },
+
+  getMyDoctor: async () => {
+    const api = createApiService();
+    return api.get('/patient/my-doctor');
+  },
+
+  removeDoctor: async () => {
+    const api = createApiService();
+    return api.delete('/patient/remove-doctor');
+  },
+
+  getAvailableDoctors: async (specialization = null) => {
+    const api = createApiService();
+    const params = specialization ? `?specialization=${specialization}` : '';
+    return api.get(`/patient/available-doctors${params}`);
+  }
+};
+
+// Public API
+export const publicAPI = {
+  getDoctors: async (params = {}) => {
+    const api = createApiService();
+    const queryParams = new URLSearchParams();
+    if (params.specialization) queryParams.append('specialization', params.specialization);
+    if (params.hospital) queryParams.append('hospital', params.hospital);
+    if (params.verified_only !== undefined) queryParams.append('verified_only', params.verified_only);
+    if (params.limit) queryParams.append('limit', params.limit);
+    
+    const queryString = queryParams.toString();
+    return api.get(`/public/doctors${queryString ? '?' + queryString : ''}`);
+  },
+
+  getSpecializations: async () => {
+    const api = createApiService();
+    return api.get('/public/doctors/specializations');
+  },
+
+  getHospitals: async () => {
+    const api = createApiService();
+    return api.get('/public/doctors/hospitals');
+  },
+
+  getStats: async () => {
+    const api = createApiService();
+    return api.get('/public/doctors/stats');
+  }
+};
+
+// Admin API
+export const adminAPI = {
+  getDashboard: async () => {
+    const api = createApiService();
+    return api.get('/admin/dashboard');
+  },
+
+  getUsers: async (params = {}) => {
+    const api = createApiService();
+    return api.get('/admin/users', { params });
+  },
+
+  getUserById: async (userId) => {
+    const api = createApiService();
+    return api.get(`/admin/users/${userId}`);
+  },
+
+  createUser: async (userData) => {
+    const api = createApiService();
+    return api.post('/admin/users', userData);
+  },
+
+  updateUser: async (userId, userData) => {
+    const api = createApiService();
+    return api.put(`/admin/users/${userId}`, userData);
+  },
+
+  deleteUser: async (userId) => {
+    const api = createApiService();
+    return api.delete(`/admin/users/${userId}`);
+  },
+
+  updateUserRole: async (userId, role) => {
+    const api = createApiService();
+    return api.put(`/admin/users/${userId}/role`, { role });
+  },
+
+  getCollections: async () => {
+    const api = createApiService();
+    return api.get('/admin/collections');
+  },
+
+  getRecords: async () => {
+    const api = createApiService();
+    return api.get('/admin/records');
+  },
+
+  deleteCollection: async (collectionId) => {
+    const api = createApiService();
+    return api.delete(`/admin/collections/${collectionId}`);
+  },
+
+  deleteRecord: async (recordId) => {
+    const api = createApiService();
+    return api.delete(`/admin/records/${recordId}`);
+  }
+};
+
 export default createApiService;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { hospitalsAPI, createApiService } from '../../utils/apiService';
+import { hospitalsAPI, adminAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Modal from '../../components/Modal';
 import Input from '../../components/Input';
@@ -49,8 +49,7 @@ const AdminHospitals = () => {
 
   const fetchAllDoctors = async () => {
     try {
-      const api = createApiService();
-      const response = await api.get('/admin/users', { 
+      const response = await adminAPI.getUsers({ 
         params: { role: 'doctor', limit: 1000 } 
       });
       setAllDoctors(response.data);

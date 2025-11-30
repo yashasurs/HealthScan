@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createApiService } from '../../utils/apiService';
+import { adminAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const AdminRecords = () => {
@@ -11,8 +11,7 @@ const AdminRecords = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const api = createApiService();
-        const response = await api.get('/admin/records');
+        const response = await adminAPI.getRecords();
         setRecords(response.data);
       } catch (err) {
         setError('Failed to fetch records');
@@ -27,8 +26,7 @@ const AdminRecords = () => {
   const handleDeleteRecord = async (recordId) => {
     if (window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
       try {
-        const api = createApiService();
-        await api.delete(`/admin/records/${recordId}`);
+        await adminAPI.deleteRecord(recordId);
         setRecords(records.filter(r => r.id !== recordId));
       } catch (err) {
         setError('Failed to delete record');

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createApiService } from '../../utils/apiService';
+import { adminAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 
@@ -13,8 +13,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const api = createApiService();
-        const response = await api.get('/admin/dashboard');
+        const response = await adminAPI.getDashboard();
         setStats(response.data);
       } catch (err) {
         setError('Failed to fetch dashboard statistics');

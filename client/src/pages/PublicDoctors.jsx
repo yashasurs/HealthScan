@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createApiService } from '../utils/apiService';
+import { publicAPI, patientAPI } from '../utils/apiService';
+import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const PublicDoctors = () => {
@@ -10,6 +11,12 @@ const PublicDoctors = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user, isAuthenticated } = useAuth();
+  
+  // Assignment state
+  const [assigningDoctorId, setAssigningDoctorId] = useState(null);
+  const [myDoctorId, setMyDoctorId] = useState(null);
+  const [assignmentMessage, setAssignmentMessage] = useState(null);
   
   // Filters
   const [selectedSpecialization, setSelectedSpecialization] = useState('');
@@ -20,19 +27,17 @@ const PublicDoctors = () => {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const api = createApiService();
-        
         // Fetch all data in parallel with error handling for individual endpoints
         const fetchPromises = [
-          api.get('/public/doctors/specializations').catch(err => {
+          publicAPI.getSpecializations().catch(err => {
             console.warn('Specializations endpoint failed:', err);
             return { data: [] };
           }),
-          api.get('/public/doctors/hospitals').catch(err => {
+          publicAPI.getHospitals().catch(err => {
             console.warn('Hospitals endpoint failed:', err);
             return { data: [] };
           }),
-          api.get('/public/doctors/stats').catch(err => {
+          publicAPI.getStats().catch(err => {
             console.warn('Stats endpoint failed:', err);
             return { data: null };
           })
@@ -60,17 +65,34 @@ const PublicDoctors = () => {
     fetchInitialData();
   }, []);
 
+  // Fetch current assigned doctor if user is a patient
+  useEffect(() => {
+    const fetchMyDoctor = async () => {
+      if (isAuthenticated && user?.role === 'patient') {
+        try {
+          const response = await patientAPI.getMyDoctor();
+          if (response.data) {
+            setMyDoctorId(response.data.id);
+          }
+        } catch (err) {
+          console.log('No doctor assigned yet or error fetching:', err);
+        }
+      }
+    };
+    
+    fetchMyDoctor();
+  }, [isAuthenticated, user]);
+
   const fetchDoctors = async () => {
     try {
-      const api = createApiService();
-      const params = new URLSearchParams();
+      const params = {
+        specialization: selectedSpecialization || undefined,
+        hospital: selectedHospital || undefined,
+        verified_only: verifiedOnly,
+        limit: 50
+      };
       
-      if (selectedSpecialization) params.append('specialization', selectedSpecialization);
-      if (selectedHospital) params.append('hospital', selectedHospital);
-      params.append('verified_only', verifiedOnly);
-      params.append('limit', '50');
-      
-      const response = await api.get(`/public/doctors?${params.toString()}`);
+      const response = await publicAPI.getDoctors(params);
       setDoctors(response.data);
       setError(null); // Clear any previous errors
     } catch (err) {
@@ -90,6 +112,65 @@ const PublicDoctors = () => {
       fetchDoctors();
     }
   }, [selectedSpecialization, selectedHospital, verifiedOnly]);
+
+  // Handle doctor assignment
+  const handleAssignDoctor = async (doctorId) => {
+    if (!isAuthenticated) {
+      setAssignmentMessage({ type: 'error', text: 'Please login to assign a doctor' });
+      return;
+    }
+
+    if (user?.role !== 'patient') {
+      setAssignmentMessage({ type: 'error', text: 'Only patients can assign doctors' });
+      return;
+    }
+
+    setAssigningDoctorId(doctorId);
+    setAssignmentMessage(null);
+
+    try {
+      const response = await patientAPI.assignDoctor(doctorId);
+      setMyDoctorId(doctorId);
+      setAssignmentMessage({ 
+        type: 'success', 
+        text: response.data.message || 'Doctor assigned successfully!' 
+      });
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setAssignmentMessage(null), 5000);
+    } catch (err) {
+      console.error('Error assigning doctor:', err);
+      setAssignmentMessage({ 
+        type: 'error', 
+        text: err.response?.data?.detail || 'Failed to assign doctor. Please try again.' 
+      });
+    } finally {
+      setAssigningDoctorId(null);
+    }
+  };
+
+  const handleRemoveDoctor = async () => {
+    if (!window.confirm('Are you sure you want to remove your assigned doctor?')) {
+      return;
+    }
+
+    try {
+      await patientAPI.removeDoctor();
+      setMyDoctorId(null);
+      setAssignmentMessage({ 
+        type: 'success', 
+        text: 'Doctor removed successfully' 
+      });
+      
+      setTimeout(() => setAssignmentMessage(null), 5000);
+    } catch (err) {
+      console.error('Error removing doctor:', err);
+      setAssignmentMessage({ 
+        type: 'error', 
+        text: err.response?.data?.detail || 'Failed to remove doctor. Please try again.' 
+      });
+    }
+  };
 
   // Filter doctors by search term on frontend
   const filteredDoctors = doctors.filter(doctor => {
@@ -136,12 +217,53 @@ const PublicDoctors = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Find Verified Doctors</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Discover qualified medical professionals in our network of verified healthcare providers
           </p>
+          {isAuthenticated && user?.role === 'patient' && (
+            <p className="text-sm text-blue-600 mt-3 font-medium">
+              Click "Assign as My Doctor" to add a doctor to your healthcare team
+            </p>
+          )}
         </div>
+
+        {/* Assignment Message Banner */}
+        {assignmentMessage && (
+          <div className={`mb-6 p-4 rounded-lg border ${
+            assignmentMessage.type === 'success' 
+              ? 'bg-green-50 border-green-200' 
+              : 'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                {assignmentMessage.type === 'success' ? (
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+                <p className={`text-sm font-medium ${
+                  assignmentMessage.type === 'success' ? 'text-green-800' : 'text-red-800'
+                }`}>
+                  {assignmentMessage.text}
+                </p>
+              </div>
+              <button
+                onClick={() => setAssignmentMessage(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Error Banner - Show if there are partial errors but content is available */}
         {error && doctors.length > 0 && (
@@ -274,8 +396,25 @@ const PublicDoctors = () => {
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredDoctors.map((doctor) => (
-              <div key={doctor.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            {filteredDoctors.map((doctor) => {
+              const isMyDoctor = myDoctorId === doctor.id;
+              const isAssigning = assigningDoctorId === doctor.id;
+              
+              return (
+              <div key={doctor.id} className={`bg-white rounded-lg border-2 p-6 hover:shadow-md transition-all duration-200 ${
+                isMyDoctor ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'
+              }`}>
+                {/* My Doctor Badge */}
+                {isMyDoctor && (
+                  <div className="mb-3 flex items-center justify-between">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500 text-white">
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Your Doctor
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                     <span className="text-lg font-bold text-blue-600">
@@ -325,8 +464,64 @@ const PublicDoctors = () => {
                     <p className="text-sm text-gray-900">{doctor.phone_number}</p>
                   </div>
                 </div>
+
+                {/* Assignment Button - Only for authenticated patients */}
+                {isAuthenticated && user?.role === 'patient' && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    {isMyDoctor ? (
+                      <button
+                        onClick={handleRemoveDoctor}
+                        className="w-full flex items-center justify-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Remove from My Care
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleAssignDoctor(doctor.id)}
+                        disabled={isAssigning}
+                        className={`w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
+                          isAssigning 
+                            ? 'bg-blue-400 cursor-not-allowed' 
+                            : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
+                      >
+                        {isAssigning ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Assigning...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Assign as My Doctor
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Login prompt for non-authenticated users */}
+                {!isAuthenticated && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <Link
+                      to="/login"
+                      className="w-full flex items-center justify-center px-4 py-2 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                      Login to Assign Doctor
+                    </Link>
+                  </div>
+                )}
               </div>
-            ))}
+            )})}
           </div>
         )}
 

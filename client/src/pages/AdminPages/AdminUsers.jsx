@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createApiService } from '../../utils/apiService';
+import { adminAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,14 +17,13 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const api = createApiService();
       const params = {
         limit: userLimit,
         skip: (currentPage - 1) * userLimit,
         ...(searchTerm && { search: searchTerm }),
         ...(selectedRole && { role: selectedRole })
       };
-      const response = await api.get('/admin/users', { params });
+      const response = await adminAPI.getUsers(params);
       setUsers(response.data);
     } catch (err) {
       setError('Failed to fetch users');
@@ -39,12 +38,8 @@ const AdminUsers = () => {
 
   const handleRoleUpdate = async (userId, newRole) => {
     try {
-      const api = createApiService();
       console.log('Sending role update request:', { user_id: userId, new_role: newRole });
-      await api.put(`/admin/users/${userId}/role`, {
-        user_id: userId,
-        new_role: newRole
-      });
+      await adminAPI.updateUserRole(userId, newRole);
       await fetchUsers();
     } catch (err) {
       console.error('Role update error:', err);
@@ -56,8 +51,7 @@ const AdminUsers = () => {
   const handleDeleteUser = async (userId) => {
     if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       try {
-        const api = createApiService();
-        await api.delete(`/admin/users/${userId}`);
+        await adminAPI.deleteUser(userId);
         await fetchUsers();
       } catch (err) {
         setError('Failed to delete user');

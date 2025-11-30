@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { createApiService } from '../../utils/apiService';
+import { adminAPI } from '../../utils/apiService';
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 const AdminCollections = () => {
@@ -34,9 +34,8 @@ const AdminCollections = () => {
   const fetchCollectionRecords = async (collectionId) => {
     try {
       setLoadingRecords(true);
-      const api = createApiService();
       // Fetch all records and filter by collection
-      const response = await api.get('/admin/records');
+      const response = await adminAPI.getRecords();
       const filteredRecords = response.data.filter(record => 
         record.collection_id === collectionId
       );
@@ -66,8 +65,7 @@ const AdminCollections = () => {
   const handleDeleteCollection = async (collectionId) => {
     if (window.confirm('Are you sure you want to delete this collection? This action cannot be undone.')) {
       try {
-        const api = createApiService();
-        await api.delete(`/admin/collections/${collectionId}`);
+        await adminAPI.deleteCollection(collectionId);
         setCollections(collections.filter(c => c.id !== collectionId));
       } catch (err) {
         setError('Failed to delete collection');
